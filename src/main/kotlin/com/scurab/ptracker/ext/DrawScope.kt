@@ -7,21 +7,21 @@ import androidx.compose.ui.graphics.drawscope.translate
 import com.scurab.ptracker.ui.PriceBoardState
 
 inline fun DrawScope.withTranslate(state: PriceBoardState, block: DrawScope.() -> Unit) {
-    translate(state.offsetX, state.offsetY) {
+    translate(state.offset.x, state.offset.y) {
         block()
     }
 }
 
 inline fun DrawScope.withTranslateAndScale(state: PriceBoardState, block: DrawScope.() -> Unit) {
-    translate(state.offsetX, state.offsetY) {
-        scale(state.scaleX, state.scaleY, pivot = state.chartScaleOffset(size)) {
+    translate(state.offset.x, state.offset.y) {
+        scale(state.scale.x, state.scale.y, pivot = state.chartScaleOffset(size)) {
             block()
         }
     }
 }
 
 inline fun DrawScope.resetScale(state: PriceBoardState, block: DrawScope.() -> Unit) {
-    scale(scaleX = 1f / state.scaleX, scaleY = 1f / state.scaleY, pivot = Offset.Zero) {
+    scale(scaleX = 1f / state.scale.x, scaleY = 1f / state.scale.y, pivot = Offset.Zero) {
         block()
     }
 }

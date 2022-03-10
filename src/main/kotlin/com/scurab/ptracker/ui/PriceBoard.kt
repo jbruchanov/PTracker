@@ -57,32 +57,32 @@ object PriceDashboardConfig {
 }
 
 class PriceBoardState {
-    var scaleX by mutableStateOf(1f)
-    var scaleY by mutableStateOf(1f)
-    var offsetX by mutableStateOf(0f)
-    var offsetY by mutableStateOf(0f)
-    var pointer by mutableStateOf(Point(0f, 0f))
-    var canvasSize by mutableStateOf(Size(0f, 0f))
+    var scale by mutableStateOf(ONE)
+    var offset by mutableStateOf(Offset.Zero)
+    var pointer by mutableStateOf(Point.ZERO)
+    var canvasSize by mutableStateOf(Size.Zero)
 
     //right, height/2
-    fun chartScaleOffset(canvasSize: Size) = Offset(-offsetX + canvasSize.width, -offsetY + canvasSize.height / 2)
+    fun chartScaleOffset(canvasSize: Size) = Offset(-offset.x + canvasSize.width, -offset.y + canvasSize.height / 2)
     fun viewPort(canvasSize: Size = this.canvasSize) = Rect(0f, canvasSize.height, canvasSize.width, 0f)
         //offset & height (to move origin to bottom/left)
-        .translate(offsetX, -canvasSize.height + offsetY)
+        .translate(offset.x, -canvasSize.height + offset.y)
         //scale in same way as we do for preview
-        .scale(1f / scaleX, 1f / scaleY, pivot = chartScaleOffset(canvasSize).translate(y = -canvasSize.height))
+        .scale(1f / scale.x, 1f / scale.y, pivot = chartScaleOffset(canvasSize).translate(y = -canvasSize.height))
         //flip x axis to have bottomLeft negavite, topRight positive
         .scale(-1f, 1f)
 
-    fun viewPortPointer() = pointer.normalize(canvasSize).transformNormToViewPort(viewPort())
+    fun viewportPointer() = pointer.normalize(canvasSize).transformNormToViewPort(viewPort())
     fun normalizedPointer() = pointer.normalize(canvasSize)
-    fun selectedPriceItemIndex() = ceil(viewPortPointer().x / PriceDashboardSizes.PriceItemWidth).toInt() - 1
+    fun selectedPriceItemIndex() = ceil(viewportPointer().x / PriceDashboardSizes.PriceItemWidth).toInt() - 1
 
     fun reset() {
-        scaleX = 1f
-        scaleY = 1f
-        offsetX = 0f
-        offsetY = 0f
+        scale = ONE
+        offset = Offset.Zero
+    }
+
+    companion object {
+        private val ONE = Point(1f, 1f)
     }
 }
 
@@ -98,7 +98,7 @@ fun PriceBoard(items: List<PriceItem>) {
             .onSizeChanged {
                 if (!state.canvasSize.isEmpty()) {
                     val diffX = it.width - state.canvasSize.width
-                    state.offsetX += diffX
+                    state.offset = state.offset.translate(diffX, 0f)
                 }
                 state.canvasSize = Size(it.width, it.height)
             }
@@ -116,8 +116,7 @@ fun PriceBoard(items: List<PriceItem>) {
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
                     change.consumeAllChanges()
-                    state.offsetX += (dragAmount.x / state.scaleX)
-                    state.offsetY += (dragAmount.y / state.scaleY)
+                    state.offset = state.offset.translate(dragAmount.x / state.scale.x, dragAmount.y / state.scale.y)
                 }
             }
             .pointerInput(Unit) {
@@ -127,8 +126,10 @@ fun PriceBoard(items: List<PriceItem>) {
                         if (event.type == PointerEventType.Scroll) {
                             val scrollEvent = event.changes.first()
                             val scrollDelta = scrollEvent.scrollDelta
-                            state.scaleY = (state.scaleY + (scrollDelta.y / 50f)).coerceIn(0.25f, 4f)
-                            state.scaleX = (state.scaleX + (scrollDelta.x / 20f)).coerceIn(0.25f, 4f)
+                            state.scale = Point(
+                                (state.scale.x + (scrollDelta.x / 20f)).coerceIn(0.25f, 4f),
+                                (state.scale.y + (scrollDelta.y / 50f)).coerceIn(0.25f, 4f)
+                            )
                             scrollEvent.consume()
                         }
                     }
@@ -164,7 +165,7 @@ private fun PriceBoardPrices(items: List<PriceItem>, state: PriceBoardState) {
                             start = Offset(x2, priceItem.spikeOffsetY1),
                             end = Offset(x2, priceItem.spikeOffsetY2),
                             //keep the strokeWidth scale independent
-                            strokeWidth = PriceDashboardSizes.SpikeLineStrokeWidth.toPx() / state.scaleX
+                            strokeWidth = PriceDashboardSizes.SpikeLineStrokeWidth.toPx() / state.scale.x
                         )
                     }
                 }
@@ -192,14 +193,14 @@ private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
         drawPath(path, PriceDashboardColor.BackgroundAxis)
 
         //Axis X
-        translate(state.offsetX, size.height) {
-            scale(state.scaleX, 1f, pivot = state.chartScaleOffset(size)) {
-                val step = ceil(TextRendering.axisXStep / state.scaleX).toInt()
+        translate(state.offset.x, size.height) {
+            scale(state.scale.x, 1f, pivot = state.chartScaleOffset(size)) {
+                val step = ceil(TextRendering.axisXStep / state.scale.x).toInt()
                 (items.indices step step).forEach { index ->
                     val priceItem = items[index]
                     val x = (index + 0.5f) * PriceDashboardSizes.PriceItemWidth
                     translate(x, 0f) {
-                        scale(scaleX = 1f / state.scaleX, scaleY = 1f, pivot = Offset.Zero) {
+                        scale(scaleX = 1f / state.scale.x, scaleY = 1f, pivot = Offset.Zero) {
                             drawIntoCanvas {
                                 it.nativeCanvas.drawTextLine(TextLine.make(priceItem.renderDate, TextRendering.fontAxis), 0f, -metrics.bottom, TextRendering.paint)
                             }
@@ -211,10 +212,10 @@ private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
 
         //Axis Y
         val text = TextLine.make("0", TextRendering.fontAxis)
-        translate(left = size.width - text.width - 2.dp.toPx(), state.offsetY) {
-            scale(1f, state.scaleY, pivot = state.chartScaleOffset(size)) {
+        translate(left = size.width - text.width - 2.dp.toPx(), state.offset.y) {
+            scale(1f, state.scale.y, pivot = state.chartScaleOffset(size)) {
                 translate(top = size.height) {
-                    scale(scaleX = 1f, scaleY = 1f / state.scaleY, pivot = Offset.Zero) {
+                    scale(scaleX = 1f, scaleY = 1f / state.scale.y, pivot = Offset.Zero) {
                         drawIntoCanvas {
                             it.nativeCanvas.drawTextLine(text, 0f, -metrics.bottom, TextRendering.paint)
                         }
@@ -235,7 +236,7 @@ private fun PriceBoardGrid(state: PriceBoardState) {
         //horizontal lines
         counter = 0
         do {
-            val yOffset = ((counter + 1f) / gridLinesCount) * canvasSize.height * state.scaleY
+            val yOffset = ((counter + 1f) / gridLinesCount) * canvasSize.height * state.scale.y
             translate(top = yOffset) {
                 drawLine(
                     PriceDashboardColor.GridLine,
@@ -250,7 +251,7 @@ private fun PriceBoardGrid(state: PriceBoardState) {
         counter = 0
         drawIntoCanvas {
             do {
-                val xOffset = (((counter + 1f) / gridLinesCount) * canvasSize.width * state.scaleX)
+                val xOffset = (((counter + 1f) / gridLinesCount) * canvasSize.width * state.scale.x)
                 translate(left = xOffset) {
                     drawLine(
                         PriceDashboardColor.GridLine,
@@ -316,14 +317,14 @@ private fun PriceBoardDebug(items: List<PriceItem>, state: PriceBoardState) {
         val rPointer = nPointer2.transformNormToReal(canvasSize)
 
         val rows = listOf(
-            "Offset:[${state.offsetX.toInt()}, ${state.offsetY.toInt()}]",
+            "Offset:[${state.offset.x.toInt()}, ${state.offset.y.toInt()}]",
             "Mouse:[${state.pointer.x.toInt()}, ${(canvasSize.height - state.pointer.y).toInt()}] " +
                     "N[${nPointer.x.f3}, ${nPointer.y.f3}] =>" +
                     "V[${vPointer.x.f3}, ${vPointer.y.f3}] => " +
                     "N[${nPointer2.x.f3}, ${nPointer2.y.f3}] =>" +
                     "R[${rPointer.x.f3}, ${rPointer.y.f3}]",
             "Canvas:[${canvasSize.width.toInt()},${canvasSize.height.toInt()}]",
-            "Scale:[${state.scaleX.f3},${state.scaleY.f3}]",
+            "Scale:[${state.scale.x.f3},${state.scale.y.f3}]",
             "ViewPort:[${viewPort.toLTWH()}]",
             "Index:[${state.selectedPriceItemIndex()}]",
         )
