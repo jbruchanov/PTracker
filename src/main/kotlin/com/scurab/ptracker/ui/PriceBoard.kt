@@ -37,20 +37,18 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.ext.Size
 import com.scurab.ptracker.ext.f3
+import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.normalize
 import com.scurab.ptracker.ext.scale
 import com.scurab.ptracker.ext.toLTWH
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.translate
-import com.scurab.ptracker.ext.widthAbs
 import com.scurab.ptracker.ext.withTranslateAndScale
 import com.scurab.ptracker.model.PriceItem
 import org.jetbrains.skia.Point
 import org.jetbrains.skia.TextLine
 import java.awt.Cursor
-import java.lang.Float.max
-import java.lang.Float.min
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -86,17 +84,8 @@ class PriceBoardState {
         offsetX = 0f
         offsetY = 0f
     }
-
-    fun viewScopeIndexRange(canvasSize: Size, items: List<PriceItem>): IntRange {
-        val vp = viewPort(canvasSize)
-        val colWidth = PriceDashboardSizes.PriceItemWidth
-        val firstIndex = (max(0f, vp.left) / colWidth).toInt()
-        val widthToFill = vp.widthAbs + min(vp.left, 0f)
-        val count = ceil(min(widthToFill, items.size * colWidth) / colWidth).toInt()
-        val lastIndex = (firstIndex + count).coerceAtMost(items.size)
-        return firstIndex until lastIndex
-    }
 }
+
 
 @Composable
 fun PriceBoard(items: List<PriceItem>) {
@@ -163,9 +152,8 @@ fun PriceBoard(items: List<PriceItem>) {
 private fun PriceBoardPrices(items: List<PriceItem>, state: PriceBoardState) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         withTranslateAndScale(state) {
-            state.viewScopeIndexRange(size, items).forEach { index ->
-                val priceItem = items[index]
-                val x = index * PriceDashboardSizes.PriceItemWidth
+            items.filterVisible(state).forEach { priceItem ->
+                val x = priceItem.index * PriceDashboardSizes.PriceItemWidth
                 val x2 = PriceDashboardSizes.PriceItemWidth / 2f
                 //scaleY flipped as we want to have origin at left/Bottom
                 translate(x, 0f) {

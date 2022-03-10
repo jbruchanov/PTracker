@@ -15,6 +15,7 @@ import kotlin.random.Random
 import kotlin.time.Duration
 
 data class PriceItem(
+    val index: Int,
     val time: LocalDateTime,
     val open: BigDecimal,
     val close: BigDecimal,
@@ -38,7 +39,7 @@ fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: 
             val close = open + random.nextInt(-100, 100).toBigDecimal()
             val high = open.max(close) + random.nextInt(20, 50).toBigDecimal()
             val low = open.min(close) - random.nextInt(20, 50).toBigDecimal()
-            add(PriceItem(time = date.toLocalDateTime(TimeZone.UTC), open = open, close = close, high = high, low = low))
+            add(PriceItem(it, time = date.toLocalDateTime(TimeZone.UTC), open = open, close = close, high = high, low = low))
             date = date.plus(step)
         }
     }
