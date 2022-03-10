@@ -2,6 +2,12 @@
 
 package com.scurab.ptracker.ui
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector2D
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -13,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -46,6 +53,8 @@ import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.translate
 import com.scurab.ptracker.ext.withTranslateAndScale
 import com.scurab.ptracker.model.PriceItem
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import org.jetbrains.skia.Point
 import org.jetbrains.skia.TextLine
 import java.awt.Cursor
@@ -76,13 +85,18 @@ class PriceBoardState {
     fun normalizedPointer() = pointer.normalize(canvasSize)
     fun selectedPriceItemIndex() = ceil(viewportPointer().x / PriceDashboardSizes.PriceItemWidth).toInt() - 1
 
-    fun reset() {
-        scale = ONE
-        offset = Offset.Zero
+    suspend fun reset(animate: Boolean = true) = coroutineScope {
+        if (animate) {
+            launch { Animatable(scale, Offset.VectorConverter).animateTo(ONE, animationSpec = tween(1000)) { scale = value } }
+            launch { Animatable(offset, Offset.VectorConverter).animateTo(Offset.Zero, animationSpec = tween(500)) { offset = value } }
+        } else {
+            scale = ONE
+            offset = Offset.Zero
+        }
     }
 
     companion object {
-        private val ONE = Point(1f, 1f)
+        private val ONE = Offset(1f, 1f)
     }
 }
 
@@ -126,7 +140,7 @@ fun PriceBoard(items: List<PriceItem>) {
                         if (event.type == PointerEventType.Scroll) {
                             val scrollEvent = event.changes.first()
                             val scrollDelta = scrollEvent.scrollDelta
-                            state.scale = Point(
+                            state.scale = Offset(
                                 (state.scale.x + (scrollDelta.x / 20f)).coerceIn(0.25f, 4f),
                                 (state.scale.y + (scrollDelta.y / 50f)).coerceIn(0.25f, 4f)
                             )
@@ -137,12 +151,13 @@ fun PriceBoard(items: List<PriceItem>) {
             }
             .fillMaxSize()
     ) {
+        val scope = rememberCoroutineScope()
         PriceBoardGrid(state)
         PriceBoardPrices(items, state)
         PriceAxis(items, state)
         PriceBoardMouseCross(state)
         PriceBoardDebug(items, state)
-        Button(modifier = Modifier.align(Alignment.TopEnd), onClick = { state.reset() }) {
+        Button(modifier = Modifier.align(Alignment.TopEnd), onClick = { scope.launch { state.reset() } }) {
             Text("R")
         }
     }
