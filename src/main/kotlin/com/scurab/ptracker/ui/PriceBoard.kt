@@ -27,6 +27,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
@@ -43,6 +44,7 @@ import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.filterVisibleIndexes
 import com.scurab.ptracker.ext.heightAbs
+import com.scurab.ptracker.ext.nativeCanvas
 import com.scurab.ptracker.ext.normalize
 import com.scurab.ptracker.ext.priceRound
 import com.scurab.ptracker.ext.scale
@@ -65,6 +67,7 @@ import kotlin.math.roundToInt
 
 object PriceDashboardConfig {
     const val SnappingMouseCrossHorizontally = true
+    const val AxisYContentCoef = 0.5f
 }
 
 class PriceBoardState {
@@ -102,6 +105,7 @@ class PriceBoardState {
     }
 }
 
+private fun PriceBoardState.verticalSteps() = (floor(canvasSize.height / TextRendering.font.metrics.height).toInt() * PriceDashboardConfig.AxisYContentCoef).toInt()
 
 @Composable
 fun PriceBoard(items: List<PriceItem>) {
@@ -154,8 +158,10 @@ fun PriceBoard(items: List<PriceItem>) {
             .fillMaxSize()
     ) {
         val scope = rememberCoroutineScope()
-        PriceAxis(items, state)
+        PriceAxisGrid(items, state)
         PriceBoardPrices(items, state)
+        PriceAxisBackground(state)
+        PriceAxisContent(items, state)
         PriceBoardMouseCross(state)
         PriceBoardDebug(items, state)
         Button(modifier = Modifier.align(Alignment.TopEnd), onClick = { scope.launch { state.reset() } }) {
@@ -192,12 +198,11 @@ private fun PriceBoardPrices(items: List<PriceItem>, state: PriceBoardState) {
 }
 
 @Composable
-private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
+private fun PriceAxisBackground(state: PriceBoardState) {
     val metrics = remember { TextRendering.fontAxis.metrics }
     val canvasSize = state.canvasSize
     val bottomAxisHeight = metrics.height + metrics.bottom
     val verticalPriceBarRight = canvasSize.width - verticalPriceBarWidth.toPx(LocalDensity)
-
     val axisBackgroundPath = remember(canvasSize) {
         Path().apply {
             moveTo(0f, canvasSize.height)
@@ -223,7 +228,67 @@ private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
             end = Offset(verticalPriceBarRight, canvasSize.height - bottomAxisHeight),
             strokeWidth = PriceDashboardSizes.GridLineStrokeWidth.toPx()
         )
+    }
+}
 
+
+@Composable
+private fun PriceAxisContent(items: List<PriceItem>, state: PriceBoardState) {
+    val metrics = remember { TextRendering.fontAxis.metrics }
+    val canvasSize = state.canvasSize
+    val viewport = state.viewport().scale(-1f, -1f)
+
+    PriceAxisContentTemplate(items, state,
+        horizontalContent = { priceItem ->
+            val text = TextLine.make(priceItem.renderDate, TextRendering.fontAxis)
+            nativeCanvas.drawTextLine(text, -text.width / 2, -metrics.bottom, TextRendering.paint)
+        },
+        verticalContent = { step ->
+            val minPrice = -viewport.top
+            val maxPrice = minPrice + viewport.heightAbs
+            val steps = state.verticalSteps()
+            val priceStep = (maxPrice - minPrice) / steps.toFloat()
+            val offsetYStep = state.canvasSize.height / steps
+            val price = minPrice + ((steps - step) * priceStep)
+            val text = TextLine.make(price.priceRound(maxPrice - minPrice).toInt().toString(), TextRendering.fontAxis)
+            val topOffset = step * offsetYStep
+            nativeCanvas.drawTextLine(
+                text,
+                canvasSize.width - text.width - PriceDashboardSizes.AxisPadding.toPx(),
+                //TODO: some misalignment here
+                topOffset - metrics.descent + text.height / PriceDashboardConfig.AxisYContentCoef,
+                TextRendering.paint
+            )
+        })
+}
+
+@Composable
+private fun PriceAxisGrid(items: List<PriceItem>, state: PriceBoardState) {
+    val metrics = remember { TextRendering.fontAxis.metrics }
+    val canvasSize = state.canvasSize
+    val steps = state.verticalSteps()
+    val offsetYStep = state.canvasSize.height / steps
+
+    PriceAxisContentTemplate(items, state,
+        horizontalContent = { priceItem ->
+            val bottomAxisHeight = metrics.height + metrics.bottom
+            drawLine(PriceDashboardColor.GridLine, start = Offset(0f, -canvasSize.height), end = Offset(0f, -bottomAxisHeight))
+        },
+        verticalContent = { step ->
+            val topOffset = step * offsetYStep
+            drawLine(PriceDashboardColor.GridLine, start = Offset(0f, topOffset), end = Offset(canvasSize.width, topOffset))
+        })
+}
+
+@Composable
+private fun PriceAxisContentTemplate(
+    items: List<PriceItem>,
+    state: PriceBoardState,
+    horizontalContent: DrawScope.(PriceItem) -> Unit,
+    verticalContent: DrawScope.(Int) -> Unit,
+    verticalStepMultiplier: Float = PriceDashboardConfig.AxisYContentCoef,
+) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
         //Axis X
         translate(state.offset.x, size.height) {
             scale(state.scale.x, 1f, pivot = state.chartScaleOffset()) {
@@ -234,11 +299,7 @@ private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
                     val x = (priceItem.index + 0.5f) * PriceDashboardSizes.PriceItemWidth
                     translate(x, 0f) {
                         scale(scaleX = 1f / state.scale.x, scaleY = 1f, pivot = Offset.Zero) {
-                            val text = TextLine.make(priceItem.renderDate, TextRendering.fontAxis)
-                            drawIntoCanvas {
-                                it.nativeCanvas.drawTextLine(text, -text.width / 2, -metrics.bottom, TextRendering.paint)
-                            }
-                            drawLine(PriceDashboardColor.GridLine, start = Offset(0f, -canvasSize.height), end = Offset(0f, -bottomAxisHeight))
+                            horizontalContent(priceItem)
                         }
                     }
                 }
@@ -246,24 +307,9 @@ private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
         }
 
         //Axis Y
-        val viewport = state.viewport().scale(-1f, -1f)
-        val minPrice = -viewport.top
-        val maxPrice = minPrice + viewport.heightAbs
-        val steps = floor(state.canvasSize.height / TextRendering.font.metrics.height).toInt() / 2
-        val priceStep = (maxPrice - minPrice) / steps.toFloat()
-        val offsetYStep = state.canvasSize.height / steps
-        (1 until steps - 1).forEach { step ->
-            val price = minPrice + ((steps - step) * priceStep)
-            val text = TextLine.make(price.priceRound().toString(), TextRendering.fontAxis)
-            val topOffset = step * offsetYStep
-            //line
-            drawLine(PriceDashboardColor.GridLine, start = Offset(0f, topOffset), end = Offset(canvasSize.width, topOffset))
-            //text
-            translate(left = canvasSize.width - text.width - PriceDashboardSizes.AxisPadding.toPx(), topOffset) {
-                drawIntoCanvas {
-                    it.nativeCanvas.drawTextLine(text, 0f, -metrics.bottom + text.height / 2, TextRendering.paint)
-                }
-            }
+        val steps = state.verticalSteps()
+        (0 until steps).forEach { step ->
+            verticalContent(step)
         }
     }
 }

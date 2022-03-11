@@ -4,7 +4,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.nativeCanvas
 import com.scurab.ptracker.ui.PriceBoardState
+
+val DrawScope.nativeCanvas get() = drawContext.canvas.nativeCanvas
 
 inline fun DrawScope.withTranslate(state: PriceBoardState, block: DrawScope.() -> Unit) {
     translate(state.offset.x, state.offset.y) {

@@ -6,14 +6,12 @@ import kotlin.math.roundToInt
 val Float.f0 get() = this.roundToInt().toString()
 val Float.f3 get() = String.format("%.3f", this)
 
-fun Float.priceRound(): Int {
+fun Float.priceRound(minMaxDiff: Float): Float {
     val abs = abs(this)
     val coef = when {
-        abs > 10000f -> 1000f
-        abs > 1000f -> 100f
-        abs > 100f -> 10f
-        abs > 10f -> 5f
-        else -> 1f
+        abs > 10000 && minMaxDiff > 20000 -> 500f
+        abs > 1000 && minMaxDiff > 5000 -> 100f
+        else -> 10f
     }
-    return ((this / coef).roundToInt() * coef).roundToInt()
+    return ((this / coef).roundToInt() * coef).roundToInt().toFloat()
 }
