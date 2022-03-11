@@ -48,6 +48,7 @@ import com.scurab.ptracker.ext.nativeCanvas
 import com.scurab.ptracker.ext.normalize
 import com.scurab.ptracker.ext.priceRound
 import com.scurab.ptracker.ext.scale
+import com.scurab.ptracker.ext.size
 import com.scurab.ptracker.ext.toLTRBWH
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToReal
@@ -55,7 +56,6 @@ import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.translate
 import com.scurab.ptracker.ext.withTranslateAndScale
 import com.scurab.ptracker.model.PriceItem
-import com.scurab.ptracker.ui.PriceDashboardSizes.verticalPriceBarWidth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.Point
@@ -106,6 +106,8 @@ class PriceBoardState {
 }
 
 private fun PriceBoardState.verticalSteps() = (floor(canvasSize.height / TextRendering.font.metrics.height).toInt() * PriceDashboardConfig.AxisYContentCoef).toInt()
+private fun PriceBoardState.mousePrice() = normalizedPointer().transformNormToViewPort(viewport()).y
+private fun PriceBoardState.verticalPriceBarLeft(density: Float): Float = canvasSize.width - PriceDashboardSizes.verticalPriceBarWidth.toPx(density)
 
 @Composable
 fun PriceBoard(items: List<PriceItem>) {
@@ -162,7 +164,8 @@ fun PriceBoard(items: List<PriceItem>) {
         PriceBoardPrices(items, state)
         PriceAxisBackground(state)
         PriceAxisContent(items, state)
-        PriceBoardMouseCross(state)
+        PriceBoardMouse(state)
+        PriceAxisLines(state)
         PriceBoardDebug(items, state)
         Button(modifier = Modifier.align(Alignment.TopEnd), onClick = { scope.launch { state.reset() } }) {
             Text("R")
@@ -200,32 +203,42 @@ private fun PriceBoardPrices(items: List<PriceItem>, state: PriceBoardState) {
 @Composable
 private fun PriceAxisBackground(state: PriceBoardState) {
     val metrics = remember { TextRendering.fontAxis.metrics }
-    val canvasSize = state.canvasSize
     val bottomAxisHeight = metrics.height + metrics.bottom
-    val verticalPriceBarRight = canvasSize.width - verticalPriceBarWidth.toPx(LocalDensity)
+    val canvasSize = state.canvasSize
+    val verticalPriceBarLeft = state.verticalPriceBarLeft(LocalDensity.current.density)
     val axisBackgroundPath = remember(canvasSize) {
         Path().apply {
             moveTo(0f, canvasSize.height)
             lineTo(canvasSize.width, canvasSize.height)
             lineTo(canvasSize.width, 0f)
-            lineTo(verticalPriceBarRight, 0f)
-            lineTo(verticalPriceBarRight, canvasSize.height - bottomAxisHeight)
+            lineTo(verticalPriceBarLeft, 0f)
+            lineTo(verticalPriceBarLeft, canvasSize.height - bottomAxisHeight)
             lineTo(0f, canvasSize.height - bottomAxisHeight)
             close()
         }
     }
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawPath(axisBackgroundPath, PriceDashboardColor.BackgroundAxis)
+    }
+}
+
+@Composable
+private fun PriceAxisLines(state: PriceBoardState) {
+    val metrics = remember { TextRendering.fontAxis.metrics }
+    val bottomAxisHeight = metrics.height + metrics.bottom
+    val canvasSize = state.canvasSize
+    val verticalPriceBarLeft = state.verticalPriceBarLeft(LocalDensity.current.density)
+    Canvas(modifier = Modifier.fillMaxSize()) {
         drawLine(
             PriceDashboardColor.BackgroundAxisEdge,
             start = Offset(0f, canvasSize.height - bottomAxisHeight),
-            end = Offset(verticalPriceBarRight, canvasSize.height - bottomAxisHeight),
+            end = Offset(verticalPriceBarLeft, canvasSize.height - bottomAxisHeight),
             strokeWidth = PriceDashboardSizes.GridLineStrokeWidth.toPx()
         )
         drawLine(
             PriceDashboardColor.BackgroundAxisEdge,
-            start = Offset(verticalPriceBarRight, 0f),
-            end = Offset(verticalPriceBarRight, canvasSize.height - bottomAxisHeight),
+            start = Offset(verticalPriceBarLeft, 0f),
+            end = Offset(verticalPriceBarLeft, canvasSize.height - bottomAxisHeight),
             strokeWidth = PriceDashboardSizes.GridLineStrokeWidth.toPx()
         )
     }
@@ -285,8 +298,7 @@ private fun PriceAxisContentTemplate(
     items: List<PriceItem>,
     state: PriceBoardState,
     horizontalContent: DrawScope.(PriceItem) -> Unit,
-    verticalContent: DrawScope.(Int) -> Unit,
-    verticalStepMultiplier: Float = PriceDashboardConfig.AxisYContentCoef,
+    verticalContent: DrawScope.(Int) -> Unit
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         //Axis X
@@ -315,20 +327,14 @@ private fun PriceAxisContentTemplate(
 }
 
 @Composable
-private fun PriceBoardMouseCross(state: PriceBoardState) {
+private fun PriceBoardMouse(state: PriceBoardState) {
+    val metrics = remember { TextRendering.fontAxis.metrics }
     val density = LocalDensity.current.density
     val effect = remember { PathEffect.dashPathEffect(floatArrayOf(10f * density, 10f * density)) }
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        //horizontal
-        drawLine(
-            PriceDashboardColor.MouseCross,
-            start = Offset(0f, state.pointer.y),
-            end = Offset(size.width, state.pointer.y),
-            strokeWidth = PriceDashboardSizes.MouseCrossStrokeWidth.toPx(),
-            pathEffect = effect
-        )
+    val bottomAxisHeight = metrics.height + metrics.bottom
+    val verticalPriceBarLeft = state.verticalPriceBarLeft(LocalDensity.current.density)
 
-        //vertical
+    Canvas(modifier = Modifier.fillMaxSize()) {
         val colWidth = PriceDashboardSizes.PriceItemWidth
         val x = if (PriceDashboardConfig.SnappingMouseCrossHorizontally) {
             val colWidthHalf = colWidth / 2f
@@ -340,13 +346,39 @@ private fun PriceBoardMouseCross(state: PriceBoardState) {
                 .transformNormToReal(size)
                 .x
         } else state.pointer.x
-        drawLine(
-            PriceDashboardColor.MouseCross,
-            start = Offset(x, 0f),
-            end = Offset(x, size.height),
-            strokeWidth = PriceDashboardSizes.MouseCrossStrokeWidth.toPx(),
-            pathEffect = effect
-        )
+
+        //vertical
+        if (state.pointer.x <= verticalPriceBarLeft) {
+            drawLine(
+                PriceDashboardColor.MouseCross,
+                start = Offset(x, 0f),
+                end = Offset(x, size.height),
+                strokeWidth = PriceDashboardSizes.MouseCrossStrokeWidth.toPx(),
+                pathEffect = effect
+            )
+        }
+
+        //horizontal
+        if (state.canvasSize.height - state.pointer.y > bottomAxisHeight) {
+            drawLine(
+                PriceDashboardColor.MouseCross,
+                start = Offset(0f, state.pointer.y),
+                end = Offset(size.width, state.pointer.y),
+                strokeWidth = PriceDashboardSizes.MouseCrossStrokeWidth.toPx(),
+                pathEffect = effect
+            )
+
+            val text = TextLine.make(state.mousePrice().toInt().toString(), TextRendering.fontAxis)
+            val padding = PriceDashboardSizes.AxisPadding.toPx()
+            val textSize = text.size(padding)
+            val top = state.pointer.y - textSize.height / 2
+            val left = state.verticalPriceBarLeft(density)
+            val verticalBarWidth = PriceDashboardSizes.verticalPriceBarWidth.toPx(density)
+            translate(left, top) {
+                drawRect(PriceDashboardColor.BackgroundPriceBubble, size = Size(verticalBarWidth, textSize.height))
+                nativeCanvas.drawTextLine(text, verticalBarWidth - text.width - padding, padding - text.ascent, TextRendering.paint)
+            }
+        }
     }
 }
 
@@ -370,7 +402,7 @@ private fun PriceBoardDebug(items: List<PriceItem>, state: PriceBoardState) {
             "Canvas:[${canvasSize.width.toInt()},${canvasSize.height.toInt()}]",
             "Scale:[${state.scale.x.f3},${state.scale.y.f3}]",
             "ViewPort:[${viewPort.toLTRBWH()}]",
-            "Index:[${state.selectedPriceItemIndex()}]",
+            "Mouse: Index=${state.selectedPriceItemIndex()}, Price:${state.mousePrice()}",
         )
         drawIntoCanvas {
             translate(left = 2f, top = TextRendering.font.metrics.height) {

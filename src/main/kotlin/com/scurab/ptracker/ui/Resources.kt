@@ -13,8 +13,9 @@ object PriceDashboardColor {
     val Background = Color(0xFF151924)
     val OnBackground = Color.White
     val GridLine = Color.DarkGray
-    val BackgroundAxis = Color.Black.copy(alpha = 0.85f)
     val BackgroundAxisEdge = Color.White.copy(alpha = 0.75f)
+    val BackgroundAxis = Color(0xFF202020)
+    val BackgroundPriceBubble = Color(0xFF404040)
     val MouseCross = Color.White
     val Debug = Color.Magenta
 

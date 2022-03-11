@@ -34,7 +34,7 @@ data class PriceItem(
 fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: Duration): List<PriceItem> {
     var date: Instant = startDate.toInstant(TimeZone.UTC)
     return buildList {
-        val coef = 3
+        val coef = 5
         repeat(count) {
             val open = lastOrNull()?.close ?: BigDecimal(0)
             val close = open + random.nextInt(-90 * coef, 100 * coef).toBigDecimal()
