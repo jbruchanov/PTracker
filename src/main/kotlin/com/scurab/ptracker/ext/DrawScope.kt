@@ -14,7 +14,7 @@ inline fun DrawScope.withTranslate(state: PriceBoardState, block: DrawScope.() -
 
 inline fun DrawScope.withTranslateAndScale(state: PriceBoardState, block: DrawScope.() -> Unit) {
     translate(state.offset.x, state.offset.y) {
-        scale(state.scale.x, state.scale.y, pivot = state.chartScaleOffset(size)) {
+        scale(state.scale.x, state.scale.y, pivot = state.chartScaleOffset()) {
             block()
         }
     }

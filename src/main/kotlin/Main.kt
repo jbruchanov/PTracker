@@ -14,7 +14,7 @@ import kotlin.time.Duration.Companion.days
 @Composable
 @Preview
 fun App() {
-    val items = randomPriceData(Random, 1000, Clock.System.now().toLocalDateTime(TimeZone.UTC), 1L.days)
+    val items = randomPriceData(Random, 10000, Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
     MaterialTheme {
         PriceBoard(items)
     }

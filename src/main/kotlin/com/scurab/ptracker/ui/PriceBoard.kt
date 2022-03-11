@@ -3,9 +3,6 @@
 package com.scurab.ptracker.ui
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector2D
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -41,13 +38,14 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.ext.Size
+import com.scurab.ptracker.ext.f0
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
+import com.scurab.ptracker.ext.heightAbs
 import com.scurab.ptracker.ext.normalize
 import com.scurab.ptracker.ext.scale
-import com.scurab.ptracker.ext.toLTWH
+import com.scurab.ptracker.ext.toLTRBWH
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.translate
@@ -59,6 +57,7 @@ import org.jetbrains.skia.Point
 import org.jetbrains.skia.TextLine
 import java.awt.Cursor
 import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 object PriceDashboardConfig {
@@ -72,16 +71,16 @@ class PriceBoardState {
     var canvasSize by mutableStateOf(Size.Zero)
 
     //right, height/2
-    fun chartScaleOffset(canvasSize: Size) = Offset(-offset.x + canvasSize.width, -offset.y + canvasSize.height / 2)
-    fun viewPort(canvasSize: Size = this.canvasSize) = Rect(0f, canvasSize.height, canvasSize.width, 0f)
+    fun chartScaleOffset() = Offset(-offset.x + canvasSize.width, -offset.y + canvasSize.height / 2)
+    fun viewport() = Rect(0f, canvasSize.height, canvasSize.width, 0f)
         //offset & height (to move origin to bottom/left)
         .translate(offset.x, -canvasSize.height + offset.y)
         //scale in same way as we do for preview
-        .scale(1f / scale.x, 1f / scale.y, pivot = chartScaleOffset(canvasSize).translate(y = -canvasSize.height))
+        .scale(1f / scale.x, 1f / scale.y, pivot = chartScaleOffset().translate(y = -canvasSize.height))
         //flip x axis to have bottomLeft negavite, topRight positive
         .scale(-1f, 1f)
 
-    fun viewportPointer() = pointer.normalize(canvasSize).transformNormToViewPort(viewPort())
+    fun viewportPointer() = pointer.normalize(canvasSize).transformNormToViewPort(viewport())
     fun normalizedPointer() = pointer.normalize(canvasSize)
     fun selectedPriceItemIndex() = ceil(viewportPointer().x / PriceDashboardSizes.PriceItemWidth).toInt() - 1
 
@@ -141,8 +140,8 @@ fun PriceBoard(items: List<PriceItem>) {
                             val scrollEvent = event.changes.first()
                             val scrollDelta = scrollEvent.scrollDelta
                             state.scale = Offset(
-                                (state.scale.x + (scrollDelta.x / 20f)).coerceIn(0.25f, 4f),
-                                (state.scale.y + (scrollDelta.y / 50f)).coerceIn(0.25f, 4f)
+                                (state.scale.x + (scrollDelta.x / 20f)).coerceIn(0.01f, 4f),
+                                (state.scale.y + (scrollDelta.y / 50f)).coerceIn(0.01f, 4f)
                             )
                             scrollEvent.consume()
                         }
@@ -209,11 +208,10 @@ private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
 
         //Axis X
         translate(state.offset.x, size.height) {
-            scale(state.scale.x, 1f, pivot = state.chartScaleOffset(size)) {
+            scale(state.scale.x, 1f, pivot = state.chartScaleOffset()) {
                 val step = ceil(TextRendering.axisXStep / state.scale.x).toInt()
-                (items.indices step step).forEach { index ->
-                    val priceItem = items[index]
-                    val x = (index + 0.5f) * PriceDashboardSizes.PriceItemWidth
+                items.filterVisible(state, step = step).forEach { priceItem ->
+                    val x = (priceItem.index + 0.5f) * PriceDashboardSizes.PriceItemWidth
                     translate(x, 0f) {
                         scale(scaleX = 1f / state.scale.x, scaleY = 1f, pivot = Offset.Zero) {
                             drawIntoCanvas {
@@ -226,15 +224,18 @@ private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
         }
 
         //Axis Y
-        val text = TextLine.make("0", TextRendering.fontAxis)
-        translate(left = size.width - text.width - 2.dp.toPx(), state.offset.y) {
-            scale(1f, state.scale.y, pivot = state.chartScaleOffset(size)) {
-                translate(top = size.height) {
-                    scale(scaleX = 1f, scaleY = 1f / state.scale.y, pivot = Offset.Zero) {
-                        drawIntoCanvas {
-                            it.nativeCanvas.drawTextLine(text, 0f, -metrics.bottom, TextRendering.paint)
-                        }
-                    }
+        val viewport = state.viewport().scale(-1f, -1f)
+        val minPrice = -viewport.top
+        val maxPrice = minPrice + viewport.heightAbs
+        val steps = floor(state.canvasSize.height / TextRendering.font.metrics.height).toInt()
+        val priceStep = (maxPrice - minPrice) / steps.toFloat()
+        val offsetYStep = state.canvasSize.height / steps
+        (2 until steps - 1).forEach { step ->
+            val price = minPrice + ((steps - step) * priceStep)
+            val text = TextLine.make(price.f0, TextRendering.fontAxis)
+            translate(left = size.width - text.width - PriceDashboardSizes.AxisPadding.toPx(), step * offsetYStep) {
+                drawIntoCanvas {
+                    it.nativeCanvas.drawTextLine(text, 0f, -metrics.bottom + text.height / 2, TextRendering.paint)
                 }
             }
         }
@@ -303,7 +304,7 @@ private fun PriceBoardMouseCross(state: PriceBoardState) {
         val colWidth = PriceDashboardSizes.PriceItemWidth
         val x = if (PriceDashboardConfig.SnappingMouseCrossHorizontally) {
             val colWidthHalf = colWidth / 2f
-            val viewPort = state.viewPort()
+            val viewPort = state.viewport()
             val vPointer = state.normalizedPointer().transformNormToViewPort(viewPort)
             val x = (((vPointer.x + colWidthHalf) / colWidth).roundToInt() * colWidth) - colWidthHalf
             Point(x, 0f)
@@ -324,9 +325,9 @@ private fun PriceBoardMouseCross(state: PriceBoardState) {
 @Composable
 private fun PriceBoardDebug(items: List<PriceItem>, state: PriceBoardState) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val viewPort = state.viewPort(size)
+        val viewPort = state.viewport()
         val canvasSize = size
-        val nPointer = state.pointer.normalize(canvasSize)
+        val nPointer = state.normalizedPointer()
         val vPointer = nPointer.transformNormToViewPort(viewPort)
         val nPointer2 = vPointer.normalize(viewPort)
         val rPointer = nPointer2.transformNormToReal(canvasSize)
@@ -340,7 +341,7 @@ private fun PriceBoardDebug(items: List<PriceItem>, state: PriceBoardState) {
                     "R[${rPointer.x.f3}, ${rPointer.y.f3}]",
             "Canvas:[${canvasSize.width.toInt()},${canvasSize.height.toInt()}]",
             "Scale:[${state.scale.x.f3},${state.scale.y.f3}]",
-            "ViewPort:[${viewPort.toLTWH()}]",
+            "ViewPort:[${viewPort.toLTRBWH()}]",
             "Index:[${state.selectedPriceItemIndex()}]",
         )
         drawIntoCanvas {

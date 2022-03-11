@@ -12,5 +12,6 @@ fun Rect.scale(scaleX: Float = 1f, scaleY: Float = scaleX) = Rect(
 )
 
 fun Rect.toLTWH() = "L:${left.f0}, T:${top.f0}, W:${widthAbs.f0}, H:${heightAbs.f0}"
+fun Rect.toLTRBWH() = "L:${left.f0}, T:${top.f0}, R:${right.f0}, B:${bottom.f0}, W:${widthAbs.f0}, H:${heightAbs.f0}"
 val Rect.widthAbs get() = abs(width)
 val Rect.heightAbs get() = abs(height)

@@ -25,6 +25,7 @@ object PriceDashboardSizes {
     val GridLineStrokeWidth = 1.dp
     val SpikeLineStrokeWidth = 1.dp
     val MouseCrossStrokeWidth = 1.dp
+    val AxisPadding = 2.dp
     const val PriceItemWidth = 10f
 }
 
