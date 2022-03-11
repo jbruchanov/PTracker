@@ -1,13 +1,17 @@
 package com.scurab.ptracker.ui
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scurab.ptracker.ext.toPx
 import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontStyle
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.Typeface
+import java.time.format.DateTimeFormatter
 
 object PriceDashboardColor {
     val Background = Color(0xFF151924)
@@ -29,13 +33,30 @@ object PriceDashboardSizes {
     val MouseCrossStrokeWidth = 1.dp
     val AxisPadding = 2.dp
     const val PriceItemWidth = 10f
-    val verticalPriceBarWidth = 60.dp
+    //depends on fontAxis size
+    val VerticalPriceBarWidth = 60.dp
+    val BottomAxisContentMinHeight = 30.dp
 }
 
 object TextRendering {
     val font = Font(Typeface.makeFromName("monospace", FontStyle.NORMAL))
-    val fontAxis = Font(Typeface.makeFromName("monospace", FontStyle.NORMAL), 16.sp.value)
+    val fontAxis = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
+    val fontLabels = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
     val paint = Paint().apply { this.color = PriceDashboardColor.OnBackground.toArgb(); this.isAntiAlias = true }
     val axisXStep = 5
-    val axisYStep = 5
+
+    @Composable
+    fun init() {
+        font.size = 14.sp.toPx(LocalDensity)
+        fontAxis.size = 14.sp.toPx(LocalDensity)
+        fontLabels.size = 14.sp.toPx(LocalDensity)
+    }
+}
+
+object DateFormats {
+    val fullDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val year = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val monthMid = DateTimeFormatter.ofPattern("MMM")
+    val monthYear = DateTimeFormatter.ofPattern("MM/yyyy")
+    val dayNumber = DateTimeFormatter.ofPattern("d")
 }

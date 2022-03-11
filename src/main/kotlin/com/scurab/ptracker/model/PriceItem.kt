@@ -1,6 +1,7 @@
 package com.scurab.ptracker.model
 
 import androidx.compose.ui.geometry.Size
+import com.scurab.ptracker.ui.DateFormats
 import com.scurab.ptracker.ui.PriceDashboardColor
 import com.scurab.ptracker.ui.PriceDashboardSizes
 import com.scurab.ptracker.ui.dateFormat
@@ -28,7 +29,9 @@ data class PriceItem(
     val rectSize = Size(PriceDashboardSizes.PriceItemWidth, rectHeight)
     val spikeOffsetY1 = high.max(low).toFloat()
     val spikeOffsetY2 = high.min(low).toFloat()
-    val renderDate: String by lazy { dateFormat.format(time.toJavaLocalDateTime()) }
+    val fullDate: String by lazy { DateFormats.fullDate.format(time.toJavaLocalDateTime()) }
+    //caching value
+    var axisDate: String? = null
 }
 
 fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: Duration): List<PriceItem> {

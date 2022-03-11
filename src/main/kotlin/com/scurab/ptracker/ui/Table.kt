@@ -51,7 +51,6 @@ import java.time.format.DateTimeFormatter
 val dateFormat = DateTimeFormatter.ofPattern("dd/MM")
 
 
-
 object Colors {
     val ScrollBarBackground = Color(0xFFEFEFEF)
 }
