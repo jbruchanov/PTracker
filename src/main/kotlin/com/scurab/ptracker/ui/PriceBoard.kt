@@ -39,18 +39,21 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import com.scurab.ptracker.ext.Size
-import com.scurab.ptracker.ext.f0
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
+import com.scurab.ptracker.ext.filterVisibleIndexes
 import com.scurab.ptracker.ext.heightAbs
 import com.scurab.ptracker.ext.normalize
+import com.scurab.ptracker.ext.priceRound
 import com.scurab.ptracker.ext.scale
 import com.scurab.ptracker.ext.toLTRBWH
+import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.translate
 import com.scurab.ptracker.ext.withTranslateAndScale
 import com.scurab.ptracker.model.PriceItem
+import com.scurab.ptracker.ui.PriceDashboardSizes.verticalPriceBarWidth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.Point
@@ -151,9 +154,8 @@ fun PriceBoard(items: List<PriceItem>) {
             .fillMaxSize()
     ) {
         val scope = rememberCoroutineScope()
-        PriceBoardGrid(state)
-        PriceBoardPrices(items, state)
         PriceAxis(items, state)
+        PriceBoardPrices(items, state)
         PriceBoardMouseCross(state)
         PriceBoardDebug(items, state)
         Button(modifier = Modifier.align(Alignment.TopEnd), onClick = { scope.launch { state.reset() } }) {
@@ -192,31 +194,51 @@ private fun PriceBoardPrices(items: List<PriceItem>, state: PriceBoardState) {
 @Composable
 private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
     val metrics = remember { TextRendering.fontAxis.metrics }
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val height = metrics.height + metrics.bottom
-        val width = 60
-        val path = Path().apply {
-            moveTo(0f, size.height)
-            lineTo(size.width, size.height)
-            lineTo(size.width, 0f)
-            lineTo(size.width - width, 0f)
-            lineTo(size.width - width, size.height - height)
-            lineTo(0f, size.height - height)
+    val canvasSize = state.canvasSize
+    val bottomAxisHeight = metrics.height + metrics.bottom
+    val verticalPriceBarRight = canvasSize.width - verticalPriceBarWidth.toPx(LocalDensity)
+
+    val axisBackgroundPath = remember(canvasSize) {
+        Path().apply {
+            moveTo(0f, canvasSize.height)
+            lineTo(canvasSize.width, canvasSize.height)
+            lineTo(canvasSize.width, 0f)
+            lineTo(verticalPriceBarRight, 0f)
+            lineTo(verticalPriceBarRight, canvasSize.height - bottomAxisHeight)
+            lineTo(0f, canvasSize.height - bottomAxisHeight)
             close()
         }
-        drawPath(path, PriceDashboardColor.BackgroundAxis)
+    }
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawPath(axisBackgroundPath, PriceDashboardColor.BackgroundAxis)
+        drawLine(
+            PriceDashboardColor.BackgroundAxisEdge,
+            start = Offset(0f, canvasSize.height - bottomAxisHeight),
+            end = Offset(verticalPriceBarRight, canvasSize.height - bottomAxisHeight),
+            strokeWidth = PriceDashboardSizes.GridLineStrokeWidth.toPx()
+        )
+        drawLine(
+            PriceDashboardColor.BackgroundAxisEdge,
+            start = Offset(verticalPriceBarRight, 0f),
+            end = Offset(verticalPriceBarRight, canvasSize.height - bottomAxisHeight),
+            strokeWidth = PriceDashboardSizes.GridLineStrokeWidth.toPx()
+        )
 
         //Axis X
         translate(state.offset.x, size.height) {
             scale(state.scale.x, 1f, pivot = state.chartScaleOffset()) {
                 val step = ceil(TextRendering.axisXStep / state.scale.x).toInt()
-                items.filterVisible(state, step = step).forEach { priceItem ->
+                val indexes = items.filterVisibleIndexes(state, step = step, endOffset = 1)
+                indexes.forEach { index ->
+                    val priceItem = items.getOrNull(index) ?: return@forEach
                     val x = (priceItem.index + 0.5f) * PriceDashboardSizes.PriceItemWidth
                     translate(x, 0f) {
                         scale(scaleX = 1f / state.scale.x, scaleY = 1f, pivot = Offset.Zero) {
+                            val text = TextLine.make(priceItem.renderDate, TextRendering.fontAxis)
                             drawIntoCanvas {
-                                it.nativeCanvas.drawTextLine(TextLine.make(priceItem.renderDate, TextRendering.fontAxis), 0f, -metrics.bottom, TextRendering.paint)
+                                it.nativeCanvas.drawTextLine(text, -text.width / 2, -metrics.bottom, TextRendering.paint)
                             }
+                            drawLine(PriceDashboardColor.GridLine, start = Offset(0f, -canvasSize.height), end = Offset(0f, -bottomAxisHeight))
                         }
                     }
                 }
@@ -227,61 +249,21 @@ private fun PriceAxis(items: List<PriceItem>, state: PriceBoardState) {
         val viewport = state.viewport().scale(-1f, -1f)
         val minPrice = -viewport.top
         val maxPrice = minPrice + viewport.heightAbs
-        val steps = floor(state.canvasSize.height / TextRendering.font.metrics.height).toInt()
+        val steps = floor(state.canvasSize.height / TextRendering.font.metrics.height).toInt() / 2
         val priceStep = (maxPrice - minPrice) / steps.toFloat()
         val offsetYStep = state.canvasSize.height / steps
-        (2 until steps - 1).forEach { step ->
+        (1 until steps - 1).forEach { step ->
             val price = minPrice + ((steps - step) * priceStep)
-            val text = TextLine.make(price.f0, TextRendering.fontAxis)
-            translate(left = size.width - text.width - PriceDashboardSizes.AxisPadding.toPx(), step * offsetYStep) {
+            val text = TextLine.make(price.priceRound().toString(), TextRendering.fontAxis)
+            val topOffset = step * offsetYStep
+            //line
+            drawLine(PriceDashboardColor.GridLine, start = Offset(0f, topOffset), end = Offset(canvasSize.width, topOffset))
+            //text
+            translate(left = canvasSize.width - text.width - PriceDashboardSizes.AxisPadding.toPx(), topOffset) {
                 drawIntoCanvas {
                     it.nativeCanvas.drawTextLine(text, 0f, -metrics.bottom + text.height / 2, TextRendering.paint)
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun PriceBoardGrid(state: PriceBoardState) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val canvasSize = size
-        val gridLinesCount = 10
-        //vertical lines
-        var counter = 0
-        //horizontal lines
-        counter = 0
-        do {
-            val yOffset = ((counter + 1f) / gridLinesCount) * canvasSize.height * state.scale.y
-            translate(top = yOffset) {
-                drawLine(
-                    PriceDashboardColor.GridLine,
-                    start = Offset(0f, 0f),
-                    end = Offset(canvasSize.width, 0f),
-                    strokeWidth = PriceDashboardSizes.GridLineStrokeWidth.toPx()
-                )
-            }
-            counter++
-        } while (yOffset < canvasSize.height)
-
-        counter = 0
-        drawIntoCanvas {
-            do {
-                val xOffset = (((counter + 1f) / gridLinesCount) * canvasSize.width * state.scale.x)
-                translate(left = xOffset) {
-                    drawLine(
-                        PriceDashboardColor.GridLine,
-                        start = Offset(0f, 0f),
-                        end = Offset(0f, canvasSize.height),
-                        strokeWidth = PriceDashboardSizes.GridLineStrokeWidth.toPx()
-                    )
-                    counter++
-
-                    val text = TextLine.make("${counter}-3", TextRendering.font)
-                    val textWidthHalf = (text.width / 2)
-                    //it.nativeCanvas.drawTextLine(text, -textWidthHalf, canvasSize.height, textPaint)
-                }
-            } while (xOffset < canvasSize.width)
         }
     }
 }

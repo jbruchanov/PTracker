@@ -10,10 +10,11 @@ import org.jetbrains.skia.Paint
 import org.jetbrains.skia.Typeface
 
 object PriceDashboardColor {
-    val Background = Color.Black
+    val Background = Color(0xFF151924)
     val OnBackground = Color.White
     val GridLine = Color.DarkGray
-    val BackgroundAxis = Color.Black.copy(alpha = 0.75f)
+    val BackgroundAxis = Color.Black.copy(alpha = 0.85f)
+    val BackgroundAxisEdge = Color.White.copy(alpha = 0.75f)
     val MouseCross = Color.White
     val Debug = Color.Magenta
 
@@ -27,6 +28,7 @@ object PriceDashboardSizes {
     val MouseCrossStrokeWidth = 1.dp
     val AxisPadding = 2.dp
     const val PriceItemWidth = 10f
+    val verticalPriceBarWidth = 60.dp
 }
 
 object TextRendering {
