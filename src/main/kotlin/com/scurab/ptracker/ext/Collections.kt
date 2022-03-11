@@ -11,14 +11,14 @@ fun List<PriceItem>.getHovered(state: PriceBoardState): PriceItem? {
     return getOrNull(state.selectedPriceItemIndex())
 }
 
-fun List<PriceItem>.filterVisibleIndexes(state: PriceBoardState, step: Int = 1, endOffset: Int = 0): IntProgression {
+fun List<PriceItem>.filterVisibleIndexes(state: PriceBoardState, step: Int = 1, startOffset : Int = 0, endOffset: Int = 0): IntProgression {
     val vp = state.viewport()
     val colWidth = PriceDashboardSizes.PriceItemWidth
     val firstIndex = (Float.max(0f, vp.left) / colWidth).toInt()
     val widthToFill = vp.widthAbs + Float.min(vp.left, 0f)
     val count = ceil(Float.min(widthToFill, size * colWidth) / colWidth).toInt()
     val lastIndex = (firstIndex + count).coerceAtMost(size)
-    return firstIndex until (lastIndex + endOffset) step step
+    return (firstIndex + startOffset) until (lastIndex + endOffset) step step
 }
 
 fun List<PriceItem>.filterVisible(state: PriceBoardState, step: Int = 1): List<PriceItem> {
