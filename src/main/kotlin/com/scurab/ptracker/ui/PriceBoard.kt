@@ -5,13 +5,12 @@ package com.scurab.ptracker.ui
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -139,7 +139,7 @@ fun PriceBoardState.viewportIndexes(startOffset: Int = 0, endOffset: Int = 0): I
     val vp = viewport()
     val colWidth = PriceDashboardSizes.PriceItemWidth
     val firstIndex = floor(vp.left / colWidth).toInt()
-    val lastIndex =  firstIndex + ceil(vp.widthAbs / colWidth).toInt()
+    val lastIndex = firstIndex + ceil(vp.widthAbs / colWidth).toInt()
     return (firstIndex + startOffset) until (lastIndex + endOffset)
 }
 
@@ -174,18 +174,16 @@ fun PriceBoard(items: List<PriceItem>) {
                 awaitPointerEventScope {
                     while (true) {
                         val event = awaitPointerEvent()
-                        if (event.type == PointerEventType.Move) {
-                            val moveEvent = event.changes.first()
-                            state.pointer = Point(moveEvent.position.x, moveEvent.position.y)
-                            mouseIcon = if (state.pointer.x < state.verticalPriceBarLeft(density)) {
-                                isChangingScale = false
-                                MouseCursors.PointerIconCross
-                            } else {
-                                isChangingScale = moveEvent.pressed
-                                MouseCursors.PointerIconResizeVertically
-                            }
+                        val change = event.changes.first()
+                        state.pointer = Point(change.position.x, change.position.y)
+                        val isInVerticalAxisZone = state.verticalPriceBarLeft(density) < state.pointer.x
+                        if (event.type == PointerEventType.Press) {
+                            isChangingScale = isInVerticalAxisZone
+                        } else if (event.type == PointerEventType.Move) {
+                            isChangingScale = isChangingScale && change.pressed
+                            mouseIcon = if (isInVerticalAxisZone) MouseCursors.PointerIconResizeVertically else MouseCursors.PointerIconCross
                             if (isChangingScale) {
-                                val diff = moveEvent.previousPosition.y - moveEvent.position.y
+                                val diff = change.previousPosition.y - change.position.y
                                 //TODO common logic for boundaries
                                 state.scale = state.scale.copy(y = (state.scale.y + (diff / 1000f)).coerceIn(0.01f, 4f))
                             }
@@ -234,7 +232,7 @@ fun PriceBoard(items: List<PriceItem>) {
 
 @Composable
 private fun PriceBoardPrices(items: List<PriceItem>, state: PriceBoardState) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas {
         withTranslateAndScale(state) {
             items.filterVisible(state).forEach { priceItem ->
                 val x = priceItem.index * PriceDashboardSizes.PriceItemWidth
@@ -275,7 +273,7 @@ private fun PriceAxisBackground(state: PriceBoardState) {
             close()
         }
     }
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas {
         drawPath(axisBackgroundPath, PriceDashboardColor.BackgroundAxis)
     }
 }
@@ -286,7 +284,7 @@ private fun PriceAxisEdgeLines(state: PriceBoardState) {
     val bottomAxisHeight = state.bottomAxisBarHeight(density)
     val canvasSize = state.canvasSize
     val verticalPriceBarLeft = state.verticalPriceBarLeft(LocalDensity.current.density)
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas {
         drawLine(
             PriceDashboardColor.BackgroundAxisEdge,
             start = Offset(0f, canvasSize.height - bottomAxisHeight),
@@ -361,7 +359,7 @@ private fun PriceAxisContentTemplate(
     verticalContent: DrawScope.(step: Int, steps: Int) -> Unit
 ) {
     val density = LocalDensity.current.density
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas {
         //Axis X
         clipRect(right = state.verticalPriceBarLeft(density)) {
             translate(state.offset.x, size.height) {
@@ -400,7 +398,7 @@ private fun PriceBoardMouse(items: List<PriceItem>, state: PriceBoardState) {
     val bottomAxisBarHeight = state.bottomAxisBarHeight(density, TextRendering.fontAxis.metrics)
     val verticalPriceBarLeft = state.verticalPriceBarLeft(density)
 
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas {
         val colWidth = PriceDashboardSizes.PriceItemWidth
         val x = if (PriceDashboardConfig.SnappingMouseCrossHorizontally) {
             val colWidthHalf = colWidth / 2f
@@ -463,7 +461,7 @@ private fun PriceBoardMouse(items: List<PriceItem>, state: PriceBoardState) {
 
 @Composable
 private fun PriceBoardDebug(items: List<PriceItem>, state: PriceBoardState) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas {
         val viewPort = state.viewport()
         val canvasSize = size
         val nPointer = state.normalizedPointer()
@@ -497,4 +495,14 @@ private fun PriceBoardDebug(items: List<PriceItem>, state: PriceBoardState) {
             }
         }
     }
+}
+
+@Composable
+fun Canvas(modifier: Modifier = Modifier, content: DrawScope.() -> Unit) {
+    Spacer(modifier = modifier.fillMaxSize()
+        .drawBehind {
+            clipRect {
+                content()
+            }
+        })
 }
