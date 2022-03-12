@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -251,7 +250,6 @@ private fun PriceBoardPrices(items: List<PriceItem>, state: PriceBoardState) {
                     }
                 }
             }
-            drawCircle(Color.Red, radius = 10f, center = Offset(0f, size.height))
         }
     }
 }
@@ -486,12 +484,6 @@ private fun PriceBoardDebug(items: List<PriceItem>, state: PriceBoardState) {
                 rows.forEachIndexed { index, s ->
                     it.nativeCanvas.drawTextLine(TextLine.Companion.make(s, TextRendering.font), 0f, index * TextRendering.font.metrics.height, TextRendering.paint)
                 }
-            }
-        }
-        withTranslateAndScale(state) {
-            translate(top = canvasSize.height) {
-                drawLine(PriceDashboardColor.Debug, start = Offset(-canvasSize.width, 0f), end = Offset(canvasSize.width, 0f))
-                drawLine(PriceDashboardColor.Debug, start = Offset(0f, -canvasSize.height), end = Offset(0f, canvasSize.height))
             }
         }
     }
