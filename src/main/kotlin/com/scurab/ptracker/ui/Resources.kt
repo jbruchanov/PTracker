@@ -3,6 +3,7 @@ package com.scurab.ptracker.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -11,6 +12,7 @@ import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontStyle
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.Typeface
+import java.awt.Cursor
 import java.time.format.DateTimeFormatter
 
 object PriceDashboardColor {
@@ -18,7 +20,7 @@ object PriceDashboardColor {
     val OnBackground = Color.White
     val GridLine = Color.DarkGray
     val BackgroundAxisEdge = Color.White.copy(alpha = 0.75f)
-    val BackgroundAxis = Color(0xFF202020)
+    val BackgroundAxis = Color(0xFF202020).copy(alpha = 0.75f)
     val BackgroundPriceBubble = Color(0xFF404040)
     val MouseCross = Color.White
     val Debug = Color.Magenta
@@ -32,7 +34,7 @@ object PriceDashboardSizes {
     val SpikeLineStrokeWidth = 1.dp
     val MouseCrossStrokeWidth = 1.dp
     val AxisPadding = 2.dp
-    const val PriceItemWidth = 10f
+    val PriceItemWidth = 10f
     //depends on fontAxis size
     val VerticalPriceBarWidth = 60.dp
     val BottomAxisContentMinHeight = 30.dp
@@ -59,4 +61,9 @@ object DateFormats {
     val monthMid = DateTimeFormatter.ofPattern("MMM")
     val monthYear = DateTimeFormatter.ofPattern("MM/yyyy")
     val dayNumber = DateTimeFormatter.ofPattern("d")
+}
+
+object MouseCursors {
+    val PointerIconCross = PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR))
+    val PointerIconResizeVertically = PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR))
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.ext.Size
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
-import com.scurab.ptracker.ext.filterVisibleIndexes
 import com.scurab.ptracker.ext.heightAbs
 import com.scurab.ptracker.ext.nativeCanvas
 import com.scurab.ptracker.ext.normalize
@@ -113,6 +113,8 @@ class PriceBoardState {
 }
 
 private fun PriceBoardState.verticalSteps() = (floor(canvasSize.height / TextRendering.font.metrics.height).toInt() * PriceDashboardConfig.AxisYContentCoef).toInt()
+private fun PriceBoardState.viewportColumnWidth() = PriceDashboardSizes.PriceItemWidth * scale.x
+private fun PriceBoardState.columns() = (viewport().widthAbs / PriceDashboardSizes.PriceItemWidth).roundToInt()
 private fun PriceBoardState.mousePrice() = normalizedPointer().transformNormToViewPort(viewport()).y
 private fun PriceBoardState.bottomAxisBarHeight(density: Float, metrics: FontMetrics = TextRendering.fontLabels.metrics): Float =
     max(metrics.height + metrics.bottom, PriceDashboardSizes.BottomAxisContentMinHeight.toPx(density))
@@ -133,13 +135,33 @@ private fun getHorizontalAxisText(items: List<PriceItem>, index: Int, step: Int)
     return formatter.format(item.time.toJavaLocalDateTime())
 }
 
+fun PriceBoardState.viewportIndexes(startOffset: Int = 0, endOffset: Int = 0): IntProgression {
+    val vp = viewport()
+    val colWidth = PriceDashboardSizes.PriceItemWidth
+    val firstIndex = floor(vp.left / colWidth).toInt()
+    val lastIndex =  firstIndex + ceil(vp.widthAbs / colWidth).toInt()
+    return (firstIndex + startOffset) until (lastIndex + endOffset)
+}
+
+fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport()): Boolean {
+    val colWidth = PriceDashboardSizes.PriceItemWidth
+    val firstIndex = (max(0f, viewport.left) / colWidth).toInt()
+    val widthToFill = viewport.widthAbs + min(viewport.left, 0f)
+    val lastIndex = firstIndex + widthToFill
+    //TODO: add vertically
+    return firstIndex <= index && index <= lastIndex
+}
+
+
 @Composable
 fun PriceBoard(items: List<PriceItem>) {
     val state = remember { PriceBoardState() }
-
+    var mouseIcon by remember { mutableStateOf(PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR))) }
+    var isChangingScale by remember { mutableStateOf(false) }
+    val density = LocalDensity.current.density
     Box(
         modifier = Modifier
-            .pointerHoverIcon(PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR)))
+            .pointerHoverIcon(mouseIcon)
             .background(PriceDashboardColor.Background)
             .onSizeChanged {
                 if (!state.canvasSize.isEmpty()) {
@@ -155,6 +177,18 @@ fun PriceBoard(items: List<PriceItem>) {
                         if (event.type == PointerEventType.Move) {
                             val moveEvent = event.changes.first()
                             state.pointer = Point(moveEvent.position.x, moveEvent.position.y)
+                            mouseIcon = if (state.pointer.x < state.verticalPriceBarLeft(density)) {
+                                isChangingScale = false
+                                MouseCursors.PointerIconCross
+                            } else {
+                                isChangingScale = moveEvent.pressed
+                                MouseCursors.PointerIconResizeVertically
+                            }
+                            if (isChangingScale) {
+                                val diff = moveEvent.previousPosition.y - moveEvent.position.y
+                                //TODO common logic for boundaries
+                                state.scale = state.scale.copy(y = (state.scale.y + (diff / 1000f)).coerceIn(0.01f, 4f))
+                            }
                         }
                     }
                 }
@@ -189,7 +223,7 @@ fun PriceBoard(items: List<PriceItem>) {
         PriceAxisBackground(state)
         PriceAxisContent(items, state)
         PriceBoardMouse(items, state)
-        PriceAxisLines(state)
+        PriceAxisEdgeLines(state)
         PriceBoardDebug(items, state)
         Button(modifier = Modifier.align(Alignment.TopEnd).offset(x = (-65).dp), onClick = { scope.launch { state.reset() } }) {
             Text("R")
@@ -247,7 +281,7 @@ private fun PriceAxisBackground(state: PriceBoardState) {
 }
 
 @Composable
-private fun PriceAxisLines(state: PriceBoardState) {
+private fun PriceAxisEdgeLines(state: PriceBoardState) {
     val density = LocalDensity.current.density
     val bottomAxisHeight = state.bottomAxisBarHeight(density)
     val canvasSize = state.canvasSize
@@ -277,6 +311,7 @@ private fun PriceAxisContent(items: List<PriceItem>, state: PriceBoardState) {
 
     PriceAxisContentTemplate(items, state,
         horizontalContent = { priceItem, step ->
+            priceItem ?: return@PriceAxisContentTemplate
             val bottomAxisHeight = state.bottomAxisBarHeight(density)
             val label = priceItem.axisDate ?: getHorizontalAxisText(items, priceItem.index, step)
                 .also { priceItem.axisDate = it }
@@ -318,19 +353,11 @@ private fun PriceAxisGrid(items: List<PriceItem>, state: PriceBoardState) {
         })
 }
 
-fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport()): Boolean {
-    val colWidth = PriceDashboardSizes.PriceItemWidth
-    val firstIndex = (max(0f, viewport.left) / colWidth).toInt()
-    val widthToFill = viewport.widthAbs + min(viewport.left, 0f)
-    val lastIndex = firstIndex + widthToFill
-    return firstIndex <= index && index <= lastIndex
-}
-
 @Composable
 private fun PriceAxisContentTemplate(
     items: List<PriceItem>,
     state: PriceBoardState,
-    horizontalContent: DrawScope.(PriceItem, step: Int) -> Unit,
+    horizontalContent: DrawScope.(PriceItem?, step: Int) -> Unit,
     verticalContent: DrawScope.(step: Int, steps: Int) -> Unit
 ) {
     val density = LocalDensity.current.density
@@ -340,16 +367,14 @@ private fun PriceAxisContentTemplate(
             translate(state.offset.x, size.height) {
                 scale(state.scale.x, 1f, pivot = state.chartScaleOffset()) {
                     val step = ceil(TextRendering.axisXStep / state.scale.x).toInt()
-                    val visibleRange = items.filterVisibleIndexes(state)
-                    for (i in items.indices step step) {
-                        if (visibleRange.first <= i) {
-                            val priceItem = items[i]
-                            if (priceItem.index > visibleRange.last) break
-                            val x = (priceItem.index + 0.5f) * PriceDashboardSizes.PriceItemWidth
-                            translate(x, 0f) {
-                                scale(scaleX = 1f / state.scale.x, scaleY = 1f, pivot = Offset.Zero) {
-                                    horizontalContent(priceItem, step)
-                                }
+                    val viewportIndexes = state.viewportIndexes()
+                    viewportIndexes.forEach { i ->
+                        //can't use step on range as it's causing scroll "jitter"
+                        if (i % step != 0) return@forEach
+                        val x = (i + 0.5f) * PriceDashboardSizes.PriceItemWidth
+                        translate(x, 0f) {
+                            scale(scaleX = 1f / state.scale.x, scaleY = 1f, pivot = Offset.Zero) {
+                                horizontalContent(items.getOrNull(i), step)
                             }
                         }
                     }
