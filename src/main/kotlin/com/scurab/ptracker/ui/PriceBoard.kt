@@ -55,7 +55,6 @@ import com.scurab.ptracker.ext.nativeCanvas
 import com.scurab.ptracker.ext.normalize
 import com.scurab.ptracker.ext.priceRound
 import com.scurab.ptracker.ext.scale
-import com.scurab.ptracker.ext.scale2
 import com.scurab.ptracker.ext.size
 import com.scurab.ptracker.ext.toLTRBWH
 import com.scurab.ptracker.ext.toPx
@@ -118,10 +117,16 @@ class PriceBoardState(items: List<PriceItem>) {
     fun initviewPort(size: Size, density: Float): Rect {
         val lastItem = items.lastOrNull() ?: return Rect(0f, 0f, size.width, size.height)
         val allColumnsWidth = (items.size * PriceDashboardSizes.PriceItemWidth)
-        val y = (lastItem.open + lastItem.close).toFloat() / 2f
+        //take last n visible items on the screen
+        val sample = items.takeLast((size.width / PriceDashboardSizes.PriceItemWidth).toInt())
+        val yLast = (lastItem.open + lastItem.close).toFloat() / 2f
+        val yAvg = sample.map { it.centerPrice }.average().toFloat()
+        val y = (yLast + yAvg) / 2f
+        val avgHeight = sample.map { it.rectSize.height }.average().toFloat()
+        val scaleY = avgHeight * 0.25f / lastItem.rectSize.height
         return Rect(0f, size.height, size.width, 0f)
             .translate(size.width - PriceDashboardSizes.VerticalPriceBarWidth.toPx(density), -size.height / 2)
-            .scale(1f, 1f/*, pivot = Offset(size.width, size.height / 2)*/)
+            .scale(1f, scaleY)
             .translate(-allColumnsWidth, y)
     }
 
