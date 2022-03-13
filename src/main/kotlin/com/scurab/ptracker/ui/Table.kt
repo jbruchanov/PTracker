@@ -141,13 +141,13 @@ fun TableRow(item: Transaction, widths: SnapshotStateList<Float>) {
             .background(background)
             .hoverable(hoverSource)
     ) {
-        Cell(item.symbol, widths[0])
-        VDivider()
-        Cell(item.time.toString(), widths[1])
-        VDivider()
-        Cell(item.amount.toString(), widths[2])
-        VDivider()
-        Cell(item.fee.toString(), widths[3])
+//        Cell(item.symbol, widths[0])
+//        VDivider()
+//        Cell(item.time.toString(), widths[1])
+//        VDivider()
+//        Cell(item.amount.toString(), widths[2])
+//        VDivider()
+//        Cell(item.fee.toString(), widths[3])
     }
 }
 
