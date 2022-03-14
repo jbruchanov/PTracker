@@ -91,6 +91,8 @@ object PriceDashboardConfig {
     const val Debug = true
     const val SnappingMouseCrossHorizontally = true
     const val AxisYContentCoef = 0.5f
+    const val MinInitScaleY = 0.2f
+    const val DefaultColumns = 100
 }
 
 class PriceBoardState(items: List<PriceItem>, val localDensity: Density) {
@@ -114,18 +116,18 @@ class PriceBoardState(items: List<PriceItem>, val localDensity: Density) {
         }
     }
 
-    fun initviewPort(size: Size, density: Float): Rect {
+    fun initviewPort(size: Size): Rect {
         val lastItem = items.lastOrNull() ?: return Rect(0f, 0f, size.width, size.height)
         val allColumnsWidth = (items.size * PriceDashboardSizes.PriceItemWidth)
         //take last n visible items on the screen
         val sample = items.takeLast((size.width / PriceDashboardSizes.PriceItemWidth).toInt())
         val y = lastItem.centerPrice
         val avgHeight = sample.map { it.rectSize.height }.average().toFloat()
+        val scaleX = size.width / PriceDashboardConfig.DefaultColumns / PriceDashboardSizes.PriceItemWidth
         val scaleY = avgHeight * 0.25f / lastItem.rectSize.height
         return Rect(0f, size.height, size.width, 0f)
-            .translate(size.width, -size.height / 2)
-            .scale(1f, 0.1f)
-            .translate(-allColumnsWidth, y)
+            .scale(scaleX, max(PriceDashboardConfig.MinInitScaleY, scaleY))
+            .translate(allColumnsWidth - verticalPriceBarLeft(), y - size.height / 2)
     }
 
     suspend fun setViewport(viewport: Rect, size: Size = this.canvasSize, animate: Boolean = false) {
@@ -150,7 +152,7 @@ class PriceBoardState(items: List<PriceItem>, val localDensity: Density) {
     }
 }
 
-fun PriceBoardState.chartScalePivot() = Offset(offset.x + verticalPriceBarLeft(localDensity.density), -offset.y - canvasSize.height / 2)
+fun PriceBoardState.chartScalePivot() = Offset(offset.x + verticalPriceBarLeft(), -offset.y - canvasSize.height / 2)
 fun PriceBoardState.viewport() = Rect(left = 0f, top = canvasSize.height, right = canvasSize.width, bottom = 0f)
     //offset & height (to move origin to bottom/left)
     .translate(offset.x, offset.y)
@@ -164,7 +166,7 @@ private fun PriceBoardState.mousePrice() = normalizedPointer().transformNormToVi
 private fun PriceBoardState.bottomAxisBarHeight(density: Float, metrics: FontMetrics = TextRendering.fontLabels.metrics): Float =
     max(metrics.height + metrics.bottom, PriceDashboardSizes.BottomAxisContentMinHeight.toPx(density))
 
-fun PriceBoardState.verticalPriceBarLeft(density: Float): Float = canvasSize.width - PriceDashboardSizes.VerticalPriceBarWidth.toPx(density)
+fun PriceBoardState.verticalPriceBarLeft(): Float = canvasSize.width - PriceDashboardSizes.VerticalPriceBarWidth.toPx(this.localDensity.density)
 private fun PriceBoardState.verticalLabel(): String = mousePrice().roundToInt().toString()
 private fun PriceBoardState.horizontalLabel(items: List<PriceItem>): String? = items.getOrNull(selectedPriceItemIndex())?.fullDate
 private fun getHorizontalAxisText(items: List<PriceItem>, index: Int, step: Int): String {
@@ -199,10 +201,10 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
 
 
 @Composable
-fun PriceBoard(items: List<PriceItem>) {
-    val localDensity = LocalDensity.current
+fun PriceBoard(state: PriceBoardState) {
+
     val scope = rememberCoroutineScope()
-    val state = remember { PriceBoardState(items, localDensity) }
+
     var mouseIcon by remember { mutableStateOf(PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR))) }
     var isChangingScale by remember { mutableStateOf(false) }
     val density = LocalDensity.current.density
@@ -215,8 +217,8 @@ fun PriceBoard(items: List<PriceItem>) {
                 if (state.canvasSize == size) return@onSizeChanged
                 if (state.canvasSize.isEmpty()) {
                     scope.launch {
-//                        val viewport = state.initviewPort(size, density)
-//                        state.setViewport(viewport, size)
+                        val viewport = state.initviewPort(size)
+                        state.setViewport(viewport, size)
                     }
                 } else {
                     val diffX = intSize.width - state.canvasSize.width
@@ -231,7 +233,7 @@ fun PriceBoard(items: List<PriceItem>) {
                         val event = awaitPointerEvent()
                         val change = event.changes.first()
                         state.pointer = Point(change.position.x, change.position.y)
-                        val isInVerticalAxisZone = state.verticalPriceBarLeft(density) < state.pointer.x
+                        val isInVerticalAxisZone = state.verticalPriceBarLeft() < state.pointer.x
                         if (event.type == PointerEventType.Press) {
                             isChangingScale = isInVerticalAxisZone
                         } else if (event.type == PointerEventType.Move) {
@@ -243,7 +245,7 @@ fun PriceBoard(items: List<PriceItem>) {
                                 state.scale = state.scale.copy(y = (state.scale.y + (diff / 1000f)).coerceIn(0.01f, 4f))
                             }
                         }
-                        state.pointedPriceItem = items.getOrNull(state.selectedPriceItemIndex())
+                        state.pointedPriceItem = state.items.getOrNull(state.selectedPriceItemIndex())
                     }
                 }
             }
@@ -288,13 +290,13 @@ fun PriceBoard(items: List<PriceItem>) {
             Button(onClick = { scope.launch { state.reset() } }) {
                 Text("R")
             }
-            Button(onClick = { scope.launch { state.setViewport(state.initviewPort(state.canvasSize, density), animate = true) } }) {
+            Button(onClick = { scope.launch { state.setViewport(state.initviewPort(state.canvasSize), animate = true) } }) {
                 Text("I")
             }
             Button(onClick = {
                 scope.launch {
-                    state.items = randomPriceData(Random, Random.nextInt(100, 200), Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
-                    state.setViewport(state.initviewPort(state.canvasSize, density), animate = true)
+                    state.items = randomPriceData(Random, Random.nextInt(500, 1000), Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
+                    state.setViewport(state.initviewPort(state.canvasSize), animate = true)
                 }
             }
             ) {
@@ -364,7 +366,7 @@ private fun PriceAxisBackground(state: PriceBoardState) {
     val density = LocalDensity.current.density
     val bottomAxisHeight = state.bottomAxisBarHeight(density)
     val canvasSize = state.canvasSize
-    val verticalPriceBarLeft = state.verticalPriceBarLeft(density)
+    val verticalPriceBarLeft = state.verticalPriceBarLeft()
     val axisBackgroundPath = remember(canvasSize) {
         Path().apply {
             moveTo(0f, canvasSize.height)
@@ -386,7 +388,7 @@ private fun PriceAxisEdgeLines(state: PriceBoardState) {
     val density = LocalDensity.current.density
     val bottomAxisHeight = state.bottomAxisBarHeight(density)
     val canvasSize = state.canvasSize
-    val verticalPriceBarLeft = state.verticalPriceBarLeft(LocalDensity.current.density)
+    val verticalPriceBarLeft = state.verticalPriceBarLeft()
     Canvas {
         drawLine(
             PriceDashboardColor.BackgroundAxisEdge,
@@ -466,7 +468,7 @@ private fun PriceAxisContentTemplate(
     val density = LocalDensity.current.density
     Canvas {
         //Axis X
-        clipRect(right = state.verticalPriceBarLeft(density)) {
+        clipRect(right = state.verticalPriceBarLeft()) {
             translate(-state.offset.x, size.height) {
                 scale(state.scale.x, 1f, pivot = state.chartScalePivot()) {
                     val step = ceil(TextRendering.axisXStep / state.scale.x).toInt()
@@ -502,7 +504,7 @@ private fun PriceBoardMouse(state: PriceBoardState) {
     val density = LocalDensity.current.density
     val effect = remember { PathEffect.dashPathEffect(floatArrayOf(10f * density, 10f * density)) }
     val bottomAxisBarHeight = state.bottomAxisBarHeight(density, TextRendering.fontAxis.metrics)
-    val verticalPriceBarLeft = state.verticalPriceBarLeft(density)
+    val verticalPriceBarLeft = state.verticalPriceBarLeft()
 
     Canvas {
         val colWidth = PriceDashboardSizes.PriceItemWidth
@@ -559,7 +561,7 @@ private fun PriceBoardMouse(state: PriceBoardState) {
             val textPadding = PriceDashboardSizes.AxisPadding.toPx()
             val textSize = text.size(textPadding)
             val top = state.pointer.y - textSize.height / 2
-            val left = state.verticalPriceBarLeft(density)
+            val left = state.verticalPriceBarLeft()
             val verticalAxisBarWidth = PriceDashboardSizes.VerticalPriceBarWidth.toPx(density)
             translate(left, top) {
                 drawRect(PriceDashboardColor.BackgroundPriceBubble, size = Size(verticalAxisBarWidth, textSize.height))

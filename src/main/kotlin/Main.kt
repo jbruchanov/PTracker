@@ -43,8 +43,9 @@ fun App() {
                 .padding(start = contentPadding, bottom = contentPadding, end = contentPadding)
         ) {
             Box(modifier = Modifier) {
-                PriceBoard(items)
-//                TestWindow()
+                val localDensity = LocalDensity.current
+                val state = remember { PriceBoardState(items, localDensity) }
+                PriceBoard(state)
             }
         }
     }
