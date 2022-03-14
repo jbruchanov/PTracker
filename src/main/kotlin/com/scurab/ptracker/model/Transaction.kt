@@ -2,7 +2,6 @@ package com.scurab.ptracker.model
 
 import kotlinx.datetime.LocalDateTime
 import java.math.BigDecimal
-import kotlin.random.Random
 
 sealed class Transaction {
     abstract val type: String

@@ -16,7 +16,7 @@ fun Point.transformNormToReal(size: Size): Point {
 
 fun Point.transformNormToViewPort(rect: Rect): Point {
     requireNormalized()
-    return Point(rect.left + (x * rect.widthAbs), rect.top + (y * rect.heightAbs))
+    return Point(rect.left + (x * rect.nWidth), rect.bottom + (y * rect.nHeight))
 }
 
 fun Point.requireNormalized() {

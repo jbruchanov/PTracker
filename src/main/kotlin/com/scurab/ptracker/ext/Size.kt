@@ -1,3 +1,5 @@
 package com.scurab.ptracker.ext
 
-fun Size(width: Int, height: Int) = androidx.compose.ui.geometry.Size(width.toFloat(), height.toFloat())
+import androidx.compose.ui.geometry.Size
+
+fun size(width: Int, height: Int) = Size(width.toFloat(), height.toFloat())
