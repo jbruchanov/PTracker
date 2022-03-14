@@ -45,7 +45,6 @@ object TextRendering {
     val fontAxis = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
     val fontLabels = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
     val paint = Paint().apply { this.color = PriceDashboardColor.OnBackground.toArgb(); this.isAntiAlias = true }
-    val axisXStep = 5
 
     @Composable
     fun init() {

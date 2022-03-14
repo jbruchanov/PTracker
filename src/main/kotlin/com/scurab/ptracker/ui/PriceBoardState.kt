@@ -10,6 +10,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Density
+import com.scurab.ptracker.ext.maxValue
 import com.scurab.ptracker.ext.nHeight
 import com.scurab.ptracker.ext.nWidth
 import com.scurab.ptracker.ext.normalize
@@ -35,6 +36,7 @@ class PriceBoardState(items: List<PriceItem>, val localDensity: Density) {
 
     fun viewportPointer() = pointer.normalize(canvasSize).transformNormToViewPort(viewport())
     fun normalizedPointer() = pointer.normalize(canvasSize)
+    fun maxDensity() = localDensity.maxValue()
 
     suspend fun reset(animate: Boolean = true) = coroutineScope {
         if (animate) {

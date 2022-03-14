@@ -87,6 +87,7 @@ object PriceDashboardConfig {
     const val AxisYContentCoef = 0.5f
     const val MinInitScaleY = 0.2f
     const val DefaultMinColumns = 100
+    const val AxisXStep = 5
 }
 
 private fun PriceBoardState.bottomAxisBarHeight(metrics: FontMetrics = TextRendering.fontLabels.metrics): Float =
@@ -382,7 +383,7 @@ private fun PriceAxisContentTemplate(
         clipRect(right = state.verticalPriceBarLeft()) {
             translate(-state.offset.x, size.height) {
                 scale(state.scale.x, 1f, pivot = state.chartScalePivot()) {
-                    val step = ceil(TextRendering.axisXStep / state.scale.x).toInt()
+                    val step = ceil(PriceDashboardConfig.AxisXStep * state.maxDensity() / state.scale.x).toInt()
                     //startOffset for long text to be visible even if line the "column" is outside visible range
                     val viewportIndexes = state.viewportIndexes(startOffset = -step)
                     viewportIndexes.forEach { i ->
