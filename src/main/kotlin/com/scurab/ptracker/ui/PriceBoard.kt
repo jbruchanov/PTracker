@@ -3,7 +3,6 @@
 package com.scurab.ptracker.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,11 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -35,17 +31,10 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.getHorizontalAxisText
@@ -60,7 +49,6 @@ import com.scurab.ptracker.ext.toLTRBWH
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
-import com.scurab.ptracker.ext.translate
 import com.scurab.ptracker.ext.withTranslateAndScale
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.priceDetails
@@ -69,10 +57,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.skia.FontMetrics
 import org.jetbrains.skia.Point
 import org.jetbrains.skia.TextLine
-import java.awt.Cursor
 import java.lang.Float.min
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -86,21 +72,19 @@ object PriceDashboardConfig {
     const val SnappingMouseCrossHorizontally = true
     const val AxisYContentCoef = 0.5f
     const val MinInitScaleY = 0.2f
+    const val MaxInitScaleY = 1.0f
     const val DefaultMinColumns = 100
     const val AxisXStep = 5
+    val ScaleRangeX = floatArrayOf(0.01f, 4f)
+    val ScaleRangeY = floatArrayOf(0.01f, 4f)
 }
-
-private fun PriceBoardState.bottomAxisBarHeight(metrics: FontMetrics = TextRendering.fontLabels.metrics): Float =
-    max(metrics.height + metrics.bottom, PriceDashboardSizes.BottomAxisContentMinHeight.toPx(localDensity.density))
 
 private fun PriceBoardState.columns() = (viewport().nWidth / PriceDashboardSizes.PriceItemWidth).roundToInt()
 private fun PriceBoardState.horizontalLabel(items: List<PriceItem>): String? = items.getOrNull(selectedPriceItemIndex())?.fullDate
 private fun PriceBoardState.mousePrice() = normalizedPointer().transformNormToViewPort(viewport()).y
-private fun PriceBoardState.selectedPriceItemIndex() = ceil(viewportPointer().x / PriceDashboardSizes.PriceItemWidth).toInt() - 1
 private fun PriceBoardState.verticalLabel(): String = mousePrice().roundToInt().toString()
 private fun PriceBoardState.verticalSteps() = (floor(canvasSize.height / TextRendering.font.metrics.height).toInt() * PriceDashboardConfig.AxisYContentCoef).toInt()
 private fun PriceBoardState.viewportColumnWidth() = PriceDashboardSizes.PriceItemWidth * scale.x
-
 private fun PriceBoardState.viewportIndexes(startOffset: Int = 0, endOffset: Int = 0): IntProgression {
     val vp = viewport()
     val colWidth = PriceDashboardSizes.PriceItemWidth
@@ -122,83 +106,22 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
 @Composable
 fun PriceBoard(state: PriceBoardState) {
     val scope = rememberCoroutineScope()
-    var mouseIcon by remember { mutableStateOf(PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR))) }
-
     Box(
         modifier = Modifier
-            .pointerHoverIcon(mouseIcon)
-            .background(PriceDashboardColor.Background)
-            .onSizeChanged { intSize ->
-                val size = intSize.toSize()
-                if (state.canvasSize == size) return@onSizeChanged
-                if (state.canvasSize.isEmpty()) {
-                    scope.launch {
-                        val viewport = state.initviewPort(size)
-                        state.setViewport(viewport, size)
-                    }
-                } else {
-                    val diffX = intSize.width - state.canvasSize.width
-                    state.offset = state.offset.translate(-diffX, 0f)
-                    state.pointer = Point.ZERO
-                }
-                state.canvasSize = size
-            }
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val change = event.changes.first()
-                        state.pointer = Point(change.position.x, change.position.y)
-                        val isInVerticalAxisZone = state.verticalPriceBarLeft() < state.pointer.x
-                        if (event.type == PointerEventType.Press) {
-                            state.isChangingScale = isInVerticalAxisZone
-                        } else if (event.type == PointerEventType.Move) {
-                            state.isChangingScale = state.isChangingScale && change.pressed
-                            mouseIcon = if (isInVerticalAxisZone) MouseCursors.PointerIconResizeVertically else MouseCursors.PointerIconCross
-                            if (state.isChangingScale) {
-                                val diff = change.previousPosition.y - change.position.y
-                                //TODO common logic for boundaries
-                                state.scale = state.scale.copy(y = (state.scale.y + (diff / 1000f)).coerceIn(0.01f, 4f))
-                            }
-                        }
-                        state.pointedPriceItem = state.items.getOrNull(state.selectedPriceItemIndex())
-                    }
-                }
-            }
-            .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
-                    if (!state.isChangingScale) {
-                        change.consumeAllChanges()
-                        val diff = Offset(-dragAmount.x / state.scale.x, dragAmount.y / state.scale.y)
-                        val newOffset = state.offset.translate(diff.x, diff.y)
-                        state.offset = newOffset
-                    }
-                }
-            }
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        if (event.type == PointerEventType.Scroll) {
-                            val scrollEvent = event.changes.first()
-                            val scrollDelta = scrollEvent.scrollDelta
-                            state.scale = Offset(
-                                (state.scale.x + (scrollDelta.x / 20f)).coerceIn(0.01f, 4f),
-                                (state.scale.y + (scrollDelta.y / 50f)).coerceIn(0.01f, 4f)
-                            )
-                            scrollEvent.consume()
-                        }
-                    }
-                }
-            }
             .fillMaxSize()
+            .pointerHoverIcon(state.mouseIcon)
+            .background(PriceDashboardColor.Background)
+            .onSizeChange(state)
+            .onMouseMove(state)
+            .onMouseDrag(state)
+            .onWheelScroll(state)
     ) {
-        PriceAxisGrid(state)
-        PriceBoardPrices(state)
-        PriceAxisBackground(state)
-        PriceAxisContent(state)
-        PriceBoardMouse(state)
-        PriceAxisEdgeLines(state)
+        Grid(state)
+        Candles(state)
+        AxisBackground(state)
+        AxisContent(state)
+        Mouse(state)
+        AxisEdgeLines(state)
         if (PriceDashboardConfig.Debug) {
             PriceBoardDebug(state)
         }
@@ -206,13 +129,13 @@ fun PriceBoard(state: PriceBoardState) {
             Button(onClick = { scope.launch { state.reset() } }) {
                 Text("R")
             }
-            Button(onClick = { scope.launch { state.setViewport(state.initviewPort(state.canvasSize), animate = true) } }) {
+            Button(onClick = { scope.launch { state.setViewport(state.initViewport(state.canvasSize), animate = true) } }) {
                 Text("I")
             }
             Button(onClick = {
                 scope.launch {
                     state.items = randomPriceData(Random, Random.nextInt(500, 1000), Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
-                    state.setViewport(state.initviewPort(state.canvasSize), animate = true)
+                    state.setViewport(state.initViewport(state.canvasSize), animate = true)
                 }
             }
             ) {
@@ -235,7 +158,7 @@ private fun PriceSelectedDayDetail(state: PriceBoardState) {
                 .background(PriceDashboardColor.BackgroundAxis, shape = RoundedCornerShape(2.dp))
                 .padding(2.dp),
             color = PriceDashboardColor.OnBackground,
-            fontSize = 12.sp,
+            fontSize = PriceDashboardSizes.PriceSelectedDayDetail,
             fontFamily = FontFamily.Monospace
         )
     }
@@ -243,28 +166,28 @@ private fun PriceSelectedDayDetail(state: PriceBoardState) {
 
 
 @Composable
-private fun PriceBoardPrices(state: PriceBoardState) {
+private fun Candles(state: PriceBoardState) {
+    val priceItemWidthHalf = PriceDashboardSizes.PriceItemWidth / 2f
     Canvas {
         withTranslateAndScale(state) {
             state.items.filterVisible(state).forEach { priceItem ->
                 val x = priceItem.index * PriceDashboardSizes.PriceItemWidth
-                val x2 = PriceDashboardSizes.PriceItemWidth / 2f
                 //scaleY flipped as we want to have origin at left/Bottom
                 translate(x, 0f) {
                     drawRect(priceItem.color, topLeft = Offset(0f, priceItem.rectOffsetY), size = priceItem.rectSize)
                     drawLine(
                         priceItem.color,
-                        start = Offset(x2, priceItem.spikeOffsetY1),
-                        end = Offset(x2, priceItem.spikeOffsetY2),
+                        start = Offset(priceItemWidthHalf, priceItem.spikeOffsetY1),
+                        end = Offset(priceItemWidthHalf, priceItem.spikeOffsetY2),
                         //keep the strokeWidth scale independent
                         strokeWidth = PriceDashboardSizes.SpikeLineStrokeWidth.toPx() / state.scale.x
                     )
                     if (PriceDashboardConfig.Debug) {
-                        translate(PriceDashboardSizes.PriceItemWidth / 2, priceItem.centerPrice) {
+                        translate(priceItemWidthHalf, priceItem.centerPrice) {
                             resetScale(state) {
                                 drawCircle(
                                     Color.Yellow.copy(alpha = 0.5f),
-                                    radius = PriceDashboardSizes.PriceItemWidth / 2,
+                                    radius = priceItemWidthHalf,
                                     center = Offset.Zero
                                 )
                             }
@@ -273,12 +196,11 @@ private fun PriceBoardPrices(state: PriceBoardState) {
                 }
             }
         }
-        drawCircle(Color.Yellow, radius = 10f, center = Offset.Zero)
     }
 }
 
 @Composable
-private fun PriceAxisBackground(state: PriceBoardState) {
+private fun AxisBackground(state: PriceBoardState) {
     val bottomAxisHeight = state.bottomAxisBarHeight()
     val canvasSize = state.canvasSize
     val verticalPriceBarLeft = state.verticalPriceBarLeft()
@@ -299,7 +221,7 @@ private fun PriceAxisBackground(state: PriceBoardState) {
 }
 
 @Composable
-private fun PriceAxisEdgeLines(state: PriceBoardState) {
+private fun AxisEdgeLines(state: PriceBoardState) {
     val bottomAxisHeight = state.bottomAxisBarHeight()
     val canvasSize = state.canvasSize
     val verticalPriceBarLeft = state.verticalPriceBarLeft()
@@ -321,7 +243,7 @@ private fun PriceAxisEdgeLines(state: PriceBoardState) {
 
 
 @Composable
-private fun PriceAxisContent(state: PriceBoardState) {
+private fun AxisContent(state: PriceBoardState) {
     val items = state.items
     val metrics = remember { TextRendering.fontAxis.metrics }
     val canvasSize = state.canvasSize
@@ -354,7 +276,7 @@ private fun PriceAxisContent(state: PriceBoardState) {
 }
 
 @Composable
-private fun PriceAxisGrid(state: PriceBoardState) {
+private fun Grid(state: PriceBoardState) {
     val items = state.items
     val canvasSize = state.canvasSize
     val steps = state.verticalSteps()
@@ -411,7 +333,7 @@ private fun PriceAxisContentTemplate(
 }
 
 @Composable
-private fun PriceBoardMouse(state: PriceBoardState) {
+private fun Mouse(state: PriceBoardState) {
     val items = state.items
     val density = LocalDensity.current.density
     val effect = remember { PathEffect.dashPathEffect(floatArrayOf(10f * density, 10f * density)) }

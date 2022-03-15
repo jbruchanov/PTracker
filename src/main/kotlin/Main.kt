@@ -12,16 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import com.scurab.ptracker.model.randomPriceData
 import com.scurab.ptracker.ui.PriceBoard
 import com.scurab.ptracker.ui.PriceBoardState
@@ -29,6 +30,7 @@ import com.scurab.ptracker.ui.TextRendering
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.awt.Toolkit
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
@@ -55,7 +57,13 @@ fun App() {
 }
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
+    val resolution = Toolkit.getDefaultToolkit().screenSize
+    Window(
+        onCloseRequest = ::exitApplication,
+        state = rememberWindowState(
+            size = DpSize((resolution.width * 0.5).dp, (resolution.height * 0.75).dp)
+        )
+    ) {
         App()
     }
 }

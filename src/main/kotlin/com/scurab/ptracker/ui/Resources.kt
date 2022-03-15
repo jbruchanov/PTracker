@@ -38,6 +38,8 @@ object PriceDashboardSizes {
     //depends on fontAxis size
     val VerticalPriceBarWidth = 60.dp
     val BottomAxisContentMinHeight = 30.dp
+
+    val PriceSelectedDayDetail = 12.sp
 }
 
 object TextRendering {
