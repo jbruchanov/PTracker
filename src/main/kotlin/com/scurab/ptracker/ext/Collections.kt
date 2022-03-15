@@ -31,9 +31,9 @@ fun List<PriceItem>.getHorizontalAxisText(index: Int, step: Int): String {
     //TODO: handle also smaller candles than day
     val formatter = when {
         prev == null -> DateFormats.monthYear
-        item.time.year != prev.time.year -> DateFormats.year
-        item.time.monthNumber != prev.time.monthNumber -> DateFormats.monthMid
+        item.date.year != prev.date.year -> DateFormats.year
+        item.date.monthNumber != prev.date.monthNumber -> DateFormats.monthMid
         else -> DateFormats.dayNumber
     }
-    return formatter.format(item.time.toJavaLocalDateTime())
+    return formatter.format(item.date.toJavaLocalDateTime())
 }

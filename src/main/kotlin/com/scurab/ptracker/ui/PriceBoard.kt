@@ -68,15 +68,15 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 object PriceDashboardConfig {
+    val ScaleRangeX = floatArrayOf(0.001f, 6f)
+    val ScaleRangeY = floatArrayOf(0.001f, 6f)
     const val Debug = true
     const val SnappingMouseCrossHorizontally = true
     const val AxisYContentCoef = 0.5f
-    const val MinInitScaleY = 0.2f
+    val MinInitScaleY = ScaleRangeY[0]
     const val MaxInitScaleY = 1.0f
     const val DefaultMinColumns = 100
     const val AxisXStep = 5
-    val ScaleRangeX = floatArrayOf(0.01f, 4f)
-    val ScaleRangeY = floatArrayOf(0.01f, 4f)
 }
 
 private fun PriceBoardState.columns() = (viewport().nWidth / PriceDashboardSizes.PriceItemWidth).roundToInt()
@@ -185,11 +185,11 @@ private fun Candles(state: PriceBoardState) {
                     if (PriceDashboardConfig.Debug) {
                         translate(priceItemWidthHalf, priceItem.centerPrice) {
                             resetScale(state) {
-                                drawCircle(
-                                    Color.Yellow.copy(alpha = 0.5f),
-                                    radius = priceItemWidthHalf,
-                                    center = Offset.Zero
-                                )
+//                                drawCircle(
+//                                    Color.Yellow.copy(alpha = 0.5f),
+//                                    radius = priceItemWidthHalf,
+//                                    center = Offset.Zero
+//                                )
                             }
                         }
                     }

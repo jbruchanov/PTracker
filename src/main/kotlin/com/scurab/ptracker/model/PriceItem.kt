@@ -13,19 +13,22 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
 import java.math.BigDecimal
-import java.math.MathContext
 import java.math.RoundingMode
 import kotlin.random.Random
 import kotlin.time.Duration
 
-data class PriceItem(
+interface IPriceItem {
+    val date: LocalDateTime
+    val open: BigDecimal
+    val close: BigDecimal
+    val high: BigDecimal
+    val low: BigDecimal
+}
+
+class PriceItem(
     val index: Int,
-    val time: LocalDateTime,
-    val open: BigDecimal,
-    val close: BigDecimal,
-    val high: BigDecimal,
-    val low: BigDecimal,
-) {
+    val item: IPriceItem
+) : IPriceItem by item {
     private val rectHeight = (open - close).abs().toFloat()
     val rectOffsetY = open.min(close).toFloat()
     val color = if (open >= close) PriceDashboardColor.CandleRed else PriceDashboardColor.CandleGreen
@@ -33,8 +36,16 @@ data class PriceItem(
     val centerPrice = (open + close).toFloat() / 2f
     val spikeOffsetY1 = high.max(low).toFloat()
     val spikeOffsetY2 = high.min(low).toFloat()
-    val fullDate: String by lazy { DateFormats.fullDate.format(time.toJavaLocalDateTime()) }
+    val fullDate: String by lazy { DateFormats.fullDate.format(date.toJavaLocalDateTime()) }
 }
+
+data class TestPriceItem(
+    override val date: LocalDateTime,
+    override val open: BigDecimal,
+    override val close: BigDecimal,
+    override val high: BigDecimal,
+    override val low: BigDecimal
+) : IPriceItem
 
 fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: Duration): List<PriceItem> {
     var date: Instant = startDate.toInstant(TimeZone.UTC)
@@ -45,7 +56,7 @@ fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: 
             val close = open + random.nextInt(-90 * coef, 100 * coef).toBigDecimal()
             val high = open.max(close) + random.nextInt(20 * coef, 50 * coef).toBigDecimal()
             val low = open.min(close) - random.nextInt(20 * coef, 50 * coef).toBigDecimal()
-            add(PriceItem(it, time = date.toLocalDateTime(TimeZone.UTC), open = open, close = close, high = high, low = low))
+            add(PriceItem(it, TestPriceItem(date = date.toLocalDateTime(TimeZone.UTC), open = open, close = close, high = high, low = low)))
             date = date.plus(step)
         }
     }

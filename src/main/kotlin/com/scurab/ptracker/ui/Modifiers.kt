@@ -96,8 +96,7 @@ internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
                     state.mouseIcon = if (isInVerticalAxisZone) MouseCursors.PointerIconResizeVertically else MouseCursors.PointerIconCross
                     if (state.isChangingScale) {
                         val diff = change.previousPosition.y - change.position.y
-                        //TODO common logic for boundaries
-                        state.scale = state.scale.copy(y = (state.scale.y + (diff / 1000f)).coerceIn(0.01f, 4f))
+                        state.scale = state.scale.copy(y = (state.scale.y + (diff / 1000f)).coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1]))
                     }
                 }
                 state.pointedPriceItem = state.items.getOrNull(state.selectedPriceItemIndex())

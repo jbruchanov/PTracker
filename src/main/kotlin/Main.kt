@@ -23,7 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import com.scurab.ptracker.model.CryptoComparePriceItem
+import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.randomPriceData
+import com.scurab.ptracker.serialisation.JsonBridge
 import com.scurab.ptracker.ui.PriceBoard
 import com.scurab.ptracker.ui.PriceBoardState
 import com.scurab.ptracker.ui.TextRendering
@@ -31,13 +34,19 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.awt.Toolkit
+import java.io.File
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 @Composable
 @Preview
 fun App() {
-    val items = randomPriceData(Random, 100, Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
+    val f = File("data/BTC-GBP.json")
+    val items = if (f.exists()) {
+        JsonBridge.deserialize<List<CryptoComparePriceItem>>(f.readText()).mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, cryptoComparePriceItem) }
+    } else {
+        randomPriceData(Random, 100, Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
+    }
     TextRendering.init()
     MaterialTheme {
         val contentPadding = 2.dp

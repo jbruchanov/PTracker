@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.6.10"
+    kotlin("plugin.serialization") version "1.6.10"
     id("org.jetbrains.compose") version "1.2.0-alpha01-dev620"
 }
 
@@ -17,10 +18,24 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
+    val ktorVersion = "1.6.7"
+    val logbackVersion = "1.2.3"
+    val ktSerialization = "1.3.2"
+    val junit = "5.7.1"
+
     implementation(compose.desktop.currentOs)
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
     implementation("org.apache.poi:poi-ooxml:5.2.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$ktSerialization")
+
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$ktSerialization")
+
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:$junit")
 }
 
 tasks.test {

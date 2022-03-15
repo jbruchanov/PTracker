@@ -18,6 +18,7 @@ import com.scurab.ptracker.ext.normalize
 import com.scurab.ptracker.ext.scale
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToViewPort
+import com.scurab.ptracker.model.IPriceItem
 import com.scurab.ptracker.model.PriceItem
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
