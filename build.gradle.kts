@@ -21,7 +21,8 @@ dependencies {
     val ktorVersion = "1.6.7"
     val logbackVersion = "1.2.3"
     val ktSerialization = "1.3.2"
-    val junit = "5.7.1"
+    val junit = "5.8.2"
+    val koinVersion = "3.1.5"
 
     implementation(compose.desktop.currentOs)
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
@@ -33,6 +34,8 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$ktSerialization")
+
+    implementation("io.insert-koin:koin-core:$koinVersion")
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:$junit")

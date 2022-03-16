@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalComposeUiApi::class)
 
-package com.scurab.ptracker.ui
+package com.scurab.ptracker.ui.priceboard
 
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.runtime.Composable
@@ -14,6 +14,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.toSize
 import com.scurab.ptracker.ext.translate
+import com.scurab.ptracker.ui.MouseCursors
+import com.scurab.ptracker.ui.PriceDashboardSizes
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.Point
 

@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
-import com.scurab.ptracker.ui.PriceBoardState
+import com.scurab.ptracker.ui.priceboard.PriceBoardState
 
 val DrawScope.nativeCanvas get() = drawContext.canvas.nativeCanvas
 

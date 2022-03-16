@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalComposeUiApi::class)
 
-package com.scurab.ptracker.ui
+package com.scurab.ptracker.ui.priceboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -35,6 +37,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.scurab.ptracker.component.get
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.getHorizontalAxisText
@@ -53,6 +56,9 @@ import com.scurab.ptracker.ext.withTranslateAndScale
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.priceDetails
 import com.scurab.ptracker.model.randomPriceData
+import com.scurab.ptracker.ui.PriceDashboardColor
+import com.scurab.ptracker.ui.PriceDashboardSizes
+import com.scurab.ptracker.ui.TextRendering
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -68,8 +74,8 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 object PriceDashboardConfig {
-    val ScaleRangeX = floatArrayOf(0.001f, 6f)
-    val ScaleRangeY = floatArrayOf(0.001f, 6f)
+    val ScaleRangeX = floatArrayOf(0.001f, 1000f)
+    val ScaleRangeY = floatArrayOf(0.001f, 1000f)
     const val Debug = true
     const val SnappingMouseCrossHorizontally = true
     const val AxisYContentCoef = 0.5f
@@ -102,9 +108,19 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
     return firstIndex <= index && index <= lastIndex
 }
 
+@Composable
+fun PriceBoard() {
+    val vm = remember { get<PriceBoardViewModel>() }
+    val uiState by vm.uiState.collectAsState()
+    when (val uiState = uiState) {
+        is PriceBoardUiState.NoAssetSelected -> Text("Select Asset")
+        is PriceBoardUiState.Data -> PriceBoard(uiState.priceBoardState)
+    }
+}
+
 
 @Composable
-fun PriceBoard(state: PriceBoardState) {
+private fun PriceBoard(state: PriceBoardState) {
     val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier
@@ -431,7 +447,7 @@ private fun PriceBoardDebug(state: PriceBoardState) {
         drawIntoCanvas {
             translate(left = 2f, top = 60.dp.toPx()) {
                 rows.forEachIndexed { index, s ->
-                    it.nativeCanvas.drawTextLine(TextLine.Companion.make(s, TextRendering.font), 0f, index * TextRendering.font.metrics.height, TextRendering.paint)
+                    it.nativeCanvas.drawTextLine(TextLine.make(s, TextRendering.font), 0f, index * TextRendering.font.metrics.height, TextRendering.paint)
                 }
             }
         }

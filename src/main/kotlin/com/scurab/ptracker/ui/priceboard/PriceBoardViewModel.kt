@@ -1,0 +1,43 @@
+package com.scurab.ptracker.ui.priceboard
+
+import androidx.compose.ui.unit.Density
+import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.repository.AppStateRepository
+import com.scurab.ptracker.usecase.LoadDataUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+
+sealed class PriceBoardUiState {
+    object NoAssetSelected : PriceBoardUiState()
+    class Data(
+        val priceBoardState: PriceBoardState
+    ) : PriceBoardUiState()
+}
+
+class PriceBoardViewModel(
+    private val appStateRepository: AppStateRepository,
+    private val loadDataUseCase: LoadDataUseCase
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow<PriceBoardUiState>(PriceBoardUiState.NoAssetSelected)
+    val uiState = _uiState.asStateFlow()
+
+    init {
+        launch {
+            appStateRepository.selectedAsset.collect(::onAssetSelected)
+        }
+    }
+
+    private fun onAssetSelected(item: String) {
+        launch {
+            val items = loadDataUseCase.loadData()
+            _uiState.emit(
+                PriceBoardUiState.Data(
+                    PriceBoardState(items, Density(1f))
+                )
+            )
+        }
+    }
+}

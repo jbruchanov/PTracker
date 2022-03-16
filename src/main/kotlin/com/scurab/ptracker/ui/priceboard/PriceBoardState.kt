@@ -1,4 +1,4 @@
-package com.scurab.ptracker.ui
+package com.scurab.ptracker.ui.priceboard
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
@@ -18,14 +18,14 @@ import com.scurab.ptracker.ext.normalize
 import com.scurab.ptracker.ext.scale
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToViewPort
-import com.scurab.ptracker.model.IPriceItem
 import com.scurab.ptracker.model.PriceItem
+import com.scurab.ptracker.ui.PriceDashboardSizes
+import com.scurab.ptracker.ui.TextRendering
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.FontMetrics
 import org.jetbrains.skia.Point
 import java.awt.Cursor
-import java.lang.Float.min
 import kotlin.math.ceil
 import kotlin.math.max
 

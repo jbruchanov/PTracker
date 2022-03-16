@@ -3,7 +3,7 @@ package com.scurab.ptracker
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import com.scurab.ptracker.ui.PriceBoardState
+import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import org.junit.jupiter.api.Test
 import test.TestDensity
 import kotlin.test.assertEquals

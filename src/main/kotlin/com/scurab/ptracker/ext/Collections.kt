@@ -2,7 +2,7 @@ package com.scurab.ptracker.ext
 
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.DateFormats
-import com.scurab.ptracker.ui.PriceBoardState
+import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import com.scurab.ptracker.ui.PriceDashboardSizes
 import kotlinx.datetime.toJavaLocalDateTime
 import java.lang.Float.max
