@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.skia.Point
 
 internal fun Modifier.onMouseDrag(state: PriceBoardState): Modifier {
-    return pointerInput(Unit) {
+    return pointerInput(state) {
         detectDragGestures { change, dragAmount ->
             if (!state.isChangingScale) {
                 change.consumeAllChanges()
@@ -53,7 +53,7 @@ internal fun Modifier.onSizeChange(state: PriceBoardState): Modifier {
 }
 
 internal fun Modifier.onWheelScroll(state: PriceBoardState): Modifier {
-    return pointerInput(Unit) {
+    return pointerInput(state) {
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
@@ -84,7 +84,7 @@ internal fun Modifier.onWheelScroll(state: PriceBoardState): Modifier {
 }
 
 internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
-    return pointerInput(Unit) {
+    return pointerInput(state) {
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()

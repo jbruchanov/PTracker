@@ -12,8 +12,8 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 class LoadDataUseCase {
-    suspend fun loadData(): List<PriceItem> {
-        val f = File("data/BTC-GBP.json")
+    suspend fun loadData(item: String): List<PriceItem> {
+        val f = File("data/$item.json")
         val items = if (f.exists()) {
             JsonBridge.deserialize<List<CryptoComparePriceItem>>(f.readText()).mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, cryptoComparePriceItem) }
         } else {

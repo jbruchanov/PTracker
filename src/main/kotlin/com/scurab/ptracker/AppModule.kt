@@ -11,6 +11,6 @@ val koinModule = module {
     single { AppStateRepository() }
 
     factory { LoadDataUseCase() }
-    factory { MainWindowViewModel() }
+    factory { MainWindowViewModel(get()) }
     factory { PriceBoardViewModel(get(), get()) }
 }

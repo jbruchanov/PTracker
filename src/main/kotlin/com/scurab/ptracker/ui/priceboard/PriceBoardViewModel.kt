@@ -32,7 +32,7 @@ class PriceBoardViewModel(
 
     private fun onAssetSelected(item: String) {
         launch {
-            val items = loadDataUseCase.loadData()
+            val items = loadDataUseCase.loadData(item)
             _uiState.emit(
                 PriceBoardUiState.Data(
                     PriceBoardState(items, Density(1f))
