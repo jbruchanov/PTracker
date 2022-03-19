@@ -3,8 +3,6 @@ package com.scurab.ptracker
 import MainWindow
 import MainWindowViewModel
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -36,8 +34,7 @@ object App : KoinComponent {
             CompositionLocalProvider(
                 LocalKoin provides getKoin(),
             ) {
-                val state by viewModel.uiState.collectAsState()
-                MainWindow(state, viewModel)
+                MainWindow(viewModel)
             }
         }
     }

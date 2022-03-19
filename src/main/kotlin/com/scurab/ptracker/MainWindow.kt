@@ -23,24 +23,10 @@ import com.scurab.ptracker.ui.settings.SettingsArgs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-sealed class MainWindowState {
-    class PriceDashboard(val assets: List<String>) : MainWindowState()
-}
-
 class MainWindowViewModel(
     private val appStateRepository: AppStateRepository,
     private val navController: NavController
 ) : ViewModel(), MainWindowHandler {
-    private val crypto = listOf("BTC", "ETH", "ADA", "LTC", "SOL")
-    private val fiat = listOf("GBP", "USD")
-    private val pairs = crypto.map { c -> fiat.map { f -> "$c-$f" } }.flatten()
-
-    private val _uiState = MutableStateFlow<MainWindowState>(MainWindowState.PriceDashboard(pairs))
-    val uiState = _uiState.asStateFlow()
-
-    override fun onPairSelected(item: String) {
-        appStateRepository.setSelectedAsset(item)
-    }
 
     override fun onOpenSettingsClick() {
         navController.push(AppNavTokens.Settings, SettingsArgs(2000))
@@ -48,13 +34,12 @@ class MainWindowViewModel(
 }
 
 interface MainWindowHandler {
-    fun onPairSelected(item: String)
     fun onOpenSettingsClick()
 }
 
 @Composable
 @Preview
-fun MainWindow(state: MainWindowState, handler: MainWindowHandler) {
+fun MainWindow(handler: MainWindowHandler) {
     MaterialTheme {
         val contentPadding = 2.dp
         Box(

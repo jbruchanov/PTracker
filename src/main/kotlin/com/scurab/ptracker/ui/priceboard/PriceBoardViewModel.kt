@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 sealed class PriceBoardUiState {
     object NoAssetSelected : PriceBoardUiState()
     class Data(
-        val priceBoardState: PriceBoardState
+        val priceBoardState: PriceBoardState,
+        val pairs: List<String>
     ) : PriceBoardUiState()
 }
 
@@ -20,6 +21,10 @@ class PriceBoardViewModel(
     private val appStateRepository: AppStateRepository,
     private val loadDataUseCase: LoadDataUseCase
 ) : ViewModel() {
+
+    private val crypto = listOf("BTC", "ETH", "ADA", "LTC", "SOL")
+    private val fiat = listOf("GBP", "USD")
+    private val pairs = crypto.map { c -> fiat.map { f -> "$c-$f" } }.flatten()
 
     private val _uiState = MutableStateFlow<PriceBoardUiState>(PriceBoardUiState.NoAssetSelected)
     val uiState = _uiState.asStateFlow()
@@ -35,9 +40,14 @@ class PriceBoardViewModel(
             val items = loadDataUseCase.loadData(item)
             _uiState.emit(
                 PriceBoardUiState.Data(
-                    PriceBoardState(items, Density(1f))
+                    PriceBoardState(items, Density(1f)),
+                    pairs
                 )
             )
         }
+    }
+
+    fun onPairSelected(item: String) {
+        appStateRepository.setSelectedAsset(item)
     }
 }

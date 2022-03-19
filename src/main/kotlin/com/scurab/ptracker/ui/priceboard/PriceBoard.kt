@@ -5,6 +5,7 @@ package com.scurab.ptracker.ui.priceboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -37,7 +38,9 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.scurab.ptracker.App
 import com.scurab.ptracker.component.get
+import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.getHorizontalAxisText
@@ -109,21 +112,28 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
 }
 
 @Composable
-fun PriceBoard() {
-    val vm = remember { get<PriceBoardViewModel>() }
-    val uiState by vm.uiState.collectAsState()
-    when (val uiState = uiState) {
-        is PriceBoardUiState.NoAssetSelected -> Text("Select Asset")
-        is PriceBoardUiState.Data -> PriceBoard(uiState.priceBoardState)
-    }
-}
-
-@Composable
 fun PriceBoard(vm: PriceBoardViewModel) {
     val uiState by vm.uiState.collectAsState()
     when (val uiState = uiState) {
         is PriceBoardUiState.NoAssetSelected -> Text("Select Asset")
-        is PriceBoardUiState.Data -> PriceBoard(uiState.priceBoardState)
+        is PriceBoardUiState.Data -> {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Row {
+                    Column {
+                        uiState.pairs.forEach { pair ->
+                            Button(onClick = { vm.onPairSelected(pair) }) {
+                                Text(pair)
+                            }
+                        }
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        PriceBoard(uiState.priceBoardState)
+                    }
+                }
+            }
+        }
     }
 }
 
