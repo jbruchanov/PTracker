@@ -5,7 +5,7 @@ import com.scurab.ptracker.component.KoinViewModelFactory
 import com.scurab.ptracker.component.navigation.DefaultNavSpecs
 import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
-import com.scurab.ptracker.component.navigation.ViewModelFactory
+import com.scurab.ptracker.component.navigation.ComponentFactory
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
@@ -14,7 +14,7 @@ import org.koin.dsl.module
 
 fun createKoinModule(appArgs: Array<String>) = module {
     single { AppStateRepository() }
-    single<ViewModelFactory> { KoinViewModelFactory() }
+    single<ComponentFactory> { KoinViewModelFactory() }
 
     single { defaultNavSpecs(appArgs, get()) }
     single<NavSpecs> { get<DefaultNavSpecs>() }

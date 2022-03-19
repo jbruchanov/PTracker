@@ -1,23 +1,24 @@
 package com.scurab.ptracker.component
 
+import com.scurab.ptracker.component.navigation.LifecycleComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
-open class ViewModel : CoroutineScope {
+open class ViewModel : CoroutineScope, LifecycleComponent {
     private val job = Job()
     override val coroutineContext: CoroutineContext = job + Dispatchers.Default
 
-    open fun start() {
+    override fun start() {
         println("Start:$this")
     }
 
-    open fun stop() {
+    override fun stop() {
         println("Stop:$this")
     }
 
-    open fun destroy() {
+    override fun destroy() {
         job.cancel()
         println("Destroy:$this")
     }

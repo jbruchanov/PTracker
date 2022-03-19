@@ -10,28 +10,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.util.Stack
 
 interface NavSpecs {
-    val activeScreen: StateFlow<NavigationToken<*>>
+    val activeScreen: StateFlow<NavToken<*>>
 
     @Composable
     fun render()
 }
 
-
 class DefaultNavSpecs(
     items: List<NavRecord<*, *>>,
-    private val viewModelFactory: ViewModelFactory,
-    appArgs: AppArgs
+    private val componentFactory: ComponentFactory,
+    appNavArgs: AppNavArgs
 ) : NavSpecs, NavController {
     private val navItems = items.toList()
     private val stack: Stack<ActiveNavRecord<*>> = Stack()
-    private val _activeScreenTokens = MutableStateFlow<NavigationToken<*>>(InitNavigationToken)
+    private val _activeScreenTokens = MutableStateFlow<NavToken<*>>(InitNavToken)
     override val activeScreen = _activeScreenTokens.asStateFlow()
 
     init {
-        requireNotNull(navItems.firstOrNull { it.navigationToken == StartNavigationToken }) {
+        requireNotNull(navItems.firstOrNull { it.navToken == StartNavToken }) {
             "NavItems must include at least 1 record using StartNavigationToken"
         }
-        push(StartNavigationToken, appArgs)
+        push(StartNavToken, appNavArgs)
     }
 
     @Composable
@@ -41,14 +40,14 @@ class DefaultNavSpecs(
         stack.peek()?.render()
     }
 
-    override fun <T : NavArgs> push(token: NavigationToken<T>, args: T) {
-        val navItem = requireNotNull(navItems.firstOrNull { it.navigationToken == token }) {
+    override fun <T : NavArgs> push(token: NavToken<T>, args: T) {
+        val navItem = requireNotNull(navItems.firstOrNull { it.navToken == token }) {
             "Unable to find navItem matching token:$token"
         } as NavRecord<T, *>
-        stack.peekOrNull()?.viewModel?.stop()
+        stack.peekOrNull()?.lifecycleComponent?.stop()
 
-        val activeRecord = navItem.createActiveRecord(viewModelFactory, args)
-        activeRecord.viewModel.start()
+        val activeRecord = navItem.createActiveRecord(componentFactory, args)
+        activeRecord.lifecycleComponent.start()
         stack.push(activeRecord)
         _activeScreenTokens.tryEmit(token)
     }
@@ -56,18 +55,18 @@ class DefaultNavSpecs(
     override fun pop(): Boolean {
         val result = stack.size > 1
         if (result) {
-            stack.pop().viewModel.apply {
+            stack.pop().lifecycleComponent.apply {
                 stop()
                 destroy()
             }
             val peek = stack.peek()
-            peek.viewModel.start()
-            _activeScreenTokens.tryEmit(peek.navigationRecord.navigationToken)
+            peek.lifecycleComponent.start()
+            _activeScreenTokens.tryEmit(peek.navigationRecord.navToken)
         }
         return result
     }
 
     companion object {
-        private object InitNavigationToken : NavigationToken<EmptyArgs>
+        private object InitNavToken : NavToken<EmptyNavArgs>
     }
 }
