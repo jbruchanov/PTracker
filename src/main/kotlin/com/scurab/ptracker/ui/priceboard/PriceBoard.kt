@@ -118,6 +118,14 @@ fun PriceBoard() {
     }
 }
 
+@Composable
+fun PriceBoard(vm: PriceBoardViewModel) {
+    val uiState by vm.uiState.collectAsState()
+    when (val uiState = uiState) {
+        is PriceBoardUiState.NoAssetSelected -> Text("Select Asset")
+        is PriceBoardUiState.Data -> PriceBoard(uiState.priceBoardState)
+    }
+}
 
 @Composable
 private fun PriceBoard(state: PriceBoardState) {

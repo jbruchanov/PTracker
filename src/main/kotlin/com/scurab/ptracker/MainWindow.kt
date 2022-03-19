@@ -9,19 +9,17 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.collection.mutableVectorOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import com.scurab.ptracker.App.getKoin
+import com.scurab.ptracker.AppNavTokens
 import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.component.navigation.NavController
+import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.repository.AppStateRepository
-import com.scurab.ptracker.ui.priceboard.PriceBoard
+import com.scurab.ptracker.ui.settings.SettingsArgs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -30,7 +28,8 @@ sealed class MainWindowState {
 }
 
 class MainWindowViewModel(
-    private val appStateRepository: AppStateRepository
+    private val appStateRepository: AppStateRepository,
+    private val navController: NavController
 ) : ViewModel(), MainWindowHandler {
     private val crypto = listOf("BTC", "ETH", "ADA", "LTC", "SOL")
     private val fiat = listOf("GBP", "USD")
@@ -42,10 +41,15 @@ class MainWindowViewModel(
     override fun onPairSelected(item: String) {
         appStateRepository.setSelectedAsset(item)
     }
+
+    override fun onOpenSettingsClick() {
+        navController.push(AppNavTokens.Settings, SettingsArgs(2000))
+    }
 }
 
 interface MainWindowHandler {
     fun onPairSelected(item: String)
+    fun onOpenSettingsClick()
 }
 
 @Composable
@@ -59,28 +63,16 @@ fun MainWindow(state: MainWindowState, handler: MainWindowHandler) {
                 .background(Color.DarkGray)
                 .padding(start = contentPadding, bottom = contentPadding, end = contentPadding)
         ) {
-            when (state) {
-                is MainWindowState.PriceDashboard -> MainWindowDashboard(state, handler)
-            }
-        }
-    }
-}
-
-@Composable
-@Preview
-private fun MainWindowDashboard(state: MainWindowState.PriceDashboard, handler: MainWindowHandler) {
-    var showDialog by remember { mutableStateOf(false) }
-    Box(modifier = Modifier) {
-        Row {
-            Column {
-                state.assets.forEach { asset ->
-                    Button(onClick = { handler.onPairSelected(asset) }) {
-                        Text(asset)
+            Row {
+                Column {
+                    Button(onClick = { handler.onOpenSettingsClick() }) {
+                        Text("Settings")
                     }
                 }
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                PriceBoard()
+                Box(modifier = Modifier.weight(1f)) {
+                    val navigation = remember { getKoin().get<NavSpecs>() }
+                    navigation.render()
+                }
             }
         }
     }

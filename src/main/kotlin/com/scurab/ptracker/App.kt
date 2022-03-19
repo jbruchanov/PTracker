@@ -5,7 +5,6 @@ import MainWindowViewModel
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -19,8 +18,8 @@ import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import java.awt.Toolkit
 
-fun main() {
-    startKoin { loadKoinModules(koinModule) }
+fun main(args: Array<String>) {
+    startKoin { loadKoinModules(createKoinModule(args)) }
     App.start()
 }
 
@@ -35,7 +34,7 @@ object App : KoinComponent {
             )
         ) {
             CompositionLocalProvider(
-                LocalKoin provides getKoin()
+                LocalKoin provides getKoin(),
             ) {
                 val state by viewModel.uiState.collectAsState()
                 MainWindow(state, viewModel)

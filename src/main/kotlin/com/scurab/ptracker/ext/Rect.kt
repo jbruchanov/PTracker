@@ -2,7 +2,6 @@ package com.scurab.ptracker.ext
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 

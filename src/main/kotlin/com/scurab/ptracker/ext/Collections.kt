@@ -2,12 +2,11 @@ package com.scurab.ptracker.ext
 
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.DateFormats
-import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import com.scurab.ptracker.ui.PriceDashboardSizes
+import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import kotlinx.datetime.toJavaLocalDateTime
 import java.lang.Float.max
 import java.lang.Float.min
-import kotlin.Int
 import kotlin.math.ceil
 
 fun List<PriceItem>.filterVisibleIndexes(state: PriceBoardState, step: Int = 1, startOffset: Int = 0, endOffset: Int = 0): IntProgression {

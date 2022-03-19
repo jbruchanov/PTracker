@@ -1,16 +1,29 @@
 package com.scurab.ptracker
 
 import MainWindowViewModel
+import com.scurab.ptracker.component.KoinViewModelFactory
+import com.scurab.ptracker.component.navigation.DefaultNavSpecs
+import com.scurab.ptracker.component.navigation.NavController
+import com.scurab.ptracker.component.navigation.NavSpecs
+import com.scurab.ptracker.component.navigation.ViewModelFactory
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
+import com.scurab.ptracker.ui.settings.SettingsViewModel
 import com.scurab.ptracker.usecase.LoadDataUseCase
 import org.koin.dsl.module
 
-val koinModule = module {
-
+fun createKoinModule(appArgs: Array<String>) = module {
     single { AppStateRepository() }
+    single<ViewModelFactory> { KoinViewModelFactory() }
+
+    single { defaultNavSpecs(appArgs, get()) }
+    single<NavSpecs> { get<DefaultNavSpecs>() }
+    single<NavController> { get<DefaultNavSpecs>() }
 
     factory { LoadDataUseCase() }
-    factory { MainWindowViewModel(get()) }
+    factory { MainWindowViewModel(get(), get()) }
     factory { PriceBoardViewModel(get(), get()) }
+    factory { args -> SettingsViewModel(args.get(), get()) }
 }
+
+
