@@ -11,7 +11,7 @@ import java.util.Stack
 
 interface NavSpecs {
     val activeScreen: StateFlow<NavToken<*>>
-
+    val activeScreenNavToken: NavToken<*>
     @Composable
     fun render()
 }
@@ -25,6 +25,7 @@ class DefaultNavSpecs(
     override val activeScreen = _activeScreenTokens.asStateFlow()
 
     override val activeRecords: Int get() = stack.size
+    override val activeScreenNavToken: NavToken<*> get() = stack.peek().navigationRecord.navToken
 
     init {
         requireNotNull(navItems.firstOrNull { it.navToken == StartNavToken }) {

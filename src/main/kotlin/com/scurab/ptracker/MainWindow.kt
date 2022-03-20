@@ -3,18 +3,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.twotone.AccountBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.App.getKoin
 import com.scurab.ptracker.AppNavTokens
@@ -23,7 +21,10 @@ import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.component.navigation.StartNavToken
 import com.scurab.ptracker.repository.AppStateRepository
-import com.scurab.ptracker.ui.common.ImageButton
+import com.scurab.ptracker.ui.AppColors
+import com.scurab.ptracker.ui.AppTheme
+import com.scurab.ptracker.ui.common.VerticalDivider
+import com.scurab.ptracker.ui.common.VerticalTabButton
 import com.scurab.ptracker.ui.settings.SettingsArgs
 
 class MainWindowViewModel(
@@ -48,22 +49,32 @@ interface MainWindowHandler {
 @Composable
 @Preview
 fun MainWindow(handler: MainWindowHandler) {
-    MaterialTheme {
+    val navigation = remember { getKoin().get<NavSpecs>() }
+    AppTheme {
         val contentPadding = 2.dp
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.DarkGray)
+                .background(AppColors.current.WindowEdge)
                 .padding(start = contentPadding, bottom = contentPadding, end = contentPadding)
+                .background(AppColors.current.BackgroundContent)
         ) {
             Row {
                 Column {
-                    ImageButton(Icons.TwoTone.AccountBox, onClick = handler::onOpenPriceDashboardClick)
-                    ImageButton(Icons.Default.Settings, onClick = handler::onOpenSettingsClick)
+                    val navToken by navigation.activeScreen.collectAsState()
+                    VerticalTabButton(
+                        Icons.TwoTone.AccountBox,
+                        isSelected = navToken == StartNavToken,
+                        onClick = handler::onOpenPriceDashboardClick
+                    )
+                    VerticalTabButton(
+                        Icons.Default.Settings,
+                        isSelected = navToken == AppNavTokens.Settings,
+                        onClick = handler::onOpenSettingsClick
+                    )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
+                VerticalDivider()
                 Box(modifier = Modifier.weight(1f)) {
-                    val navigation = remember { getKoin().get<NavSpecs>() }
                     navigation.render()
                 }
             }

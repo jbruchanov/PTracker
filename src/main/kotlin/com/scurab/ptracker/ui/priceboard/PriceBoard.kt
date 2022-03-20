@@ -38,9 +38,6 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.scurab.ptracker.App
-import com.scurab.ptracker.component.get
-import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.getHorizontalAxisText
@@ -59,6 +56,7 @@ import com.scurab.ptracker.ext.withTranslateAndScale
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.priceDetails
 import com.scurab.ptracker.model.randomPriceData
+import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.PriceDashboardColor
 import com.scurab.ptracker.ui.PriceDashboardSizes
 import com.scurab.ptracker.ui.TextRendering
@@ -118,18 +116,20 @@ fun PriceBoard(vm: PriceBoardViewModel) {
         is PriceBoardUiState.NoAssetSelected -> Text("Select Asset")
         is PriceBoardUiState.Data -> {
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(AppColors.current.BackgroundContent)
             ) {
                 Row {
+                    Box(modifier = Modifier.weight(1f)) {
+                        PriceBoard(uiState.priceBoardState)
+                    }
                     Column {
                         uiState.pairs.forEach { pair ->
                             Button(onClick = { vm.onPairSelected(pair) }) {
                                 Text(pair)
                             }
                         }
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        PriceBoard(uiState.priceBoardState)
                     }
                 }
             }
@@ -144,7 +144,7 @@ private fun PriceBoard(state: PriceBoardState) {
         modifier = Modifier
             .fillMaxSize()
             .pointerHoverIcon(state.mouseIcon)
-            .background(PriceDashboardColor.Background)
+            .background(AppColors.current.BackgroundContent)
             .onSizeChange(state)
             .onMouseMove(state)
             .onMouseDrag(state)

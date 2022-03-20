@@ -27,7 +27,8 @@ object App : KoinComponent {
         val resolution = Toolkit.getDefaultToolkit().screenSize
         val viewModel = get<MainWindowViewModel>()
         Window(
-            onCloseRequest = ::exitApplication, state = rememberWindowState(
+            onCloseRequest = ::exitApplication,
+            state = rememberWindowState(
                 size = DpSize((resolution.width * 0.5).dp, (resolution.height * 0.75).dp)
             )
         ) {

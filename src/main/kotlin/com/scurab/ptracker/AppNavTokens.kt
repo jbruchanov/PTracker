@@ -12,11 +12,13 @@ import com.scurab.ptracker.ui.settings.SettingsArgs
 import com.scurab.ptracker.ui.settings.SettingsViewModel
 
 sealed class AppNavTokens<T : NavArgs> : NavToken<T> {
+    object PriceDashboard : AppNavTokens<SettingsArgs>()
     object Settings : AppNavTokens<SettingsArgs>()
 }
 
 fun defaultNavSpecs(appArgs: Array<String>, componentFactory: ComponentFactory) = navigation(componentFactory) {
     appArgs(appArgs)
     screen(StartNavToken) { vm: PriceBoardViewModel -> PriceBoard(vm) }
+    screen(AppNavTokens.PriceDashboard) { vm: PriceBoardViewModel -> PriceBoard(vm) }
     screen(AppNavTokens.Settings) { vm: SettingsViewModel -> Settings(vm) }
 }
