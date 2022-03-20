@@ -370,6 +370,7 @@ private fun PriceAxisContentTemplate(
 
 @Composable
 private fun Mouse(state: PriceBoardState) {
+    if (state.pointer.isEmpty) return
     val items = state.items
     val density = LocalDensity.current.density
     val effect = remember { PathEffect.dashPathEffect(floatArrayOf(10f * density, 10f * density)) }
@@ -392,15 +393,13 @@ private fun Mouse(state: PriceBoardState) {
 
         //vertical
         if (state.pointer.x <= verticalPriceBarLeft) {
-            if (!state.pointer.isEmpty) {
-                drawLine(
-                    DashboardColors.MouseCross,
-                    start = Offset(x, 0f),
-                    end = Offset(x, size.height),
-                    strokeWidth = DashboardSizes.MouseCrossStrokeWidth.toPx(),
-                    pathEffect = effect
-                )
-            }
+            drawLine(
+                DashboardColors.MouseCross,
+                start = Offset(x, 0f),
+                end = Offset(x, size.height),
+                strokeWidth = DashboardSizes.MouseCrossStrokeWidth.toPx(),
+                pathEffect = effect
+            )
 
             val label = state.horizontalLabel(items)
             if (label != null) {
@@ -416,27 +415,25 @@ private fun Mouse(state: PriceBoardState) {
         }
 
         //horizontal
-        if (state.pointer.y != 0f && state.canvasSize.height - state.pointer.y > bottomAxisBarHeight) {
-            if (!state.pointer.isEmpty) {
-                drawLine(
-                    DashboardColors.MouseCross,
-                    start = Offset(0f, state.pointer.y),
-                    end = Offset(size.width, state.pointer.y),
-                    strokeWidth = DashboardSizes.MouseCrossStrokeWidth.toPx(),
-                    pathEffect = effect
-                )
-            }
+        if (state.canvasSize.height - state.pointer.y > bottomAxisBarHeight) {
+            drawLine(
+                DashboardColors.MouseCross,
+                start = Offset(0f, state.pointer.y),
+                end = Offset(size.width, state.pointer.y),
+                strokeWidth = DashboardSizes.MouseCrossStrokeWidth.toPx(),
+                pathEffect = effect
+            )
+        }
 
-            val text = TextLine.make(state.verticalLabel(), TextRendering.fontAxis)
-            val textPadding = DashboardSizes.VerticalAxisHorizontalPadding.toPx()
-            val textSize = text.size(textPadding)
-            val top = state.pointer.y - textSize.height / 2
-            val left = state.verticalPriceBarLeft()
-            val verticalAxisBarWidth = DashboardSizes.VerticalPriceBarWidth.toPx(density)
-            translate(left, top) {
-                drawRect(DashboardColors.BackgroundPriceBubble, size = Size(verticalAxisBarWidth, textSize.height))
-                nativeCanvas.drawTextLine(text, verticalAxisBarWidth - text.width - textPadding, textPadding - text.ascent, TextRendering.paint)
-            }
+        val text = TextLine.make(state.verticalLabel(), TextRendering.fontAxis)
+        val textPadding = DashboardSizes.VerticalAxisHorizontalPadding.toPx()
+        val textSize = text.size(textPadding)
+        val top = state.pointer.y - textSize.height / 2
+        val left = state.verticalPriceBarLeft()
+        val verticalAxisBarWidth = DashboardSizes.VerticalPriceBarWidth.toPx(density)
+        translate(left, top) {
+            drawRect(DashboardColors.BackgroundPriceBubble, size = Size(verticalAxisBarWidth, textSize.height))
+            nativeCanvas.drawTextLine(text, verticalAxisBarWidth - text.width - textPadding, textPadding - text.ascent, TextRendering.paint)
         }
     }
 }
@@ -487,7 +484,7 @@ private fun PriceBoardDebug(state: PriceBoardState) {
 private fun Canvas(modifier: Modifier = Modifier, content: DrawScope.() -> Unit) {
     Spacer(modifier = modifier.fillMaxSize()
         .drawBehind {
-            clipRectSafe(left = 0.0f, top = 0.0f, right = size.width, bottom = size.height) {
+            clipRectSafe {
                 content()
             }
         })

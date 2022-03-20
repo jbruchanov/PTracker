@@ -13,7 +13,7 @@ fun Point.normalize(size: Size): Point {
 }
 
 fun Point.normalize(rect: Rect): Point {
-    return if (rect.isEmpty) Point.ZERO
+    return if (rect.width == 0f || rect.height == 0f) Point.ZERO
     else Point(((x - rect.left) / abs(rect.width)).coerceIn(NormalizedRange), ((y - rect.top) / abs(rect.height)).coerceIn(NormalizedRange))
 }
 
