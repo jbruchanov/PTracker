@@ -23,8 +23,12 @@ dependencies {
     val ktSerialization = "1.3.2"
     val junit = "5.8.2"
     val koinVersion = "3.1.5"
+    val composeVersion = "1.2.0-alpha01-dev620"
 
     implementation(compose.desktop.currentOs)
+    implementation("org.jetbrains.compose.material:material-icons-core-desktop:$composeVersion")
+    implementation("org.jetbrains.compose.material:material-icons-extended-desktop:$composeVersion")
+
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
     implementation("org.apache.poi:poi-ooxml:5.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$ktSerialization")

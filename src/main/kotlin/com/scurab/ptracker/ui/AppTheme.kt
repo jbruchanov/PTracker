@@ -46,6 +46,7 @@ object AppTheme {
 
     object Colors {
         val Primary = Color(0xFF546E7A)
+        val PrimaryVariant = Color(0xFF546E7A).copy(alpha = .75f)
         val Secondary = Color(0xFFFF7F00)
         val BackgroundContent = Color(0xFF2B2B2B)
         val ToDo = Color.Magenta
@@ -56,7 +57,7 @@ object AppTheme {
 
         val DarkMaterial = darkColors(
             primary = Primary,
-            primaryVariant = ToDo,
+            primaryVariant = PrimaryVariant,
             secondary = Secondary,
             secondaryVariant = ToDo,
             background = BackgroundContent,

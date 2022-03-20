@@ -13,6 +13,7 @@ import com.scurab.ptracker.ui.settings.SettingsViewModel
 
 sealed class AppNavTokens<T : NavArgs> : NavToken<T> {
     object PriceDashboard : AppNavTokens<SettingsArgs>()
+    object PieChart : AppNavTokens<SettingsArgs>()
     object Settings : AppNavTokens<SettingsArgs>()
 }
 

@@ -2,23 +2,29 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DataUsage
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.twotone.AccountBox
+import androidx.compose.material.icons.filled.WaterfallChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.App.getKoin
 import com.scurab.ptracker.AppNavTokens
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
+import com.scurab.ptracker.component.navigation.NavToken
 import com.scurab.ptracker.component.navigation.StartNavToken
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.ui.AppColors
@@ -46,6 +52,12 @@ interface MainWindowHandler {
     fun onOpenSettingsClick()
 }
 
+private data class LeftMenuButton(
+    val imageVector: ImageVector,
+    val token: NavToken<*>,
+    val onClick: () -> Unit
+)
+
 @Composable
 @Preview
 fun MainWindow(handler: MainWindowHandler) {
@@ -60,18 +72,21 @@ fun MainWindow(handler: MainWindowHandler) {
                 .background(AppColors.current.BackgroundContent)
         ) {
             Row {
-                Column {
+                val buttons = remember {
+                    listOf(
+                        LeftMenuButton(Icons.Default.WaterfallChart, StartNavToken, handler::onOpenPriceDashboardClick),
+                        LeftMenuButton(Icons.Default.DataUsage, AppNavTokens.PieChart, { }),
+                        LeftMenuButton(Icons.Default.Settings, AppNavTokens.Settings, handler::onOpenSettingsClick),
+                    )
+                }
+                Column(
+                    modifier = Modifier.width(IntrinsicSize.Max)
+                ) {
                     val navToken by navigation.activeScreen.collectAsState()
-                    VerticalTabButton(
-                        Icons.TwoTone.AccountBox,
-                        isSelected = navToken == StartNavToken,
-                        onClick = handler::onOpenPriceDashboardClick
-                    )
-                    VerticalTabButton(
-                        Icons.Default.Settings,
-                        isSelected = navToken == AppNavTokens.Settings,
-                        onClick = handler::onOpenSettingsClick
-                    )
+                    buttons.forEach { (icon, token, handler) ->
+                        VerticalTabButton(icon, isSelected = navToken == token, onClick = handler)
+                        Divider(color = AppTheme.Colors.PrimaryVariant)
+                    }
                 }
                 VerticalDivider()
                 Box(modifier = Modifier.weight(1f)) {

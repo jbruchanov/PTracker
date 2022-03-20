@@ -206,7 +206,7 @@ private fun Candles(state: PriceBoardState) {
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
     Canvas {
         withTranslateAndScale(state) {
-            state.items.filterVisible(state).forEach { priceItem ->
+            state.items.filterVisible(state, endOffset = 1).forEach { priceItem ->
                 val x = priceItem.index * DashboardSizes.PriceItemWidth
                 //scaleY flipped as we want to have origin at left/Bottom
                 translate(x, 0f) {
@@ -342,7 +342,7 @@ private fun PriceAxisContentTemplate(
             translate(-state.offset.x, size.height) {
                 scale(state.scale.x, 1f, pivot = state.chartScalePivot()) {
                     val step = ceil(PriceDashboardConfig.AxisXStep * state.maxDensity() / state.scale.x).toInt()
-                    //startOffset for long text to be visible even if line the "column" is outside visible range
+                    //offset for long text to be visible even if line the "column" is outside visible range
                     val viewportIndexes = state.viewportIndexes(startOffset = -step)
                     viewportIndexes.forEach { i ->
                         //can't use step on range as it's causing scroll "jitter"
