@@ -416,7 +416,7 @@ private fun Mouse(state: PriceBoardState) {
         }
 
         //horizontal
-        if (state.canvasSize.height - state.pointer.y > bottomAxisBarHeight) {
+        if (state.pointer.y != 0f && state.canvasSize.height - state.pointer.y > bottomAxisBarHeight) {
             if (!state.pointer.isEmpty) {
                 drawLine(
                     DashboardColors.MouseCross,
