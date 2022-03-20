@@ -3,11 +3,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.twotone.AccountBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,10 +21,10 @@ import com.scurab.ptracker.AppNavTokens
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
+import com.scurab.ptracker.component.navigation.StartNavToken
 import com.scurab.ptracker.repository.AppStateRepository
+import com.scurab.ptracker.ui.common.ImageButton
 import com.scurab.ptracker.ui.settings.SettingsArgs
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class MainWindowViewModel(
     private val appStateRepository: AppStateRepository,
@@ -31,9 +34,14 @@ class MainWindowViewModel(
     override fun onOpenSettingsClick() {
         navController.push(AppNavTokens.Settings, SettingsArgs(2000))
     }
+
+    override fun onOpenPriceDashboardClick() {
+        navController.popTo(StartNavToken)
+    }
 }
 
 interface MainWindowHandler {
+    fun onOpenPriceDashboardClick()
     fun onOpenSettingsClick()
 }
 
@@ -50,10 +58,10 @@ fun MainWindow(handler: MainWindowHandler) {
         ) {
             Row {
                 Column {
-                    Button(onClick = { handler.onOpenSettingsClick() }) {
-                        Text("Settings")
-                    }
+                    ImageButton(Icons.TwoTone.AccountBox, onClick = handler::onOpenPriceDashboardClick)
+                    ImageButton(Icons.Default.Settings, onClick = handler::onOpenSettingsClick)
                 }
+                Spacer(modifier = Modifier.width(4.dp))
                 Box(modifier = Modifier.weight(1f)) {
                     val navigation = remember { getKoin().get<NavSpecs>() }
                     navigation.render()

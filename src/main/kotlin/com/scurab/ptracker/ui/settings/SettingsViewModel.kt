@@ -12,10 +12,7 @@ class SettingsViewModel(
     private val args: SettingsArgs,
     private val navController: NavController
 ) : ViewModel() {
-    init {
-        launch {
-            delay(args.delay)
-            navController.pop()
-        }
+    fun close() {
+        navController.pop()
     }
 }
