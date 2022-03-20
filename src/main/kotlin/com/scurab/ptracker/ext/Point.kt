@@ -7,8 +7,16 @@ import kotlin.math.abs
 
 val NormalizedRange = 0f..1f
 
-fun Point.normalize(size: Size) = Point((x / abs(size.width)).coerceIn(NormalizedRange), (1f - (y / abs(size.height))).coerceIn(NormalizedRange))
-fun Point.normalize(rect: Rect) = Point(((x - rect.left) / abs(rect.width)).coerceIn(NormalizedRange), ((y - rect.top) / abs(rect.height)).coerceIn(NormalizedRange))
+fun Point.normalize(size: Size): Point {
+    return if (size.isEmpty()) Point.ZERO
+    else Point((x / abs(size.width)).coerceIn(NormalizedRange), (1f - (y / abs(size.height))).coerceIn(NormalizedRange))
+}
+
+fun Point.normalize(rect: Rect): Point {
+    return if (rect.isEmpty) Point.ZERO
+    else Point(((x - rect.left) / abs(rect.width)).coerceIn(NormalizedRange), ((y - rect.top) / abs(rect.height)).coerceIn(NormalizedRange))
+}
+
 fun Point.transformNormToReal(size: Size): Point {
     requireNormalized()
     return Point(abs(size.width) * x, abs(size.height) * y)

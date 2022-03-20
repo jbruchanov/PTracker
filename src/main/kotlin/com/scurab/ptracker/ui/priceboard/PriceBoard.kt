@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
@@ -38,6 +37,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.scurab.ptracker.ext.clipRectSafe
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.getHorizontalAxisText
@@ -338,7 +338,7 @@ private fun PriceAxisContentTemplate(
 ) {
     Canvas {
         //Axis X
-        clipRect(right = state.verticalPriceBarLeft()) {
+        clipRectSafe(right = state.verticalPriceBarLeft()) {
             translate(-state.offset.x, size.height) {
                 scale(state.scale.x, 1f, pivot = state.chartScalePivot()) {
                     val step = ceil(PriceDashboardConfig.AxisXStep * state.maxDensity() / state.scale.x).toInt()
@@ -359,7 +359,7 @@ private fun PriceAxisContentTemplate(
         }
 
         //Axis Y
-        clipRect(bottom = size.height - state.bottomAxisBarHeight()) {
+        clipRectSafe(bottom = size.height - state.bottomAxisBarHeight()) {
             val steps = state.verticalSteps()
             (0 until steps).forEach { step ->
                 verticalContent(step, steps)
@@ -487,7 +487,7 @@ private fun PriceBoardDebug(state: PriceBoardState) {
 private fun Canvas(modifier: Modifier = Modifier, content: DrawScope.() -> Unit) {
     Spacer(modifier = modifier.fillMaxSize()
         .drawBehind {
-            clipRect {
+            clipRectSafe(left = 0.0f, top = 0.0f, right = size.width, bottom = size.height) {
                 content()
             }
         })

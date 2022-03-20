@@ -4,7 +4,11 @@ package com.scurab.ptracker.ui.priceboard
 
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -35,10 +39,12 @@ internal fun Modifier.onMouseDrag(state: PriceBoardState): Modifier {
 @Composable
 internal fun Modifier.onSizeChange(state: PriceBoardState): Modifier {
     val scope = rememberCoroutineScope()
+    var initStateSet by remember { mutableStateOf(false) }
     return onSizeChanged { intSize ->
         val size = intSize.toSize()
         if (state.canvasSize == size) return@onSizeChanged
-        if (state.canvasSize.isEmpty()) {
+        if (!initStateSet) {
+            initStateSet = true
             scope.launch {
                 val viewport = state.initViewport(size)
                 state.setViewport(viewport, size)
