@@ -3,9 +3,9 @@ package com.scurab.ptracker.model
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import com.scurab.ptracker.ui.AppTheme
+import com.scurab.ptracker.ui.AppTheme.DashboardColors
 import com.scurab.ptracker.ui.DateFormats
-import com.scurab.ptracker.ui.PriceDashboardColor
-import com.scurab.ptracker.ui.PriceDashboardSizes
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -31,8 +31,8 @@ class PriceItem(
 ) : IPriceItem by item {
     private val rectHeight = (open - close).abs().toFloat()
     val rectOffsetY = open.min(close).toFloat()
-    val color = if (open >= close) PriceDashboardColor.CandleRed else PriceDashboardColor.CandleGreen
-    val rectSize = Size(PriceDashboardSizes.PriceItemWidth, rectHeight)
+    val color = if (open >= close) DashboardColors.CandleRed else DashboardColors.CandleGreen
+    val rectSize = Size(AppTheme.DashboardSizes.PriceItemWidth, rectHeight)
     val centerPrice = (open + close).toFloat() / 2f
     val spikeOffsetY1 = high.max(low).toFloat()
     val spikeOffsetY2 = high.min(low).toFloat()

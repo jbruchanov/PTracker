@@ -1,8 +1,8 @@
 package com.scurab.ptracker.ext
 
 import com.scurab.ptracker.model.PriceItem
+import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.DateFormats
-import com.scurab.ptracker.ui.PriceDashboardSizes
 import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import kotlinx.datetime.toJavaLocalDateTime
 import java.lang.Float.max
@@ -11,7 +11,7 @@ import kotlin.math.ceil
 
 fun List<PriceItem>.filterVisibleIndexes(state: PriceBoardState, step: Int = 1, startOffset: Int = 0, endOffset: Int = 0): IntProgression {
     val vp = state.viewport()
-    val colWidth = PriceDashboardSizes.PriceItemWidth
+    val colWidth = DashboardSizes.PriceItemWidth
     val firstIndex = (max(0f, vp.left) / colWidth).toInt()
     val widthToFill = vp.nWidth + min(vp.left, 0f)
     val count = ceil(min(widthToFill, size * colWidth) / colWidth).toInt()

@@ -9,7 +9,6 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.scurab.ptracker.component.LocalKoin
-import com.scurab.ptracker.ui.TextRendering
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.loadKoinModules
@@ -23,7 +22,6 @@ fun main(args: Array<String>) {
 
 object App : KoinComponent {
     fun start() = application {
-        TextRendering.init()
         val resolution = Toolkit.getDefaultToolkit().screenSize
         val viewModel = get<MainWindowViewModel>()
         Window(

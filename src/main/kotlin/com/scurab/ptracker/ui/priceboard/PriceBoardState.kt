@@ -19,8 +19,8 @@ import com.scurab.ptracker.ext.scale
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.model.PriceItem
-import com.scurab.ptracker.ui.PriceDashboardSizes
-import com.scurab.ptracker.ui.TextRendering
+import com.scurab.ptracker.ui.AppTheme.DashboardSizes
+import com.scurab.ptracker.ui.AppTheme.TextRendering
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.FontMetrics
@@ -55,12 +55,12 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
 
     fun initViewport(size: Size): Rect {
         val lastItem = items.lastOrNull() ?: return Rect(0f, 0f, size.width, size.height)
-        val allColumnsWidth = (items.size * PriceDashboardSizes.PriceItemWidth)
+        val allColumnsWidth = (items.size * DashboardSizes.PriceItemWidth)
         //take last n visible items on the screen
-        val sample = items.takeLast((size.width / PriceDashboardSizes.PriceItemWidth).toInt())
+        val sample = items.takeLast((size.width / DashboardSizes.PriceItemWidth).toInt())
         val y = lastItem.centerPrice
         val avgHeight = sample.map { it.rectSize.height }.average().toFloat()
-        val scaleX = (size.width / PriceDashboardConfig.DefaultMinColumns / PriceDashboardSizes.PriceItemWidth)
+        val scaleX = (size.width / PriceDashboardConfig.DefaultMinColumns / DashboardSizes.PriceItemWidth)
             .coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1])
         val scaleY = (avgHeight * 0.25f / lastItem.rectSize.height)
             .coerceIn(PriceDashboardConfig.MinInitScaleY, PriceDashboardConfig.MaxInitScaleY)
@@ -81,10 +81,16 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
         }
     }
 
-    fun selectedPriceItemIndex() = ceil(viewportPointer().x / PriceDashboardSizes.PriceItemWidth).toInt() - 1
-    fun verticalPriceBarLeft(): Float = max(0f, canvasSize.width - PriceDashboardSizes.VerticalPriceBarWidth.toPx(this.localDensity.density))
+    fun selectedPriceItemIndex() = ceil(viewportPointer().x / DashboardSizes.PriceItemWidth).toInt() - 1
+    fun verticalPriceBarLeft(): Float = max(
+        0f,
+        canvasSize.width -
+                DashboardSizes.VerticalPriceBarWidth.toPx(localDensity.density) -
+                (2 * DashboardSizes.VerticalAxisHorizontalPadding.toPx(localDensity.density))
+    )
+
     fun bottomAxisBarHeight(metrics: FontMetrics = TextRendering.fontLabels.metrics): Float =
-        max(metrics.height + metrics.bottom, PriceDashboardSizes.BottomAxisContentMinHeight.toPx(localDensity.density))
+        max(metrics.height + metrics.bottom, DashboardSizes.BottomAxisContentMinHeight.toPx(localDensity.density))
 
     suspend fun animateToOffsetScale(offset: Offset = this.offset, scale: Offset = this.scale) = coroutineScope {
         launch { Animatable(this@PriceBoardState.offset, Offset.VectorConverter).animateTo(offset, animationSpec = tween(300)) { this@PriceBoardState.offset = value } }

@@ -14,8 +14,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.toSize
 import com.scurab.ptracker.ext.translate
-import com.scurab.ptracker.ui.MouseCursors
-import com.scurab.ptracker.ui.PriceDashboardSizes
+import com.scurab.ptracker.ui.AppTheme
+import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.Point
 
@@ -65,7 +65,7 @@ internal fun Modifier.onWheelScroll(state: PriceBoardState): Modifier {
                     val scrollDelta = scrollEvent.scrollDelta
                     var scaleX = 0f
                     var scaleY = 0f
-                    val offsetX = scrollDelta.x * 5 * PriceDashboardSizes.PriceItemWidth
+                    val offsetX = scrollDelta.x * 5 * DashboardSizes.PriceItemWidth
                     when {
                         isInVerticalAxis -> scaleY = scrollDelta.y
                         else -> scaleX = scrollDelta.y
@@ -95,7 +95,7 @@ internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
                     state.isChangingScale = isInVerticalAxisZone
                 } else if (event.type == PointerEventType.Move) {
                     state.isChangingScale = state.isChangingScale && change.pressed
-                    state.mouseIcon = if (isInVerticalAxisZone) MouseCursors.PointerIconResizeVertically else MouseCursors.PointerIconCross
+                    state.mouseIcon = if (isInVerticalAxisZone) AppTheme.MouseCursors.PointerIconResizeVertically else AppTheme.MouseCursors.PointerIconCross
                     if (state.isChangingScale) {
                         val diff = change.previousPosition.y - change.position.y
                         state.scale = state.scale.copy(y = (state.scale.y + (diff / 1000f)).coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1]))
