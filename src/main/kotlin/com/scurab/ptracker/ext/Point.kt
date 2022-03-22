@@ -7,6 +7,9 @@ import kotlin.math.abs
 
 val NormalizedRange = 0f..1f
 
+private val ONE = Point(1f, 1f)
+val Point.Companion.ONE get() = com.scurab.ptracker.ext.ONE
+
 fun Point.normalize(size: Size): Point {
     return if (size.isEmpty()) Point.ZERO
     else Point((x / abs(size.width)).coerceIn(NormalizedRange), (1f - (y / abs(size.height))).coerceIn(NormalizedRange))

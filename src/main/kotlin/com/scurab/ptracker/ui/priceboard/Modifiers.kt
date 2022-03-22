@@ -22,6 +22,12 @@ import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.Point
+import kotlin.math.sign
+
+private fun Offset.scrollOffset(scrollX: Float, scrollY: Float) = Offset(
+    (x + (x * 0.1f * scrollX.sign)).coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1]),
+    (y + (y * 0.1f * scrollY.sign)).coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1]),
+)
 
 internal fun Modifier.onMouseDrag(state: PriceBoardState): Modifier {
     return pointerInput(state) {
@@ -39,15 +45,17 @@ internal fun Modifier.onMouseDrag(state: PriceBoardState): Modifier {
 @Composable
 internal fun Modifier.onSizeChange(state: PriceBoardState): Modifier {
     val scope = rememberCoroutineScope()
-    var initStateSet by remember { mutableStateOf(false) }
+    var everInitStateSet by remember { mutableStateOf(false) }
+    var initStateSet by remember(state) { mutableStateOf(false) }
     return onSizeChanged { intSize ->
         val size = intSize.toSize()
         if (state.canvasSize == size) return@onSizeChanged
         if (!initStateSet) {
             initStateSet = true
+            everInitStateSet = true
             scope.launch {
                 val viewport = state.initViewport(size)
-                state.setViewport(viewport, size)
+                state.setViewport(viewport, size, animate = everInitStateSet)
             }
         } else {
             val diffX = intSize.width - state.canvasSize.width
@@ -67,20 +75,15 @@ internal fun Modifier.onWheelScroll(state: PriceBoardState): Modifier {
                     val scrollEvent = event.changes.first()
                     val isInVerticalAxis = scrollEvent.position.x > state.verticalPriceBarLeft()
                     val isInHorizontalAxis = scrollEvent.position.y > state.bottomAxisBarHeight()
-
                     val scrollDelta = scrollEvent.scrollDelta
-                    var scaleX = 0f
-                    var scaleY = 0f
-                    val offsetX = scrollDelta.x * 5 * DashboardSizes.PriceItemWidth
+                    var scrollX = 0f
+                    var scrollY = 0f
+                    val offsetX = scrollDelta.x * 5 / state.scale.x * DashboardSizes.PriceItemWidth
                     when {
-                        isInVerticalAxis -> scaleY = scrollDelta.y
-                        else -> scaleX = scrollDelta.y
+                        isInVerticalAxis -> scrollY = scrollDelta.y
+                        else -> scrollX = scrollDelta.y
                     }
-
-                    state.scale = Offset(
-                        (state.scale.x + (scaleX / 20f)).coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1]),
-                        (state.scale.y + (scaleY / 50f)).coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1]),
-                    )
+                    state.scale = state.scale.scrollOffset(scrollX, scrollY)
                     state.offset = state.offset.translate(offsetX)
                     scrollEvent.consume()
                 }
@@ -104,7 +107,7 @@ internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
                     state.mouseIcon = if (isInVerticalAxisZone) AppTheme.MouseCursors.PointerIconResizeVertically else AppTheme.MouseCursors.PointerIconCross
                     if (state.isChangingScale) {
                         val diff = change.previousPosition.y - change.position.y
-                        state.scale = state.scale.copy(y = (state.scale.y + (diff / 1000f)).coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1]))
+                        state.scale = state.scale.scrollOffset(0f, diff)
                     }
                 }
                 state.pointedPriceItem = state.items.getOrNull(state.selectedPriceItemIndex())

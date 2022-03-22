@@ -11,6 +11,8 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.unit.Density
+import com.scurab.ptracker.ext.FloatRange
+import com.scurab.ptracker.ext.ONE
 import com.scurab.ptracker.ext.maxValue
 import com.scurab.ptracker.ext.nHeight
 import com.scurab.ptracker.ext.nWidth
@@ -27,7 +29,10 @@ import org.jetbrains.skia.FontMetrics
 import org.jetbrains.skia.Point
 import java.awt.Cursor
 import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.log10
 import kotlin.math.max
+import kotlin.math.pow
 
 class PriceBoardState(items: List<PriceItem>, private val localDensity: Density) {
     var scale by mutableStateOf(Offset(1f, 1f))
@@ -58,15 +63,18 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
         val allColumnsWidth = (items.size * DashboardSizes.PriceItemWidth)
         //take last n visible items on the screen
         val sample = items.takeLast((size.width / DashboardSizes.PriceItemWidth).toInt())
-        val y = lastItem.centerPrice
-        val avgHeight = sample.map { it.rectSize.height }.average().toFloat()
+        val priceRange = sample.minOf { it.low }.toFloat().rangeTo(sample.maxOf { it.high }.toFloat())
+        val y = lastItem.centerY
         val scaleX = (size.width / PriceDashboardConfig.DefaultMinColumns / DashboardSizes.PriceItemWidth)
             .coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1])
-        val scaleY = (avgHeight * 0.25f / lastItem.rectSize.height)
-            .coerceIn(PriceDashboardConfig.MinInitScaleY, PriceDashboardConfig.MaxInitScaleY)
+
+        val gradeY = floor(log10(y)).toInt()
+        val gradeValueY = 10.0.pow(gradeY)
+        val scaleY = size.height / (2f * gradeValueY.toFloat())
+            .coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1])
         return Rect(0f, size.height, size.width, 0f)
             .scale(scaleX, scaleY)
-            .translate(allColumnsWidth - verticalPriceBarLeft(), y - size.height / 2)
+            .translate(allColumnsWidth - verticalPriceBarLeft(priceRange), y - size.height / 2)
     }
 
     suspend fun setViewport(viewport: Rect, size: Size = this.canvasSize, animate: Boolean = false) {
@@ -82,10 +90,10 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
     }
 
     fun selectedPriceItemIndex() = ceil(viewportPointer().x / DashboardSizes.PriceItemWidth).toInt() - 1
-    fun verticalPriceBarLeft(): Float = max(
+    fun verticalPriceBarLeft(priceRange: FloatRange = visiblePriceRange()): Float = max(
         0f,
         canvasSize.width -
-                DashboardSizes.VerticalPriceBarWidth.toPx(localDensity.density) -
+                TextRendering.measureAxisWidth(priceRange) -
                 (2 * DashboardSizes.VerticalAxisHorizontalPadding.toPx(localDensity.density))
     )
 
@@ -98,11 +106,17 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
     }
 
     fun chartScalePivot() = Offset(offset.x + verticalPriceBarLeft(), -offset.y - canvasSize.height / 2)
+
     fun viewport() = Rect(left = 0f, top = canvasSize.height, right = canvasSize.width, bottom = 0f)
         //offset & height (to move origin to bottom/left)
         .translate(offset.x, offset.y)
         //scale in same way as we do for preview
         .scale(1f / scale.x, 1f / scale.y, pivot = chartScalePivot().let { it.copy(-it.x) })
+
+    fun visiblePriceRange() = Rect(left = 0f, top = canvasSize.height, right = canvasSize.width, bottom = 0f)
+        .translate(0f, offset.y)
+        .scale(1f, 1f / scale.y, pivot = Offset(0f, -offset.y - canvasSize.height / 2))
+        .let { it.bottom.rangeTo(it.top) }
 
     companion object {
         private val ONE = Offset(1f, 1f)

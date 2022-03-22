@@ -33,7 +33,7 @@ class PriceItem(
     val rectOffsetY = open.min(close).toFloat()
     val color = if (open >= close) DashboardColors.CandleRed else DashboardColors.CandleGreen
     val rectSize = Size(AppTheme.DashboardSizes.PriceItemWidth, rectHeight)
-    val centerPrice = (open + close).toFloat() / 2f
+    val centerY = (open + close).toFloat() / 2f
     val spikeOffsetY1 = high.max(low).toFloat()
     val spikeOffsetY2 = high.min(low).toFloat()
     val fullDate: String by lazy { DateFormats.fullDate.format(date.toJavaLocalDateTime()) }

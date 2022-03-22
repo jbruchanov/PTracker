@@ -15,3 +15,5 @@ fun Float.priceRound(minMaxDiff: Float): Float {
     }
     return ((this / coef).roundToInt() * coef).roundToInt().toFloat()
 }
+val Int.bd get() = toBigDecimal()
+val Double.bd get() = toBigDecimal()

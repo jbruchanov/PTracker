@@ -13,10 +13,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.component.compose.StateColor
+import com.scurab.ptracker.ext.FloatRange
+import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.toPx
 import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontStyle
 import org.jetbrains.skia.Paint
+import org.jetbrains.skia.TextLine
 import org.jetbrains.skia.Typeface
 import java.awt.Cursor
 
@@ -102,8 +105,15 @@ object AppTheme {
         @Composable
         fun init() {
             font.size = 14.sp.toPx(LocalDensity)
-            fontAxis.size = 14.sp.toPx(LocalDensity)
+            fontAxis.size = 12.sp.toPx(LocalDensity)
             fontLabels.size = 14.sp.toPx(LocalDensity)
+        }
+
+        fun measureAxisWidth(range: FloatRange): Float {
+            val min = range.start.f3
+            val max = range.endInclusive.f3
+            val v = max.takeIf { max.length > min.length } ?: min
+            return TextLine.make(v, fontAxis).width
         }
     }
 
@@ -126,6 +136,7 @@ object AppTheme {
         val SpikeLineStrokeWidth = Sizes.Hairline
         val MouseCrossStrokeWidth = Sizes.Hairline
         val VerticalAxisHorizontalPadding = 8.dp
+
         //depends on fontAxis size
         val VerticalPriceBarWidth = 60.dp
         val BottomAxisContentMinHeight = 30.dp
