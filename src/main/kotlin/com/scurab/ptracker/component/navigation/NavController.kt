@@ -12,5 +12,5 @@ interface NavController {
 
     fun pop(steps: Int = 1): Int
     fun popToTop() = pop(steps = activeRecords - 1)
-    fun popTo(token: NavToken<*>): Boolean
+    fun popTo(token: NavToken<*>): Int
 }

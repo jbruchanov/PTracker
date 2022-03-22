@@ -12,6 +12,7 @@ import java.util.Stack
 interface NavSpecs {
     val activeScreen: StateFlow<NavToken<*>>
     val activeScreenNavToken: NavToken<*>
+
     @Composable
     fun render()
 }
@@ -64,12 +65,9 @@ class DefaultNavSpecs(
         replace(Int.MAX_VALUE, token, args)
     }
 
-    override fun popTo(token: NavToken<*>): Boolean {
+    override fun popTo(token: NavToken<*>): Int {
         val i = stack.indexOfFirst { it.navigationRecord.navToken == token }
-            .takeIf { it != -1 }
-            ?: return false
-        pop(stack.size - i - 1)
-        return true
+        return pop(stack.size - i - 1)
     }
 
     private fun <T : NavArgs> replace(removeRecords: Int, token: NavToken<T>, args: T) {
