@@ -39,18 +39,19 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.ext.clipRectSafe
+import com.scurab.ptracker.ext.f
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.getHorizontalAxisText
+import com.scurab.ptracker.ext.getLabelPriceDecimals
 import com.scurab.ptracker.ext.nHeight
 import com.scurab.ptracker.ext.nWidth
 import com.scurab.ptracker.ext.nativeCanvas
 import com.scurab.ptracker.ext.normalize
-import com.scurab.ptracker.ext.priceRound
+import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.resetScale
 import com.scurab.ptracker.ext.size
 import com.scurab.ptracker.ext.toLTRBWH
-import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.withTranslateAndScale
@@ -78,7 +79,7 @@ import kotlin.time.Duration.Companion.days
 
 object PriceDashboardConfig {
     val ScaleRangeX = floatArrayOf(1e-2f, 20f)
-    val ScaleRangeY = floatArrayOf(1e-6f, 1e6f)
+    val ScaleRangeY = floatArrayOf(1e-6f, 1e7f)
     const val Debug = true
     const val SnappingMouseCrossHorizontally = true
     const val AxisYContentCoef = 0.5f
@@ -89,7 +90,7 @@ object PriceDashboardConfig {
 private fun PriceBoardState.columns() = (viewport().nWidth / DashboardSizes.PriceItemWidth).roundToInt()
 private fun PriceBoardState.horizontalLabel(items: List<PriceItem>): String? = items.getOrNull(selectedPriceItemIndex())?.fullDate
 private fun PriceBoardState.mousePrice() = normalizedPointer().transformNormToViewPort(viewport()).y
-private fun PriceBoardState.verticalLabel(): String = mousePrice().f3
+private fun PriceBoardState.verticalLabel(): String = mousePrice().f(visiblePriceRange().getLabelPriceDecimals())
 private fun PriceBoardState.verticalSteps() = (floor(canvasSize.height / TextRendering.font.metrics.height).toInt() * PriceDashboardConfig.AxisYContentCoef).toInt()
 private fun PriceBoardState.viewportColumnWidth() = DashboardSizes.PriceItemWidth * scale.x
 private fun PriceBoardState.viewportIndexes(startOffset: Int = 0, endOffset: Int = 0): IntProgression {
@@ -160,7 +161,7 @@ private fun PriceBoard(state: PriceBoardState) {
         if (PriceDashboardConfig.Debug) {
             PriceBoardDebug(state)
         }
-        Column(modifier = Modifier.align(Alignment.TopEnd).offset(x = (-65).dp)) {
+        Column(modifier = Modifier.align(Alignment.TopEnd).offset(x = (-130).dp)) {
             Button(onClick = { scope.launch { state.reset() } }) {
                 Text("R")
             }
@@ -303,7 +304,7 @@ private fun AxisContent(state: PriceBoardState) {
             val priceStep = (maxPrice - minPrice) / steps.toFloat()
             val offsetYStep = state.canvasSize.height / steps
             val price = minPrice + ((steps - step) * priceStep)
-            val text = TextLine.make(price.priceRound(maxPrice - minPrice).f3, TextRendering.fontAxis)
+            val text = TextLine.make(price.toLabelPrice(minPrice.rangeTo(maxPrice)), TextRendering.fontAxis)
             val topOffset = step * offsetYStep
             if (topOffset < text.height) return@PriceAxisContentTemplate
             nativeCanvas.drawTextLine(
@@ -427,16 +428,16 @@ private fun Mouse(state: PriceBoardState) {
                 strokeWidth = DashboardSizes.MouseCrossStrokeWidth.toPx(),
                 pathEffect = effect
             )
-        }
 
-        val text = TextLine.make(state.verticalLabel(), TextRendering.fontAxis)
-        val textPadding = DashboardSizes.VerticalAxisHorizontalPadding.toPx()
-        val textSize = text.size(textPadding)
-        val top = state.pointer.y - textSize.height / 2
-        val verticalAxisBarWidth = state.verticalPriceBarWidth()
-        translate(verticalPriceBarLeft, top) {
-            drawRect(DashboardColors.BackgroundPriceBubble, size = Size(verticalAxisBarWidth, textSize.height))
-            nativeCanvas.drawTextLine(text, verticalAxisBarWidth - text.width - textPadding, textPadding - text.ascent, TextRendering.paint)
+            val text = TextLine.make(state.verticalLabel(), TextRendering.fontAxis)
+            val textPadding = DashboardSizes.VerticalAxisHorizontalPadding.toPx()
+            val textSize = text.size(textPadding)
+            val top = state.pointer.y - textSize.height / 2
+            val verticalAxisBarWidth = state.verticalPriceBarWidth()
+            translate(verticalPriceBarLeft, top) {
+                drawRect(DashboardColors.BackgroundPriceBubble, size = Size(verticalAxisBarWidth, textSize.height))
+                nativeCanvas.drawTextLine(text, verticalAxisBarWidth - text.width - textPadding, textPadding - text.ascent, TextRendering.paint)
+            }
         }
     }
 }

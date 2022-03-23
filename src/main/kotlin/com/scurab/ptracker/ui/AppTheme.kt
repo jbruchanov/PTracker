@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.component.compose.StateColor
 import com.scurab.ptracker.ext.FloatRange
 import com.scurab.ptracker.ext.f3
+import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.toPx
 import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontStyle
@@ -110,8 +111,8 @@ object AppTheme {
         }
 
         fun measureAxisWidth(range: FloatRange): Float {
-            val min = range.start.f3
-            val max = range.endInclusive.f3
+            val min = range.start.toLabelPrice(range)
+            val max = range.endInclusive.toLabelPrice(range)
             val v = max.takeIf { max.length > min.length } ?: min
             return TextLine.make(v, fontAxis).width
         }
