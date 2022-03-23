@@ -38,12 +38,17 @@ class PriceBoardViewModel(
     private fun onAssetSelected(item: String) {
         launch {
             val items = loadDataUseCase.loadData(item)
-            _uiState.emit(
-                PriceBoardUiState.Data(
-                    PriceBoardState(items, Density(1f)),
-                    pairs
+            val data = (_uiState.value as? PriceBoardUiState.Data)
+            if (data != null) {
+                data.priceBoardState.setItemsAndInitViewPort(items)
+            } else {
+                _uiState.emit(
+                    PriceBoardUiState.Data(
+                        PriceBoardState(items, Density(1f)),
+                        pairs
+                    )
                 )
-            )
+            }
         }
     }
 

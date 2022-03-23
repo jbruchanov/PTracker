@@ -26,7 +26,7 @@ import kotlin.math.sign
 
 private fun Offset.scrollOffset(scrollX: Float, scrollY: Float) = Offset(
     (x + (x * 0.1f * scrollX.sign)).coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1]),
-    (y + (y * 0.1f * scrollY.sign)).coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1]),
+    (y + (y * 0.025f * scrollY.sign)).coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1]),
 )
 
 internal fun Modifier.onMouseDrag(state: PriceBoardState): Modifier {
@@ -44,20 +44,10 @@ internal fun Modifier.onMouseDrag(state: PriceBoardState): Modifier {
 
 @Composable
 internal fun Modifier.onSizeChange(state: PriceBoardState): Modifier {
-    val scope = rememberCoroutineScope()
-    var everInitStateSet by remember { mutableStateOf(false) }
-    var initStateSet by remember(state) { mutableStateOf(false) }
     return onSizeChanged { intSize ->
         val size = intSize.toSize()
         if (state.canvasSize == size) return@onSizeChanged
-        if (!initStateSet) {
-            initStateSet = true
-            everInitStateSet = true
-            scope.launch {
-                val viewport = state.initViewport(size)
-                state.setViewport(viewport, size, animate = everInitStateSet)
-            }
-        } else {
+        if (!state.canvasSize.isEmpty()) {
             val diffX = intSize.width - state.canvasSize.width
             state.offset = state.offset.translate(-diffX, 0f)
             state.pointer = Point.ZERO

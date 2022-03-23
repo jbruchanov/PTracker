@@ -3,8 +3,10 @@ package com.scurab.ptracker.ui.priceboard
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -23,6 +25,8 @@ import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.FontMetrics
@@ -44,6 +48,7 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
 
     var mouseIcon by mutableStateOf(PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR)))
     var isChangingScale by mutableStateOf(false)
+    var animateInitViewPort by mutableStateOf(0L)
 
     fun viewportPointer() = pointer.normalize(canvasSize).transformNormToViewPort(viewport())
     fun normalizedPointer() = pointer.normalize(canvasSize)
@@ -68,9 +73,8 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
         val scaleX = (size.width / PriceDashboardConfig.DefaultMinColumns / DashboardSizes.PriceItemWidth)
             .coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1])
 
-        val gradeY = floor(log10(y)).toInt()
-        val gradeValueY = 10.0.pow(gradeY)
-        val scaleY = size.height / (2f * gradeValueY.toFloat())
+        val maxMinDiff = sample.maxOf { it.high } - sample.minOf { it.low }
+        val scaleY = size.height / (1.25f * maxMinDiff.toFloat())
             .coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1])
         return Rect(0f, size.height, size.width, 0f)
             .scale(scaleX, scaleY)
@@ -117,6 +121,11 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
         .translate(0f, offset.y)
         .scale(1f, 1f / scale.y, pivot = Offset(0f, -offset.y - canvasSize.height / 2))
         .let { it.bottom.rangeTo(it.top) }
+
+    fun setItemsAndInitViewPort(items: List<PriceItem>) {
+        this@PriceBoardState.items = items
+        animateInitViewPort = System.currentTimeMillis()
+    }
 
     companion object {
         private val ONE = Offset(1f, 1f)
