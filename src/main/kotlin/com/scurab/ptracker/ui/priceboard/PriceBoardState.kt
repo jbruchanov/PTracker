@@ -94,12 +94,11 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
     }
 
     fun selectedPriceItemIndex() = ceil(viewportPointer().x / DashboardSizes.PriceItemWidth).toInt() - 1
-    fun verticalPriceBarLeft(priceRange: FloatRange = visiblePriceRange()): Float = max(
-        0f,
-        canvasSize.width -
-                TextRendering.measureAxisWidth(priceRange) -
-                (2 * DashboardSizes.VerticalAxisHorizontalPadding.toPx(localDensity.density))
+    fun verticalPriceBarWidth(priceRange: FloatRange = visiblePriceRange()): Float = max(
+        0f, TextRendering.measureAxisWidth(priceRange) + (2 * DashboardSizes.VerticalAxisHorizontalPadding.toPx(localDensity.density))
     )
+
+    fun verticalPriceBarLeft(priceRange: FloatRange = visiblePriceRange()): Float = max(0f, canvasSize.width - verticalPriceBarWidth(priceRange))
 
     fun bottomAxisBarHeight(metrics: FontMetrics = TextRendering.fontLabels.metrics): Float =
         max(metrics.height + metrics.bottom, DashboardSizes.BottomAxisContentMinHeight.toPx(localDensity.density))

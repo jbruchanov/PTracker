@@ -433,9 +433,8 @@ private fun Mouse(state: PriceBoardState) {
         val textPadding = DashboardSizes.VerticalAxisHorizontalPadding.toPx()
         val textSize = text.size(textPadding)
         val top = state.pointer.y - textSize.height / 2
-        val left = state.verticalPriceBarLeft()
-        val verticalAxisBarWidth = DashboardSizes.VerticalPriceBarWidth.toPx(density)
-        translate(left, top) {
+        val verticalAxisBarWidth = state.verticalPriceBarWidth()
+        translate(verticalPriceBarLeft, top) {
             drawRect(DashboardColors.BackgroundPriceBubble, size = Size(verticalAxisBarWidth, textSize.height))
             nativeCanvas.drawTextLine(text, verticalAxisBarWidth - text.width - textPadding, textPadding - text.ascent, TextRendering.paint)
         }

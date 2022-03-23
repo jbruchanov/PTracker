@@ -90,14 +90,21 @@ internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
                 val change = event.changes.first()
                 state.pointer = Point(change.position.x, change.position.y)
                 val isInVerticalAxisZone = state.verticalPriceBarLeft() < state.pointer.x
-                if (event.type == PointerEventType.Press) {
-                    state.isChangingScale = isInVerticalAxisZone
-                } else if (event.type == PointerEventType.Move) {
-                    state.isChangingScale = state.isChangingScale && change.pressed
-                    state.mouseIcon = if (isInVerticalAxisZone) AppTheme.MouseCursors.PointerIconResizeVertically else AppTheme.MouseCursors.PointerIconCross
-                    if (state.isChangingScale) {
-                        val diff = change.previousPosition.y - change.position.y
-                        state.scale = state.scale.scrollOffset(0f, diff)
+                when (event.type) {
+                    PointerEventType.Press -> {
+                        state.isChangingScale = isInVerticalAxisZone
+                    }
+                    PointerEventType.Move -> {
+                        state.isChangingScale = state.isChangingScale && change.pressed
+                        state.mouseIcon = if (isInVerticalAxisZone) AppTheme.MouseCursors.PointerIconResizeVertically else AppTheme.MouseCursors.PointerIconCross
+                        if (state.isChangingScale) {
+                            val diff = change.previousPosition.y - change.position.y
+                            state.scale = state.scale.scrollOffset(0f, diff)
+                        }
+                    }
+                    PointerEventType.Exit -> {
+                        state.isChangingScale = false
+                        state.pointer = Point.ZERO
                     }
                 }
                 state.pointedPriceItem = state.items.getOrNull(state.selectedPriceItemIndex())
