@@ -4,11 +4,6 @@ package com.scurab.ptracker.ui.priceboard
 
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -20,7 +15,6 @@ import androidx.compose.ui.unit.toSize
 import com.scurab.ptracker.ext.translate
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
-import kotlinx.coroutines.launch
 import org.jetbrains.skia.Point
 import kotlin.math.sign
 

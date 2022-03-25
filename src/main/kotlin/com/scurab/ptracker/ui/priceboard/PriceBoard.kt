@@ -48,10 +48,10 @@ import com.scurab.ptracker.ext.nHeight
 import com.scurab.ptracker.ext.nWidth
 import com.scurab.ptracker.ext.nativeCanvas
 import com.scurab.ptracker.ext.normalize
-import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.resetScale
 import com.scurab.ptracker.ext.size
 import com.scurab.ptracker.ext.toLTRBWH
+import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.withTranslateAndScale

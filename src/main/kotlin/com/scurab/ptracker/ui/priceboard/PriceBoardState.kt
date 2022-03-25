@@ -3,10 +3,8 @@ package com.scurab.ptracker.ui.priceboard
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
-import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -14,7 +12,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.ext.FloatRange
-import com.scurab.ptracker.ext.ONE
 import com.scurab.ptracker.ext.maxValue
 import com.scurab.ptracker.ext.nHeight
 import com.scurab.ptracker.ext.nWidth
@@ -25,18 +22,13 @@ import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.skia.FontMetrics
 import org.jetbrains.skia.Point
 import java.awt.Cursor
 import kotlin.math.ceil
-import kotlin.math.floor
-import kotlin.math.log10
 import kotlin.math.max
-import kotlin.math.pow
 
 class PriceBoardState(items: List<PriceItem>, private val localDensity: Density) {
     var scale by mutableStateOf(Offset(1f, 1f))

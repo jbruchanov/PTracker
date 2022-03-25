@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.component.compose.StateColor
 import com.scurab.ptracker.ext.FloatRange
-import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.toPx
 import org.jetbrains.skia.Font
