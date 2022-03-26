@@ -205,8 +205,9 @@ object AppTheme {
     }
 
     object TextStyles {
-        val TransactionMoney = TextStyle(color = Colors.OnBackground, fontSize = 14.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
-        val TransactionDateTime = TextStyle(color = Colors.Secondary, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
+        val TransactionPrimary = TextStyle(color = Colors.OnBackground, fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
+        val TransactionPrimaryVariant = TextStyle(color = Colors.Secondary, fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
+        val TransactionSecondary = TextStyle(color = Colors.Secondary, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
         val TransactionDetail = TextStyle(color = Colors.Primary, fontSize = 12.sp, fontWeight = FontWeight.Light)
         val TransactionMoneyAnnotation = TextStyle(color = Colors.PrimaryVariant, fontSize = 10.sp, fontWeight = FontWeight.Normal)
     }

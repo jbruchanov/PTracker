@@ -20,12 +20,12 @@ fun Transaction.iconColor() = when {
     else -> AppTheme.TransactionIcons.Else
 }
 
-private fun String.annotatedPriceRow(prefix: String? = null, suffix: String? = null) = buildAnnotatedString {
+private fun String.annotatedPrice(prefix: String? = null, suffix: String? = null) = buildAnnotatedString {
     if (prefix != null) {
         append(prefix)
-        append(": ")
+        append(" ")
     }
-    append(this@annotatedPriceRow)
+    append(this@annotatedPrice)
     if (suffix != null) {
         append(" ")
         append(
@@ -47,15 +47,19 @@ fun Transaction.formattedPrices(): TransactionTextPrices {
     val bn = bq?.base()?.coerceAtLeast(1) ?: 0
     val sn = sq?.base()?.coerceAtLeast(1) ?: 0
     val fn = fq?.base()?.coerceAtLeast(1) ?: 0
+    val up = this.unitPrice()
+    val un = up?.base()?.coerceAtLeast(1) ?: 0
 
-    val max = max(max(bn, sn), fn)
-    val buy = bq?.let { v -> "+" + v.toPlainString().let { " ".repeat(max(0, max - bn)) + it } }
-    val sell = sq?.let { v -> "-" + v.toPlainString().let { " ".repeat(max(0, max - sn)) + it } }
-    val fee = fq?.let { v -> "-" + v.toPlainString().let { " ".repeat(max(0, max - fn)) + it } }
+    val max = max(max(max(bn, sn), fn), un)
+    val buy = bq?.toPlainString()?.let { " ".repeat(max(0, max - bn)) + "+" + it }
+    val sell = sq?.toPlainString()?.let { " ".repeat(max(0, max - sn)) + "-" + it }
+    val fee = fq?.toPlainString()?.let { " ".repeat(max(0, max - fn)) + "-" + it }
+    val price = up?.toPlainString()?.let { " ".repeat(max(0, max - un)) + it }
 
     return TransactionTextPrices(
-        buy = buy?.annotatedPriceRow(ba),
-        sell = sell?.annotatedPriceRow(sa),
-        fee = fee?.annotatedPriceRow(feeAsset),
+        buy = buy?.annotatedPrice(ba),
+        sell = sell?.annotatedPrice(sa),
+        fee = fee?.annotatedPrice(feeAsset),
+        unitPrice = price?.annotatedPrice(" ".repeat(4))
     )
 }

@@ -47,8 +47,11 @@ val Double.bd get() = toBigDecimal()
 fun BigDecimal.isZero() = compareTo(BigDecimal.ZERO) == 0
 fun BigDecimal.base() = ceil(log10(toDouble())).toInt()
 
-fun BigDecimal.round(asset: String?, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal {
-    return if (asset != null && FiatCurrencies.contains(asset) && scale() > scaleFiat) {
+fun BigDecimal.round(asset: String?, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal =
+    round(asset != null && FiatCurrencies.contains(asset), scaleFiat, scaleCrypto)
+
+fun BigDecimal.round(isFiat: Boolean, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal {
+    return if (isFiat && scale() > scaleFiat) {
         setScale(scaleFiat, RoundingMode.HALF_UP)
     } else if (scale() > scaleCrypto) {
         setScale(scaleCrypto, RoundingMode.HALF_UP)

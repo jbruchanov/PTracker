@@ -1,5 +1,7 @@
 package com.scurab.ptracker.model
 
+import com.scurab.ptracker.ext.round
+import com.scurab.ptracker.ext.sameElseSwap
 import kotlinx.datetime.LocalDateTime
 import java.math.BigDecimal
 
@@ -87,4 +89,10 @@ sealed class Transaction {
     }
 
     fun isTransactionWithAsset(asset: Asset) = this is Trade && hasAsset(asset)
+
+    fun unitPrice(): BigDecimal? {
+        if (this !is Trade) return null
+        val (fiat, crypto) = Pair(buyQuantity, sellQuantity).sameElseSwap(FiatCurrencies.contains(buyAsset))
+        return (fiat / crypto).round(true)
+    }
 }

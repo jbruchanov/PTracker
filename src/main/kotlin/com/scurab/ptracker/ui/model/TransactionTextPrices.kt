@@ -6,4 +6,5 @@ data class TransactionTextPrices(
     val buy: AnnotatedString?,
     val sell: AnnotatedString?,
     val fee: AnnotatedString? = null,
+    val unitPrice: AnnotatedString? = null
 )

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -46,37 +45,41 @@ fun TransactionRow(index: Int, item: Transaction) {
                 .size(24.dp)
                 .padding(AppSizes.current.Space)
         )
-        SelectionContainer {
-            val prices = item.formattedPrices()
-            Column {
-                Text(text = formatter.fullDateTime(item.time), style = AppTheme.TextStyles.TransactionDateTime)
-                Spacer(modifier = Modifier.height(AppSizes.current.Space))
-                if (prices.buy != null) {
-                    Row {
-                        Text(text = prices.buy, style = AppTheme.TextStyles.TransactionMoney)
-                        AnnotatedText(text = item.typeIfNotTradeElseText("Buy"))
-                    }
+        val prices = item.formattedPrices()
+        Column {
+            Text(text = formatter.fullDateTime(item.time), style = AppTheme.TextStyles.TransactionSecondary)
+            Spacer(modifier = Modifier.height(AppSizes.current.Space))
+            if (prices.buy != null) {
+                Row {
+                    Text(text = prices.buy, style = AppTheme.TextStyles.TransactionPrimary)
+                    AnnotatedText(text = item.typeIfNotTradeElseText("Buy"))
                 }
-                if (prices.sell != null) {
-                    Row {
-                        Text(text = prices.sell, style = AppTheme.TextStyles.TransactionMoney)
-                        AnnotatedText(text = item.typeIfNotTradeElseText("Sell"))
-                    }
-                }
-                if (prices.fee != null) {
-                    Row {
-                        Text(text = prices.fee, style = AppTheme.TextStyles.TransactionMoney)
-                        AnnotatedText(text = "Fee")
-                    }
-                }
-                Spacer(modifier = Modifier.height(AppSizes.current.Space))
-                Text(text = item.exchange, style = AppTheme.TextStyles.TransactionDetail)
             }
+            if (prices.sell != null) {
+                Row {
+                    Text(text = prices.sell, style = AppTheme.TextStyles.TransactionPrimary)
+                    AnnotatedText(text = item.typeIfNotTradeElseText("Sell"))
+                }
+            }
+            if (prices.fee != null) {
+                Row {
+                    Text(text = prices.fee, style = AppTheme.TextStyles.TransactionPrimary)
+                    AnnotatedText(text = "Fee")
+                }
+            }
+            if (prices.unitPrice != null) {
+                Row {
+                    Text(text = prices.unitPrice, style = AppTheme.TextStyles.TransactionPrimaryVariant)
+                    AnnotatedText(text = "Price")
+                }
+            }
+            Spacer(modifier = Modifier.height(AppSizes.current.Space))
+            Text(text = item.exchange, style = AppTheme.TextStyles.TransactionDetail)
         }
     }
 }
 
-private fun Transaction.typeIfNotTradeElseText(text:String) = if (this is Transaction.Trade) text else type
+private fun Transaction.typeIfNotTradeElseText(text: String) = if (this is Transaction.Trade) text else type
 
 @Composable
 private fun RowScope.AnnotatedText(text: String) {
