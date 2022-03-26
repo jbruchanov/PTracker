@@ -27,13 +27,13 @@ import com.scurab.ptracker.ui.DateTimeFormats
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun TransactionRow(index: Int, item: Transaction) {
+fun TransactionRow(index: Int, item: Transaction, isSelected: Boolean) {
     val formatter = remember { KoinJavaComponent.getKoin().get<DateTimeFormats>() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppSizes.current.Space)
-            .background(AppColors.current.RowBackground.get(isSelected = index % 2 == 0))
+            .background(AppColors.current.RowBackground.get(isSelected = isSelected, isEven = index % 2 == 0))
             .padding(top = AppSizes.current.Space, bottom = AppSizes.current.Space, end = AppSizes.current.Space2)
     ) {
         val iconColor = item.iconColor()
@@ -47,7 +47,7 @@ fun TransactionRow(index: Int, item: Transaction) {
         )
         val prices = item.formattedPrices()
         Column {
-            Text(text = formatter.fullDateTime(item.time), style = AppTheme.TextStyles.TransactionSecondary)
+            Text(text = formatter.fullDateTime(item.dateTime), style = AppTheme.TextStyles.TransactionSecondary)
             Spacer(modifier = Modifier.height(AppSizes.current.Space))
             if (prices.buy != null) {
                 Row {

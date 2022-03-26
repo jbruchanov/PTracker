@@ -99,7 +99,7 @@ object PriceDashboardConfig {
 }
 
 private fun PriceBoardState.columns() = (viewport().nWidth / DashboardSizes.PriceItemWidth).roundToInt()
-private fun PriceBoardState.horizontalLabel(items: List<PriceItem>): String? = items.getOrNull(selectedPriceItemIndex())?.fullDate
+private fun PriceBoardState.horizontalLabel(items: List<PriceItem>): String? = items.getOrNull(selectedPriceItemIndex())?.formattedFullDate
 private fun PriceBoardState.mousePrice() = normalizedPointer().transformNormToViewPort(viewport()).y
 private fun PriceBoardState.verticalLabel(): String = mousePrice().f(visiblePriceRange().getLabelPriceDecimals())
 private fun PriceBoardState.verticalSteps() = (floor(canvasSize.height / TextRendering.font.metrics.height).toInt() * PriceDashboardConfig.AxisYContentCoef).toInt()
@@ -159,13 +159,17 @@ fun PriceBoard(vm: PriceBoardViewModel) {
 private fun PriceBoardTransactions(priceBoardState: PriceBoardState) {
     val selectedAsset = priceBoardState.selectedAsset
     if (selectedAsset != null) {
-        val state = remember(selectedAsset) {
-            LazyListState(0, 0)
+        val state = remember(selectedAsset) { LazyListState(0, 0) }
+        LaunchedEffect(selectedAsset, priceBoardState.scrollToIndex) {
+            state.animateScrollToItem(priceBoardState.scrollToIndex)
         }
         Box {
+            val priceItem = priceBoardState.pointedPriceItem
+            val grouping = priceBoardState.grouping.groupingKey
             LazyColumn(modifier = Modifier.fillMaxWidth(), state = state) {
-                itemsIndexed(priceBoardState.ledger.getTransactions(selectedAsset)) { i, v ->
-                    TransactionRow(i, v)
+                itemsIndexed(priceBoardState.visibleTransactions) { i, v ->
+                    val isSelected = priceItem != null && grouping(priceItem.dateTime) == grouping(v.dateTime)
+                    TransactionRow(i, v, isSelected)
                 }
             }
             VerticalScrollbar(adapter = rememberScrollbarAdapter(state), modifier = Modifier.align(Alignment.CenterEnd))
@@ -184,6 +188,7 @@ private fun PriceBoard(state: PriceBoardState) {
             .onSizeChange(state)
             .onMouseMove(state)
             .onMouseDrag(state)
+            .onDoubleTap(state)
             .onWheelScroll(state)
     ) {
         Grid(state)

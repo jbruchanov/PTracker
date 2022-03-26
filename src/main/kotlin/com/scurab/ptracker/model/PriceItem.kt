@@ -18,8 +18,8 @@ import java.math.RoundingMode
 import kotlin.random.Random
 import kotlin.time.Duration
 
-interface IPriceItem {
-    val date: LocalDateTime
+interface IPriceItem : HasDateTime {
+    override val dateTime: LocalDateTime
     val open: BigDecimal
     val close: BigDecimal
     val high: BigDecimal
@@ -38,11 +38,11 @@ class PriceItem(
     val centerY = (open + close).toFloat() / 2f
     val spikeOffsetY1 = high.max(low).toFloat()
     val spikeOffsetY2 = high.min(low).toFloat()
-    val fullDate: String by lazy { DateTimeFormats.fullDate.format(date.toJavaLocalDateTime()) }
+    val formattedFullDate: String by lazy { DateTimeFormats.fullDate.format(dateTime.toJavaLocalDateTime()) }
 }
 
 data class TestPriceItem(
-    override val date: LocalDateTime,
+    override val dateTime: LocalDateTime,
     override val open: BigDecimal,
     override val close: BigDecimal,
     override val high: BigDecimal,
@@ -59,7 +59,7 @@ fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: 
             val close = open + random.nextInt(-90 * coef, 100 * coef).toBigDecimal()
             val high = open.max(close) + random.nextInt(20 * coef, 50 * coef).toBigDecimal()
             val low = open.min(close) - random.nextInt(20 * coef, 50 * coef).toBigDecimal()
-            add(PriceItem(it, asset, TestPriceItem(date = date.toLocalDateTime(TimeZone.UTC), open = open, close = close, high = high, low = low)))
+            add(PriceItem(it, asset, TestPriceItem(dateTime = date.toLocalDateTime(TimeZone.UTC), open = open, close = close, high = high, low = low)))
             date = date.plus(step)
         }
     }

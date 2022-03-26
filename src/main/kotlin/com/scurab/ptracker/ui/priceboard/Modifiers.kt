@@ -3,6 +3,7 @@
 package com.scurab.ptracker.ui.priceboard
 
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -12,6 +13,7 @@ import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.toSize
+import com.scurab.ptracker.ext.firstIndexOf
 import com.scurab.ptracker.ext.translate
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
@@ -90,7 +92,12 @@ internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
                     }
                     PointerEventType.Move -> {
                         state.isChangingScale = state.isChangingScale && change.pressed
-                        state.mouseIcon = if (isInVerticalAxisZone) AppTheme.MouseCursors.PointerIconResizeVertically else AppTheme.MouseCursors.PointerIconCross
+                        state.isDragging = !state.isChangingScale && change.pressed
+                        state.mouseIcon = when {
+                            state.isDragging -> AppTheme.MouseCursors.PointerIconMove
+                            isInVerticalAxisZone -> AppTheme.MouseCursors.PointerIconResizeVertically
+                            else -> AppTheme.MouseCursors.PointerIconCross
+                        }
                         if (state.isChangingScale) {
                             val diff = change.previousPosition.y - change.position.y
                             state.scale = state.scale.scrollOffset(0f, diff)
@@ -104,5 +111,18 @@ internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
                 state.pointedPriceItem = state.items.getOrNull(state.selectedPriceItemIndex())
             }
         }
+    }
+}
+
+internal fun Modifier.onDoubleTap(state: PriceBoardState): Modifier {
+    return pointerInput(state) {
+        detectTapGestures(onDoubleTap = {
+            state.pointedPriceItem?.let {
+                val index = state.visibleTransactions.firstIndexOf(it, state.grouping)
+                if (index >= 0) {
+                    state.scrollToIndex = index
+                }
+            }
+        })
     }
 }

@@ -11,15 +11,15 @@ class Ledger(
 
     fun getGroupedData(by: Grouping = grouping): Map<Long, List<Transaction>> {
         return cacheByGrouping.getOrPut(by) {
-            items.groupBy { by.groupingKey(it.time) }
+            items.groupBy { by.groupingKey(it.dateTime) }
         }
     }
 
     fun getData(priceItem: PriceItem, onlyTrades: Boolean = true): List<Transaction> {
-        val key = KeyAssetGroupingKey(priceItem.asset, grouping.groupingKey(priceItem.date), onlyTrades)
+        val key = KeyAssetGroupingKey(priceItem.asset, grouping.groupingKey(priceItem.dateTime), onlyTrades)
         return cacheByItemAndAsset.getOrPut(key) {
             val groupedData = getGroupedData()
-            groupedData[grouping.groupingKey(priceItem.date)]
+            groupedData[grouping.groupingKey(priceItem.dateTime)]
                 ?.asSequence()
                 ?.filter { !onlyTrades || it is Transaction.Trade }
                 ?.filter { it.hasAsset(priceItem.asset) }
@@ -36,6 +36,11 @@ class Ledger(
                 .filter { it.hasAsset(asset) }
                 .toList()
         }
+    }
+
+    fun firstIndexOf(it: PriceItem): Int {
+        val key = grouping.groupingKey(it.dateTime)
+        return items.indexOfFirst { grouping.groupingKey(it.dateTime) == key }
     }
 
     companion object {

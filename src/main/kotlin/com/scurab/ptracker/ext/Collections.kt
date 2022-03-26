@@ -1,5 +1,7 @@
 package com.scurab.ptracker.ext
 
+import com.scurab.ptracker.model.Grouping
+import com.scurab.ptracker.model.HasDateTime
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.DateTimeFormats
@@ -31,9 +33,14 @@ fun List<PriceItem>.getHorizontalAxisText(index: Int, step: Int): String {
     //TODO: handle also smaller candles than day
     val formatter = when {
         prev == null -> DateTimeFormats.monthYear
-        item.date.year != prev.date.year -> DateTimeFormats.year
-        item.date.monthNumber != prev.date.monthNumber -> DateTimeFormats.monthMid
+        item.dateTime.year != prev.dateTime.year -> DateTimeFormats.year
+        item.dateTime.monthNumber != prev.dateTime.monthNumber -> DateTimeFormats.monthMid
         else -> DateTimeFormats.dayNumber
     }
-    return formatter.format(item.date.toJavaLocalDateTime())
+    return formatter.format(item.dateTime.toJavaLocalDateTime())
+}
+
+fun List<HasDateTime>.firstIndexOf(other: HasDateTime, grouping: Grouping): Int {
+    val v = grouping.groupingKey(other.dateTime)
+    return indexOfFirst { grouping.groupingKey(it.dateTime) == v }
 }

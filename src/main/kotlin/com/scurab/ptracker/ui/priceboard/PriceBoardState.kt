@@ -22,6 +22,7 @@ import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.Ledger
 import com.scurab.ptracker.model.PriceItem
+import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
 import kotlinx.coroutines.coroutineScope
@@ -31,6 +32,7 @@ import org.jetbrains.skia.Point
 import java.awt.Cursor
 import kotlin.math.ceil
 import kotlin.math.max
+import com.scurab.ptracker.model.Grouping
 
 class PriceBoardState(items: List<PriceItem>, private val localDensity: Density) {
     var scale by mutableStateOf(Offset(1f, 1f))
@@ -39,12 +41,16 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
     var canvasSize by mutableStateOf(Size.Zero)
     var pointedPriceItem by mutableStateOf<PriceItem?>(null)
     var items by mutableStateOf(items)
+    var visibleTransactions by mutableStateOf(emptyList<Transaction>())
     var ledger by mutableStateOf(Ledger.Empty)
     var selectedAsset by mutableStateOf<Asset?>(null)
+    val grouping by mutableStateOf(Grouping.Day)
 
     var mouseIcon by mutableStateOf(PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR)))
     var isChangingScale by mutableStateOf(false)
+    var isDragging by mutableStateOf(false)
     var animateInitViewPort by mutableStateOf(0L)
+    var scrollToIndex by mutableStateOf(0)
 
     fun viewportPointer() = pointer.normalize(canvasSize).transformNormToViewPort(viewport())
     fun normalizedPointer() = pointer.normalize(canvasSize)
@@ -89,6 +95,7 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
         }
     }
 
+    fun selectedPriceItem() = items.getOrNull(selectedPriceItemIndex())
     fun selectedPriceItemIndex() = ceil(viewportPointer().x / DashboardSizes.PriceItemWidth).toInt() - 1
     fun verticalPriceBarWidth(priceRange: FloatRange = visiblePriceRange()): Float = max(
         0f, TextRendering.measureAxisWidth(priceRange) + (2 * DashboardSizes.VerticalAxisHorizontalPadding.toPx(localDensity.density))

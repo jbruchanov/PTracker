@@ -12,6 +12,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.VectorPainter
@@ -79,7 +80,11 @@ object AppTheme {
         val Content = StateColor(default = OnBackground, selected = Secondary)
         val ToggleButtonBackground = StateColor(default = Primary)
         val WindowEdge = Color.White
-        val RowBackground = StateColor(default = Primary.copy(alpha = 0.1f), selected = Primary.copy(alpha = 0.15f))
+        val RowBackground = StateColor(
+            default = Primary.copy(alpha = 0.1f),
+            default2 = Primary.copy(alpha = 0.15f),
+            selected = Secondary.copy(alpha = .15f).compositeOver(Primary.copy(alpha = 0.1f))
+        )
 
         val DarkMaterial = darkColors(
             primary = Primary,
@@ -120,6 +125,7 @@ object AppTheme {
     object MouseCursors {
         val PointerIconCross = PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR))
         val PointerIconResizeVertically = PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR))
+        val PointerIconMove = PointerIcon(Cursor(Cursor.MOVE_CURSOR))
     }
 
     object TextRendering {

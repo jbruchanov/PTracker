@@ -23,7 +23,7 @@ class LoadLedgerUseCase : BittyTaxParser {
                     .toList()
             }
             .flatten()
-            .sortedByDescending { it.time }
+            .sortedByDescending { it.dateTime }
         workbook.closeQuietly()
         return Ledger(items, Grouping.Day)
     }

@@ -28,7 +28,7 @@ interface BittyTaxParser {
                 Transaction.Trade(
                     exchange = exchange,
                     type = type,
-                    time = timestamp,
+                    dateTime = timestamp,
                     buyQuantity = buyQuantity,
                     buyAsset = buyAsset,
                     buyValueInFiat = buyValueInFiat,
@@ -46,7 +46,7 @@ interface BittyTaxParser {
                 Transaction.Income(
                     exchange = exchange,
                     type = type,
-                    time = timestamp,
+                    dateTime = timestamp,
                     buyQuantity = buyQuantity,
                     buyAsset = buyAsset,
                     buyValueInFiat = buyValueInFiat,
@@ -61,7 +61,7 @@ interface BittyTaxParser {
                 Transaction.Outcome(
                     exchange = exchange,
                     type = type,
-                    time = timestamp,
+                    dateTime = timestamp,
                     sellQuantity = sellQuantity,
                     sellAsset = sellAsset,
                     sellValueInFiat = sellValueInFiat,

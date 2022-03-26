@@ -43,5 +43,5 @@ data class CryptoComparePriceItem(
 ) : IPriceItem {
     val localDateTime by lazy(LazyThreadSafetyMode.NONE) { Instant.fromEpochMilliseconds(time * 1000).toLocalDateTime(TimeZone.currentSystemDefault()) }
     val localDate by lazy(LazyThreadSafetyMode.NONE) { localDateTime.date }
-    override val date: LocalDateTime = localDateTime
+    override val dateTime: LocalDateTime = localDateTime
 }

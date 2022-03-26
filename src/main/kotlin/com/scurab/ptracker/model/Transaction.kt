@@ -15,10 +15,10 @@ interface HasOutcome {
     val sellAsset: String
 }
 
-sealed class Transaction {
+sealed class Transaction : HasDateTime {
     abstract val exchange: String
     abstract val type: String
-    abstract val time: LocalDateTime
+    abstract override val dateTime: LocalDateTime
     abstract val feeQuantity: BigDecimal
     abstract val feeAsset: String
     abstract val feeValueInFiat: BigDecimal?
@@ -31,7 +31,7 @@ sealed class Transaction {
     data class Income(
         override val exchange: String,
         override val type: String,
-        override val time: LocalDateTime,
+        override val dateTime: LocalDateTime,
         override val buyQuantity: BigDecimal,
         override val buyAsset: String,
         val buyValueInFiat: BigDecimal?,
@@ -48,7 +48,7 @@ sealed class Transaction {
     data class Outcome(
         override val exchange: String,
         override val type: String,
-        override val time: LocalDateTime,
+        override val dateTime: LocalDateTime,
         override val sellQuantity: BigDecimal,
         override val sellAsset: String,
         val sellValueInFiat: BigDecimal?,
@@ -65,7 +65,7 @@ sealed class Transaction {
     data class Trade(
         override val exchange: String,
         override val type: String,
-        override val time: LocalDateTime,
+        override val dateTime: LocalDateTime,
         override val buyQuantity: BigDecimal,
         override val buyAsset: String,
         val buyValueInFiat: BigDecimal?,
