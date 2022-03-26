@@ -1,22 +1,39 @@
 package com.scurab.ptracker.ui
 
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.defaultScrollbarStyle
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Air
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.VectorPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.component.compose.StateColor
 import com.scurab.ptracker.ext.FloatRange
 import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.toPx
+import com.scurab.ptracker.icons.Circle
+import com.scurab.ptracker.icons.Cross
+import com.scurab.ptracker.icons.Rhombus
+import com.scurab.ptracker.icons.Square
+import com.scurab.ptracker.icons.TriangleDown
+import com.scurab.ptracker.icons.TriangleUp
+import com.scurab.ptracker.ui.model.IconColor
 import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontStyle
 import org.jetbrains.skia.Paint
@@ -35,6 +52,10 @@ fun AppTheme(block: @Composable () -> Unit) {
             AppColors provides AppTheme.Colors,
             AppShapes provides AppTheme.Shapes,
             AppSizes provides AppTheme.Sizes,
+            LocalScrollbarStyle provides defaultScrollbarStyle().copy(
+                hoverColor = AppTheme.Colors.Primary,
+                unhoverColor = AppTheme.Colors.PrimaryVariant,
+            )
         ) {
             block()
         }
@@ -55,9 +76,10 @@ object AppTheme {
         val BackgroundContent = Color(0xFF2B2B2B)
         val ToDo = Color.Magenta
         val OnBackground = Color.White
-        val ContentColor = StateColor(default = OnBackground, selected = Secondary)
+        val Content = StateColor(default = OnBackground, selected = Secondary)
         val ToggleButtonBackground = StateColor(default = Primary)
         val WindowEdge = Color.White
+        val RowBackground = StateColor(default = Primary.copy(alpha = 0.1f), selected = Primary.copy(alpha = 0.15f))
 
         val DarkMaterial = darkColors(
             primary = Primary,
@@ -149,8 +171,44 @@ object AppTheme {
 
         val PriceSelectedDayDetail = 12.sp
 
-        val TransctionIconScale = Offset(0.5f, 0.5f)
-        val TransctionTradeIconScale = Offset(0.75f, 0.75f)
+        val TransctionIconScale = Offset(0.4f, 0.4f)
+        val TransctionTradeIconScale = Offset(0.6f, 0.6f)
+    }
+
+    object TransactionIcons {
+        val Square = IconColor(0, Icons.Filled.Square, Color.Green.copy(alpha = 0.5f), DashboardSizes.TransctionTradeIconScale)
+        val Rhombus = IconColor(1, Icons.Filled.Rhombus, Color.Yellow.copy(alpha = 0.5f), DashboardSizes.TransctionTradeIconScale)
+        val TriangleDown = IconColor(2, Icons.Filled.TriangleDown, Color.Green)
+        val TriangleUp = IconColor(2, Icons.Filled.TriangleUp, Color.Red)
+        val Cross = IconColor(99, Icons.Filled.Cross, Color.Red)
+        val Else = IconColor(100, Icons.Filled.Air, Color.Cyan)
+
+        private var mapIconsVectorPainters: Map<ImageVector, VectorPainter>? = null
+
+        @Composable
+        fun mapIconsVectorPainters(): Map<ImageVector, VectorPainter> {
+            val triangleUp = rememberVectorPainter(image = Icons.Filled.TriangleUp)
+            val triangleDown = rememberVectorPainter(image = Icons.Filled.TriangleDown)
+            val rhombus = rememberVectorPainter(image = Icons.Filled.Rhombus)
+            val square = rememberVectorPainter(image = Icons.Filled.Square)
+            val circle = rememberVectorPainter(image = Icons.Filled.Circle)
+            return mapIconsVectorPainters ?: mapOf(
+                Icons.Filled.TriangleUp to triangleUp,
+                Icons.Filled.TriangleDown to triangleDown,
+                Icons.Filled.Rhombus to rhombus,
+                Icons.Filled.Square to square,
+                Icons.Filled.Circle to circle,
+            ).also {
+                mapIconsVectorPainters = it
+            }
+        }
+    }
+
+    object TextStyles {
+        val TransactionMoney = TextStyle(color = Colors.OnBackground, fontSize = 14.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
+        val TransactionDateTime = TextStyle(color = Colors.Secondary, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
+        val TransactionDetail = TextStyle(color = Colors.Primary, fontSize = 12.sp, fontWeight = FontWeight.Light)
+        val TransactionMoneyAnnotation = TextStyle(color = Colors.PrimaryVariant, fontSize = 10.sp, fontWeight = FontWeight.Normal)
     }
 }
 

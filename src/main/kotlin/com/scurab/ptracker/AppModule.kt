@@ -7,6 +7,7 @@ import com.scurab.ptracker.component.navigation.DefaultNavSpecs
 import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.repository.AppStateRepository
+import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
 import com.scurab.ptracker.usecase.LoadDataUseCase
@@ -20,6 +21,7 @@ fun createKoinModule(appArgs: Array<String>) = module {
     single { defaultNavSpecs(appArgs, get()) }
     single<NavSpecs> { get<DefaultNavSpecs>() }
     single<NavController> { get<DefaultNavSpecs>() }
+    single { DateTimeFormats }
 
     factory { LoadDataUseCase() }
     factory { LoadLedgerUseCase() }

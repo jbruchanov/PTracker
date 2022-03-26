@@ -2,7 +2,7 @@ package com.scurab.ptracker.ext
 
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
-import com.scurab.ptracker.ui.DateFormats
+import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import kotlinx.datetime.toJavaLocalDateTime
 import java.lang.Float.max
@@ -30,10 +30,10 @@ fun List<PriceItem>.getHorizontalAxisText(index: Int, step: Int): String {
     val prev = getOrNull(index - step)
     //TODO: handle also smaller candles than day
     val formatter = when {
-        prev == null -> DateFormats.monthYear
-        item.date.year != prev.date.year -> DateFormats.year
-        item.date.monthNumber != prev.date.monthNumber -> DateFormats.monthMid
-        else -> DateFormats.dayNumber
+        prev == null -> DateTimeFormats.monthYear
+        item.date.year != prev.date.year -> DateTimeFormats.year
+        item.date.monthNumber != prev.date.monthNumber -> DateTimeFormats.monthMid
+        else -> DateTimeFormats.dayNumber
     }
     return formatter.format(item.date.toJavaLocalDateTime())
 }

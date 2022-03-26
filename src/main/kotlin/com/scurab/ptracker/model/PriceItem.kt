@@ -6,7 +6,7 @@ import androidx.compose.ui.text.SpanStyle
 import com.scurab.ptracker.ext.isZero
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
-import com.scurab.ptracker.ui.DateFormats
+import com.scurab.ptracker.ui.DateTimeFormats
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -38,7 +38,7 @@ class PriceItem(
     val centerY = (open + close).toFloat() / 2f
     val spikeOffsetY1 = high.max(low).toFloat()
     val spikeOffsetY2 = high.min(low).toFloat()
-    val fullDate: String by lazy { DateFormats.fullDate.format(date.toJavaLocalDateTime()) }
+    val fullDate: String by lazy { DateTimeFormats.fullDate.format(date.toJavaLocalDateTime()) }
 }
 
 data class TestPriceItem(

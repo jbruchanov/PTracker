@@ -2,6 +2,7 @@
 
 package com.scurab.ptracker.ui.priceboard
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -35,7 +40,6 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
@@ -47,6 +51,7 @@ import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.getHorizontalAxisText
 import com.scurab.ptracker.ext.getLabelPriceDecimals
+import com.scurab.ptracker.ext.iconColor
 import com.scurab.ptracker.ext.nHeight
 import com.scurab.ptracker.ext.nWidth
 import com.scurab.ptracker.ext.nativeCanvas
@@ -58,19 +63,17 @@ import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.withTranslateAndScale
-import com.scurab.ptracker.icons.Rhombus
-import com.scurab.ptracker.icons.TriangleDown
-import com.scurab.ptracker.icons.TriangleUp
 import com.scurab.ptracker.model.PriceItem
-import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.model.priceDetails
 import com.scurab.ptracker.model.randomPriceData
 import com.scurab.ptracker.ui.AppColors
+import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
 import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.ToggleButton
+import com.scurab.ptracker.ui.common.TransactionRow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -138,11 +141,34 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                             Divider()
                         }
                     }
-                    Box(modifier = Modifier.weight(1f)) {
-                        PriceBoard(priceBoardState)
+                    Row {
+                        Box(modifier = Modifier.weight(1f)) {
+                            PriceBoard(priceBoardState)
+                        }
+                        Column(modifier = Modifier.width(width = 220.dp)) {
+                            PriceBoardTransactions(priceBoardState)
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PriceBoardTransactions(priceBoardState: PriceBoardState) {
+    val selectedAsset = priceBoardState.selectedAsset
+    if (selectedAsset != null) {
+        val state = remember(selectedAsset) {
+            LazyListState(0, 0)
+        }
+        Box {
+            LazyColumn(modifier = Modifier.fillMaxWidth(), state = state) {
+                itemsIndexed(priceBoardState.ledger.getTransactions(selectedAsset)) { i, v ->
+                    TransactionRow(i, v)
+                }
+            }
+            VerticalScrollbar(adapter = rememberScrollbarAdapter(state), modifier = Modifier.align(Alignment.CenterEnd))
         }
     }
 }
@@ -243,9 +269,7 @@ private fun Candles(state: PriceBoardState) {
 private fun CandleTransactions(state: PriceBoardState) {
     state.selectedAsset ?: return
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
-    val triangleUp = rememberVectorPainter(image = Icons.Filled.TriangleUp)
-    val triangleDown = rememberVectorPainter(image = Icons.Filled.TriangleDown)
-    val rhombus = rememberVectorPainter(image = Icons.Filled.Rhombus)
+    val iconPaintersMap = AppTheme.TransactionIcons.mapIconsVectorPainters()
     Canvas {
         withTranslateAndScale(state) {
             val filterVisible = state.items.filterVisible(state, endOffset = 1)
@@ -254,16 +278,13 @@ private fun CandleTransactions(state: PriceBoardState) {
                 //scaleY flipped as we want to have origin at left/Bottom
                 translate(x, 0f) {
                     //draw candle transaction
-                    val transactions = state.ledger.getData(priceItem)
-                    if (transactions.isNotEmpty()) {
+                    val icons = state.ledger.getData(priceItem).map { it.iconColor() }.distinct().sortedBy { it.drawPriority }
+                    if (icons.isNotEmpty()) {
                         translate(priceItemWidthHalf, priceItem.centerY) {
                             resetScale(state) {
-                                transactions.forEach { t ->
-                                    when (t) {
-                                        is Transaction.Outcome -> draw(triangleUp, DashboardSizes.TransctionIconScale, colorFilter = tint(color = Color.Red))
-                                        is Transaction.Income -> draw(triangleDown, DashboardSizes.TransctionIconScale, colorFilter = tint(color = Color.Green))
-                                        is Transaction.Trade -> draw(rhombus, DashboardSizes.TransctionTradeIconScale, colorFilter = tint(color = Color.Yellow.copy(alpha = 0.5f)))
-                                    }
+                                icons.forEach { ic ->
+                                    val painter = iconPaintersMap.getValue(ic.image)
+                                    draw(painter, ic.scale, colorFilter = tint(color = ic.color))
                                 }
                             }
                         }

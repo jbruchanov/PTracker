@@ -18,7 +18,7 @@ fun ToggleButton(
     text: String, isSelected: Boolean, onClick: () -> Unit
 ) {
     val background = AppColors.current.ToggleButtonBackground.get(isSelected = isSelected)
-    val textColor = AppColors.current.ContentColor.get(isSelected = isSelected)
+    val textColor = AppColors.current.Content.get(isSelected = isSelected)
     Box(
         modifier = Modifier
             .background(background)

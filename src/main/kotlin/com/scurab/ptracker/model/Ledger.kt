@@ -5,7 +5,8 @@ class Ledger(
     val grouping: Grouping
 ) {
     private val cacheByGrouping = mutableMapOf<Grouping, Map<Long, List<Transaction>>>()
-    private val cacheByItemAndAsset = mutableMapOf<Key, List<Transaction>>()
+    private val cacheByItemAndAsset = mutableMapOf<KeyAssetGroupingKey, List<Transaction>>()
+    private val cacheByAssets = mutableMapOf<KeyAssetTrades, List<Transaction>>()
     val assets = items.mapNotNull { (it as? Transaction.Trade)?.asset }.toSet().sortedBy { it.text }
 
     fun getGroupedData(by: Grouping = grouping): Map<Long, List<Transaction>> {
@@ -14,13 +15,26 @@ class Ledger(
         }
     }
 
-    fun getData(priceItem: PriceItem): List<Transaction> {
-        val key = Key(priceItem.asset, grouping.groupingKey(priceItem.date))
+    fun getData(priceItem: PriceItem, onlyTrades: Boolean = true): List<Transaction> {
+        val key = KeyAssetGroupingKey(priceItem.asset, grouping.groupingKey(priceItem.date), onlyTrades)
         return cacheByItemAndAsset.getOrPut(key) {
             val groupedData = getGroupedData()
             groupedData[grouping.groupingKey(priceItem.date)]
+                ?.asSequence()
+                ?.filter { !onlyTrades || it is Transaction.Trade }
                 ?.filter { it.hasAsset(priceItem.asset) }
+                ?.toList()
                 ?: emptyList()
+        }
+    }
+
+    fun getTransactions(asset: Asset, onlyTrades: Boolean = true): List<Transaction> {
+        val key = KeyAssetTrades(asset, onlyTrades)
+        return cacheByAssets.getOrPut(key) {
+            items.asSequence()
+                .filter { !onlyTrades || it is Transaction.Trade }
+                .filter { it.hasAsset(asset) }
+                .toList()
         }
     }
 
@@ -28,5 +42,6 @@ class Ledger(
         val Empty = Ledger(emptyList(), Grouping.Day)
     }
 
-    private data class Key(val asset: Asset, val groupingKey: Long)
+    private data class KeyAssetGroupingKey(val asset: Asset, val groupingKey: Long, val onlyTrades: Boolean)
+    private data class KeyAssetTrades(val asset: Asset, val onlyTrades: Boolean)
 }

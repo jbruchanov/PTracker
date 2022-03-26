@@ -3,6 +3,16 @@ package com.scurab.ptracker.model
 import kotlinx.datetime.LocalDateTime
 import java.math.BigDecimal
 
+interface HasIncome {
+    val buyQuantity: BigDecimal
+    val buyAsset: String
+}
+
+interface HasOutcome {
+    val sellQuantity: BigDecimal
+    val sellAsset: String
+}
+
 sealed class Transaction {
     abstract val exchange: String
     abstract val type: String
@@ -14,20 +24,22 @@ sealed class Transaction {
     abstract val note: String?
 
     abstract fun hasAsset(asset: Asset): Boolean
+    abstract val assets: String
 
     data class Income(
         override val exchange: String,
         override val type: String,
         override val time: LocalDateTime,
-        val buyQuantity: BigDecimal,
-        val buyAsset: String,
+        override val buyQuantity: BigDecimal,
+        override val buyAsset: String,
         val buyValueInFiat: BigDecimal?,
         override val feeQuantity: BigDecimal,
         override val feeAsset: String,
         override val feeValueInFiat: BigDecimal?,
         override val wallet: String,
         override val note: String?,
-    ) : Transaction() {
+    ) : Transaction(), HasIncome {
+        override val assets: String = buyAsset
         override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset)
     }
 
@@ -35,15 +47,16 @@ sealed class Transaction {
         override val exchange: String,
         override val type: String,
         override val time: LocalDateTime,
-        val sellQuantity: BigDecimal,
-        val sellAsset: String,
+        override val sellQuantity: BigDecimal,
+        override val sellAsset: String,
         val sellValueInFiat: BigDecimal?,
         override val feeQuantity: BigDecimal,
         override val feeAsset: String,
         override val feeValueInFiat: BigDecimal?,
         override val wallet: String,
         override val note: String?,
-    ) : Transaction() {
+    ) : Transaction(), HasOutcome {
+        override val assets: String = sellAsset
         override fun hasAsset(asset: Asset): Boolean = asset.has(sellAsset)
     }
 
@@ -51,18 +64,18 @@ sealed class Transaction {
         override val exchange: String,
         override val type: String,
         override val time: LocalDateTime,
-        val buyQuantity: BigDecimal,
-        val buyAsset: String,
+        override val buyQuantity: BigDecimal,
+        override val buyAsset: String,
         val buyValueInFiat: BigDecimal?,
-        val sellQuantity: BigDecimal,
-        val sellAsset: String,
+        override val sellQuantity: BigDecimal,
+        override val sellAsset: String,
         val sellValueInFiat: BigDecimal?,
         override val feeQuantity: BigDecimal,
         override val feeAsset: String,
         override val feeValueInFiat: BigDecimal?,
         override val wallet: String,
         override val note: String?,
-    ) : Transaction() {
+    ) : Transaction(), HasIncome, HasOutcome {
         override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset, sellAsset)
         val asset by lazy {
             val isBuyAssetFiat = FiatCurrencies.contains(buyAsset)
@@ -70,6 +83,7 @@ sealed class Transaction {
             val crypto = if (!isBuyAssetFiat) buyAsset else sellAsset
             Asset(crypto, fiat)
         }
+        override val assets: String = asset.text
     }
 
     fun isTransactionWithAsset(asset: Asset) = this is Trade && hasAsset(asset)
