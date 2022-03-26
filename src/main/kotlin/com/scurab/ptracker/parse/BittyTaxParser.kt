@@ -19,13 +19,14 @@ interface BittyTaxParser {
     val Row.wallet get() = getCell(WALLET).stringCellValue
     val Row.note get() = getCell(NOTE)?.stringCellValue
 
-    fun Row.toTransaction(): Transaction? {
+    fun Row.toTransaction(exchange: String): Transaction? {
         if (shouldSkip()) return null
         val buyQuantity = buyQuantity
         val sellQuantity = sellQuantity
         return when {
             buyQuantity != null && sellQuantity != null -> {
                 Transaction.Trade(
+                    exchange = exchange,
                     type = type,
                     time = timestamp,
                     buyQuantity = buyQuantity,
@@ -43,6 +44,7 @@ interface BittyTaxParser {
             }
             buyQuantity != null -> {
                 Transaction.Income(
+                    exchange = exchange,
                     type = type,
                     time = timestamp,
                     buyQuantity = buyQuantity,
@@ -57,6 +59,7 @@ interface BittyTaxParser {
             }
             sellQuantity != null -> {
                 Transaction.Outcome(
+                    exchange = exchange,
                     type = type,
                     time = timestamp,
                     sellQuantity = sellQuantity,

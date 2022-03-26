@@ -8,15 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -27,6 +27,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -34,11 +35,13 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.ext.clipRectSafe
+import com.scurab.ptracker.ext.draw
 import com.scurab.ptracker.ext.f
 import com.scurab.ptracker.ext.f3
 import com.scurab.ptracker.ext.filterVisible
@@ -55,14 +58,19 @@ import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.withTranslateAndScale
+import com.scurab.ptracker.icons.Rhombus
+import com.scurab.ptracker.icons.TriangleDown
+import com.scurab.ptracker.icons.TriangleUp
 import com.scurab.ptracker.model.PriceItem
+import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.model.priceDetails
 import com.scurab.ptracker.model.randomPriceData
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
-import com.scurab.ptracker.ui.common.VerticalDivider
+import com.scurab.ptracker.ui.common.Divider
+import com.scurab.ptracker.ui.common.ToggleButton
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -112,26 +120,26 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
 
 @Composable
 fun PriceBoard(vm: PriceBoardViewModel) {
-    val uiState by vm.uiState.collectAsState()
-    when (val uiState = uiState) {
-        is PriceBoardUiState.NoAssetSelected -> Text("Select Asset")
-        is PriceBoardUiState.Data -> {
+    val priceBoardState = vm.uiState.priceBoardState
+    when {
+        priceBoardState.items.isEmpty() -> Text("Select Asset")
+        priceBoardState.items.isNotEmpty() -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(AppColors.current.BackgroundContent)
             ) {
-                Row {
-                    Box(modifier = Modifier.weight(1f)) {
-                        PriceBoard(uiState.priceBoardState)
-                    }
-                    VerticalDivider()
-                    Column {
-                        uiState.pairs.forEach { pair ->
-                            Button(onClick = { vm.onPairSelected(pair) }) {
-                                Text(pair)
-                            }
+                Column {
+                    val assets = vm.uiState.assets
+                    Row {
+                        assets.forEach { asset ->
+                            val isSelected = asset == vm.uiState.priceBoardState.selectedAsset
+                            ToggleButton(onClick = { vm.onAssetSelected(asset) }, isSelected = isSelected, text = asset.text)
+                            Divider()
                         }
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        PriceBoard(priceBoardState)
                     }
                 }
             }
@@ -154,6 +162,7 @@ private fun PriceBoard(state: PriceBoardState) {
     ) {
         Grid(state)
         Candles(state)
+        CandleTransactions(state)
         AxisBackground(state)
         AxisContent(state)
         Mouse(state)
@@ -211,7 +220,8 @@ private fun Candles(state: PriceBoardState) {
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
     Canvas {
         withTranslateAndScale(state) {
-            state.items.filterVisible(state, endOffset = 1).forEach { priceItem ->
+            val filterVisible = state.items.filterVisible(state, endOffset = 1)
+            filterVisible.forEach { priceItem ->
                 val x = priceItem.index * DashboardSizes.PriceItemWidth
                 //scaleY flipped as we want to have origin at left/Bottom
                 translate(x, 0f) {
@@ -223,14 +233,38 @@ private fun Candles(state: PriceBoardState) {
                         //keep the strokeWidth scale independent
                         strokeWidth = DashboardSizes.SpikeLineStrokeWidth.toPx() / state.scale.x
                     )
-                    if (PriceDashboardConfig.Debug) {
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CandleTransactions(state: PriceBoardState) {
+    state.selectedAsset ?: return
+    val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
+    val triangleUp = rememberVectorPainter(image = Icons.Filled.TriangleUp)
+    val triangleDown = rememberVectorPainter(image = Icons.Filled.TriangleDown)
+    val rhombus = rememberVectorPainter(image = Icons.Filled.Rhombus)
+    Canvas {
+        withTranslateAndScale(state) {
+            val filterVisible = state.items.filterVisible(state, endOffset = 1)
+            filterVisible.forEach { priceItem ->
+                val x = priceItem.index * DashboardSizes.PriceItemWidth
+                //scaleY flipped as we want to have origin at left/Bottom
+                translate(x, 0f) {
+                    //draw candle transaction
+                    val transactions = state.ledger.getData(priceItem)
+                    if (transactions.isNotEmpty()) {
                         translate(priceItemWidthHalf, priceItem.centerY) {
                             resetScale(state) {
-//                                drawCircle(
-//                                    Color.Yellow.copy(alpha = 0.5f),
-//                                    radius = priceItemWidthHalf,
-//                                    center = Offset.Zero
-//                                )
+                                transactions.forEach { t ->
+                                    when (t) {
+                                        is Transaction.Outcome -> draw(triangleUp, DashboardSizes.TransctionIconScale, colorFilter = tint(color = Color.Red))
+                                        is Transaction.Income -> draw(triangleDown, DashboardSizes.TransctionIconScale, colorFilter = tint(color = Color.Green))
+                                        is Transaction.Trade -> draw(rhombus, DashboardSizes.TransctionTradeIconScale, colorFilter = tint(color = Color.Yellow.copy(alpha = 0.5f)))
+                                    }
+                                }
                             }
                         }
                     }
@@ -239,6 +273,7 @@ private fun Candles(state: PriceBoardState) {
         }
     }
 }
+
 
 @Composable
 private fun AxisBackground(state: PriceBoardState) {

@@ -3,6 +3,7 @@ package com.scurab.ptracker.model
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import com.scurab.ptracker.ext.isZero
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
 import com.scurab.ptracker.ui.DateFormats
@@ -27,6 +28,7 @@ interface IPriceItem {
 
 class PriceItem(
     val index: Int,
+    val asset: Asset,
     val item: IPriceItem
 ) : IPriceItem by item {
     private val rectHeight = (open - close).abs().toFloat()
@@ -51,12 +53,13 @@ fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: 
     var date: Instant = startDate.toInstant(TimeZone.UTC)
     return buildList {
         val coef = 5
+        val asset = Asset("BTC", "GBP")
         repeat(count) {
             val open = lastOrNull()?.close ?: BigDecimal(0)
             val close = open + random.nextInt(-90 * coef, 100 * coef).toBigDecimal()
             val high = open.max(close) + random.nextInt(20 * coef, 50 * coef).toBigDecimal()
             val low = open.min(close) - random.nextInt(20 * coef, 50 * coef).toBigDecimal()
-            add(PriceItem(it, TestPriceItem(date = date.toLocalDateTime(TimeZone.UTC), open = open, close = close, high = high, low = low)))
+            add(PriceItem(it, asset, TestPriceItem(date = date.toLocalDateTime(TimeZone.UTC), open = open, close = close, high = high, low = low)))
             date = date.plus(step)
         }
     }
@@ -75,7 +78,7 @@ fun PriceItem.priceDetails(): AnnotatedString {
         append(AnnotatedString(low.toScaleString(), spanStyle))
         append(" C")
         append(AnnotatedString(close.toScaleString(), spanStyle))
-        if (open != BigDecimal.ZERO) {
+        if (!open.isZero()) {
             append("  ")
             append(AnnotatedString((close.setScale(3, RoundingMode.HALF_UP) / open).toScaleString(2) + "%", spanStyle))
         }

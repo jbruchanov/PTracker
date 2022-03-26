@@ -1,58 +1,58 @@
 package com.scurab.ptracker.ui.priceboard
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.Ledger
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.usecase.LoadDataUseCase
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.scurab.ptracker.usecase.LoadLedgerUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
-sealed class PriceBoardUiState {
-    object NoAssetSelected : PriceBoardUiState()
-    class Data(
-        val priceBoardState: PriceBoardState,
-        val pairs: List<String>
-    ) : PriceBoardUiState()
+class PriceBoardUiState(localDensity: Density) {
+    var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity))
+    var ledger by mutableStateOf(Ledger.Empty)
+    val assets get() = ledger.assets
 }
 
 class PriceBoardViewModel(
     private val appStateRepository: AppStateRepository,
-    private val loadDataUseCase: LoadDataUseCase
+    private val loadDataUseCase: LoadDataUseCase,
+    private val loadLedgerUseCase: LoadLedgerUseCase
 ) : ViewModel() {
 
-    private val crypto = listOf("BTC", "ETH", "ADA", "LTC", "SOL")
-    private val fiat = listOf("GBP", "USD")
-    private val pairs = crypto.map { c -> fiat.map { f -> "$c-$f" } }.flatten()
-
-    private val _uiState = MutableStateFlow<PriceBoardUiState>(PriceBoardUiState.NoAssetSelected)
-    val uiState = _uiState.asStateFlow()
+    val uiState = PriceBoardUiState(Density(1f))
 
     init {
         launch {
-            appStateRepository.selectedAsset.collect(::onAssetSelected)
+            appStateRepository.selectedAsset.collect(::loadAsset)
         }
-    }
-
-    private fun onAssetSelected(item: String) {
-        launch {
-            val items = loadDataUseCase.loadData(item)
-            val data = (_uiState.value as? PriceBoardUiState.Data)
-            if (data != null) {
-                data.priceBoardState.setItemsAndInitViewPort(items)
-            } else {
-                _uiState.emit(
-                    PriceBoardUiState.Data(
-                        PriceBoardState(items, Density(1f)),
-                        pairs
-                    )
-                )
+        launch(Dispatchers.IO) {
+            val ledger = runCatching { loadLedgerUseCase.load(File("data/output.xlsx")) }.getOrDefault(Ledger.Empty)
+            withContext(Dispatchers.Main) {
+                uiState.ledger = ledger
+                uiState.priceBoardState.ledger = ledger
             }
         }
     }
 
-    fun onPairSelected(item: String) {
+    private fun loadAsset(asset: Asset) {
+        launch(Dispatchers.IO) {
+            val loadData = loadDataUseCase.loadData(asset)
+            withContext(Dispatchers.Main) {
+                uiState.priceBoardState.setItemsAndInitViewPort(asset, loadData)
+            }
+        }
+    }
+
+    fun onAssetSelected(item: Asset) {
         appStateRepository.setSelectedAsset(item)
     }
 }

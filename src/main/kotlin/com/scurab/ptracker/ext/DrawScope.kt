@@ -1,12 +1,16 @@
 package com.scurab.ptracker.ext
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ClipOp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.vector.VectorPainter
 import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import java.lang.Float.max
 
@@ -51,7 +55,7 @@ inline fun DrawScope.withTranslateAndScale(state: PriceBoardState, block: DrawSc
 }
 
 inline fun DrawScope.resetScale(state: PriceBoardState, block: DrawScope.() -> Unit) {
-    scale(scaleX = 1f / state.scale.x, scaleY = 1f / state.scale.y, pivot = Offset.Zero) {
+    scale(scaleX = 1f / state.scale.x, scaleY = -1f / state.scale.y, pivot = Offset.Zero) {
         block()
     }
 }
@@ -65,3 +69,11 @@ inline fun DrawScope.clipRectSafe(
     clipOp: ClipOp = ClipOp.Intersect,
     block: DrawScope.() -> Unit
 ) = withTransform({ clipRect(left, top, max(0f, right), max(0f, bottom), clipOp) }, block)
+
+
+fun DrawScope.draw(vectorPainter: VectorPainter, scale: Offset, colorFilter: ColorFilter? = null) {
+    val size = vectorPainter.intrinsicSize * scale
+    translate(-size.width / 2, -size.height / 2) {
+        with(vectorPainter) { draw(size, colorFilter = colorFilter) }
+    }
+}

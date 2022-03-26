@@ -1,5 +1,6 @@
 package com.scurab.ptracker.ext
 
+import java.math.BigDecimal
 import kotlin.math.roundToInt
 
 val Float.f0 get() = this.roundToInt().toString()
@@ -38,3 +39,5 @@ private fun Float.round(base: Float, decimals: Int = 2) = ((this / base).roundTo
 
 val Int.bd get() = toBigDecimal()
 val Double.bd get() = toBigDecimal()
+
+fun BigDecimal.isZero() = compareTo(BigDecimal.ZERO) == 0

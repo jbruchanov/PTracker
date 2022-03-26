@@ -6,6 +6,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -79,12 +80,15 @@ object AppTheme {
     }
 
     object Sizes {
-        val MinClickableSize = 48.dp
+        val MinClickableSize = 40.dp
+        val ClickableSize = 48.dp
         val IconButtonPadding = 8.dp
 
         val Hairline = 1.dp
         val Space05 = 2.dp
         val Space = 4.dp
+        val Space2 = 8.dp
+        val Space4 = 16.dp
     }
 
     object Values {
@@ -97,6 +101,7 @@ object AppTheme {
     }
 
     object TextRendering {
+        val small = 12.sp
         val font = Font(Typeface.makeFromName("monospace", FontStyle.NORMAL))
         val fontAxis = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
         val fontLabels = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
@@ -126,6 +131,7 @@ object AppTheme {
         val MouseCross = Color.White
         val CandleRed = Color(0xFFEF5350)
         val CandleGreen = Color(0xFF26A69A)
+        val CandleTransaction = Colors.Primary
     }
 
     object DashboardSizes {
@@ -142,6 +148,9 @@ object AppTheme {
         val BottomAxisContentMinHeight = 30.dp
 
         val PriceSelectedDayDetail = 12.sp
+
+        val TransctionIconScale = Offset(0.5f, 0.5f)
+        val TransctionTradeIconScale = Offset(0.75f, 0.75f)
     }
 }
 

@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDateTime
 import java.math.BigDecimal
 
 sealed class Transaction {
+    abstract val exchange: String
     abstract val type: String
     abstract val time: LocalDateTime
     abstract val feeQuantity: BigDecimal
@@ -12,7 +13,10 @@ sealed class Transaction {
     abstract val wallet: String
     abstract val note: String?
 
+    abstract fun hasAsset(asset: Asset): Boolean
+
     data class Income(
+        override val exchange: String,
         override val type: String,
         override val time: LocalDateTime,
         val buyQuantity: BigDecimal,
@@ -23,9 +27,12 @@ sealed class Transaction {
         override val feeValueInFiat: BigDecimal?,
         override val wallet: String,
         override val note: String?,
-    ) : Transaction()
+    ) : Transaction() {
+        override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset)
+    }
 
     data class Outcome(
+        override val exchange: String,
         override val type: String,
         override val time: LocalDateTime,
         val sellQuantity: BigDecimal,
@@ -36,9 +43,12 @@ sealed class Transaction {
         override val feeValueInFiat: BigDecimal?,
         override val wallet: String,
         override val note: String?,
-    ) : Transaction()
+    ) : Transaction() {
+        override fun hasAsset(asset: Asset): Boolean = asset.has(sellAsset)
+    }
 
     data class Trade(
+        override val exchange: String,
         override val type: String,
         override val time: LocalDateTime,
         val buyQuantity: BigDecimal,
@@ -52,5 +62,15 @@ sealed class Transaction {
         override val feeValueInFiat: BigDecimal?,
         override val wallet: String,
         override val note: String?,
-    ) : Transaction()
+    ) : Transaction() {
+        override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset, sellAsset)
+        val asset by lazy {
+            val isBuyAssetFiat = FiatCurrencies.contains(buyAsset)
+            val fiat = if (isBuyAssetFiat) buyAsset else sellAsset
+            val crypto = if (!isBuyAssetFiat) buyAsset else sellAsset
+            Asset(crypto, fiat)
+        }
+    }
+
+    fun isTransactionWithAsset(asset: Asset) = this is Trade && hasAsset(asset)
 }

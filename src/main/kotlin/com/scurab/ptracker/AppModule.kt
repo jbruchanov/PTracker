@@ -10,6 +10,7 @@ import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
 import com.scurab.ptracker.usecase.LoadDataUseCase
+import com.scurab.ptracker.usecase.LoadLedgerUseCase
 import org.koin.dsl.module
 
 fun createKoinModule(appArgs: Array<String>) = module {
@@ -21,8 +22,9 @@ fun createKoinModule(appArgs: Array<String>) = module {
     single<NavController> { get<DefaultNavSpecs>() }
 
     factory { LoadDataUseCase() }
+    factory { LoadLedgerUseCase() }
     factory { MainWindowViewModel(get(), get()) }
-    factory { PriceBoardViewModel(get(), get()) }
+    factory { PriceBoardViewModel(get(), get(), get()) }
     factory { args -> SettingsViewModel(args.get(), get()) }
 }
 

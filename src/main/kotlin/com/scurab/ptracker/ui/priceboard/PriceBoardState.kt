@@ -19,6 +19,8 @@ import com.scurab.ptracker.ext.normalize
 import com.scurab.ptracker.ext.scale
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToViewPort
+import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.Ledger
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
@@ -37,6 +39,8 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
     var canvasSize by mutableStateOf(Size.Zero)
     var pointedPriceItem by mutableStateOf<PriceItem?>(null)
     var items by mutableStateOf(items)
+    var ledger by mutableStateOf(Ledger.Empty)
+    var selectedAsset by mutableStateOf<Asset?>(null)
 
     var mouseIcon by mutableStateOf(PointerIcon(Cursor(Cursor.CROSSHAIR_CURSOR)))
     var isChangingScale by mutableStateOf(false)
@@ -113,7 +117,8 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density)
         .scale(1f, 1f / scale.y, pivot = Offset(0f, -offset.y - canvasSize.height / 2))
         .let { it.bottom.rangeTo(it.top) }
 
-    fun setItemsAndInitViewPort(items: List<PriceItem>) {
+    fun setItemsAndInitViewPort(asset: Asset, items: List<PriceItem>) {
+        this.selectedAsset = asset
         this@PriceBoardState.items = items
         animateInitViewPort = System.currentTimeMillis()
     }
