@@ -15,7 +15,7 @@ interface HasOutcome {
     val sellAsset: String
 }
 
-sealed class Transaction : HasDateTime {
+sealed class Transaction : HasDateTime, WithCache by MapCache() {
     abstract val exchange: String
     abstract val type: String
     abstract override val dateTime: LocalDateTime

@@ -20,6 +20,7 @@ import com.scurab.ptracker.ext.scale
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.Grouping
 import com.scurab.ptracker.model.Ledger
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.Transaction
@@ -32,7 +33,6 @@ import org.jetbrains.skia.Point
 import java.awt.Cursor
 import kotlin.math.ceil
 import kotlin.math.max
-import com.scurab.ptracker.model.Grouping
 
 class PriceBoardState(items: List<PriceItem>, private val localDensity: Density) {
     var scale by mutableStateOf(Offset(1f, 1f))
