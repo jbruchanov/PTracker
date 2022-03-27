@@ -1,7 +1,11 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.scurab.ptracker.ui.common
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -28,15 +32,19 @@ import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
 import org.koin.java.KoinJavaComponent
 
+
 @Composable
-fun TransactionRow(onClick: () -> Unit, index: Int, item: Transaction, isSelected: Boolean, modifier: Modifier = Modifier) {
+fun TransactionRow(onClick: (Boolean) -> Unit, index: Int, item: Transaction, isSelected: Boolean, modifier: Modifier = Modifier) {
     val formatter = remember { KoinJavaComponent.getKoin().get<DateTimeFormats>() }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = AppSizes.current.Space)
             .background(AppColors.current.RowBackground.get(isSelected = isSelected, isEven = index % 2 == 0))
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onClick = { onClick(false) },
+                onDoubleClick = { onClick(true) }
+            )
             .padding(vertical = AppSizes.current.Space, horizontal = AppSizes.current.Space2)
     ) {
         val prices = item.formattedPrices()

@@ -181,7 +181,7 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState, eventDelega
                     TransactionRow(
                         onClick = {
                             priceBoardState.clickedTransaction = System.currentTimeMillis() to transaction
-                            eventDelegate.onTransactionClicked(transaction)
+                            eventDelegate.onTransactionClicked(transaction, it)
                         },
                         index, transaction, isSelected,
                     )

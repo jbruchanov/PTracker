@@ -30,7 +30,7 @@ class PriceBoardUiState(localDensity: Density, grouping: GroupStrategy) {
 
 interface PriceBoardEventDelegate {
     fun onAssetSelected(item: Asset)
-    fun onTransactionClicked(item: Transaction)
+    fun onTransactionClicked(item: Transaction, doubleClick: Boolean)
     fun onSpacePressed()
 }
 
@@ -55,16 +55,16 @@ class PriceBoardViewModel(
         }
         launch(Dispatchers.IO) {
             ledger.combine(prices) { i1, i2 -> Pair(i1, i2) }.collect { (ledger, pricePair) ->
-                    val (asset, prices) = pricePair
-                    val transactions = ledger.getTransactions(asset)
-                    updateTransactionsUseCase.fillPriceItems(transactions, prices, grouping)
-                    withContext(Dispatchers.Main) {
-                        uiState.assets = ledger.assets
-                        uiState.priceBoardState.ledger = ledger
-                        uiState.priceBoardState.visibleTransactions = transactions
-                        uiState.priceBoardState.setItemsAndInitViewPort(asset, prices)
-                    }
+                val (asset, prices) = pricePair
+                val transactions = ledger.getTransactions(asset)
+                updateTransactionsUseCase.fillPriceItems(transactions, prices, grouping)
+                withContext(Dispatchers.Main) {
+                    uiState.assets = ledger.assets
+                    uiState.priceBoardState.ledger = ledger
+                    uiState.priceBoardState.visibleTransactions = transactions
+                    uiState.priceBoardState.setItemsAndInitViewPort(asset, prices)
                 }
+            }
         }
     }
 
@@ -78,11 +78,11 @@ class PriceBoardViewModel(
         appStateRepository.setSelectedAsset(item)
     }
 
-    override fun onTransactionClicked(item: Transaction) {
+    override fun onTransactionClicked(item: Transaction, doubleClick: Boolean) {
         val state = uiState.priceBoardState
         launch {
             val priceItem = requireNotNull(item.priceItem) { "item.priceItem:${item}" }
-            if (!priceItem.isVisible(state)) {
+            if (doubleClick || !priceItem.isVisible(state)) {
                 withContext(Dispatchers.Main) {
                     state.setViewport(state.initViewport(priceItemIndex = priceItem.index + 1, alignCenter = true), animate = true)
                 }
