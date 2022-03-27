@@ -20,8 +20,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BorderOuter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -70,20 +71,16 @@ import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.withTranslateAndScale
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.priceDetails
-import com.scurab.ptracker.model.randomPriceData
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
 import com.scurab.ptracker.ui.common.Divider
+import com.scurab.ptracker.ui.common.FlatButton
 import com.scurab.ptracker.ui.common.ToggleButton
 import com.scurab.ptracker.ui.common.TransactionRow
 import com.scurab.ptracker.ui.common.VerticalDivider
-import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.skia.Point
 import org.jetbrains.skia.TextLine
 import java.lang.Float.min
@@ -91,8 +88,6 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.roundToInt
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.days
 
 object PriceDashboardConfig {
     val ScaleRangeX = floatArrayOf(1e-2f, 20f)
@@ -142,8 +137,10 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                     .background(AppColors.current.BackgroundContent)
             ) {
                 Column {
-                    val assets = vm.uiState.assets
                     Row {
+                        FlatButton(Icons.Default.BorderOuter, onClick = { vm.onResetClicked() })
+                        VerticalDivider()
+                        val assets = vm.uiState.assets
                         assets.forEach { asset ->
                             val isSelected = asset == vm.uiState.priceBoardState.selectedAsset
                             ToggleButton(onClick = { vm.onAssetSelected(asset) }, isSelected = isSelected, text = asset.text)
@@ -195,11 +192,11 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState, eventDelega
 
 @Composable
 private fun PriceBoard(state: PriceBoardState, eventDelegate: PriceBoardEventDelegate) {
-    val scope = rememberCoroutineScope()
     val requester = remember { FocusRequester() }
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .onKeyboardInteractions(requester, eventDelegate)
             .pointerHoverIcon(state.mouseIcon)
             .background(AppColors.current.BackgroundContent)
             .onSizeChange(state)
@@ -208,7 +205,6 @@ private fun PriceBoard(state: PriceBoardState, eventDelegate: PriceBoardEventDel
             //disabled, doesn't work properly with dragDetection
             //.onDoubleTap(state)
             .onWheelScroll(state)
-            .onKeyboardInteractions(requester, state, eventDelegate)
     ) {
         Grid(state)
         Candles(state)
@@ -220,29 +216,10 @@ private fun PriceBoard(state: PriceBoardState, eventDelegate: PriceBoardEventDel
         if (PriceDashboardConfig.Debug) {
             PriceBoardDebug(state)
         }
-        Column(modifier = Modifier.align(Alignment.TopEnd).offset(x = (-130).dp)) {
-            Button(onClick = { scope.launch { state.reset() } }) {
-                Text("R")
-            }
-            Button(onClick = { scope.launch { state.setViewport(state.initViewport(), animate = true) } }) {
-                Text("I")
-            }
-            Button(onClick = {
-                scope.launch {
-                    state.priceItems = randomPriceData(Random, Random.nextInt(500, 1000), Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
-                    state.setViewport(state.initViewport(), animate = true)
-                }
-            }
-            ) {
-                Text("D")
-            }
-        }
 
         PriceSelectedDayDetail(state)
         LaunchedEffect(state.animateInitViewPort) {
-            scope.launch {
-                state.setViewport(state.initViewport(), animate = true)
-            }
+            state.setViewport(state.initViewport(), animate = true)
         }
         LaunchedEffect(state) {
             requester.requestFocus()

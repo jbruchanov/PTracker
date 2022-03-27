@@ -19,7 +19,7 @@ fun VerticalTabButton(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val background = AppColors.current.ToggleButtonBackground.get(isSelected = isSelected)
+    val background = AppColors.current.ButtonBackground.get(isSelected = isSelected)
     val tint = AppColors.current.Content.get(isSelected = isSelected)
     Surface(
         modifier = Modifier

@@ -32,6 +32,7 @@ interface PriceBoardEventDelegate {
     fun onAssetSelected(item: Asset)
     fun onTransactionClicked(item: Transaction, doubleClick: Boolean)
     fun onSpacePressed()
+    fun onResetClicked()
 }
 
 class PriceBoardViewModel(
@@ -98,6 +99,12 @@ class PriceBoardViewModel(
             if (index >= 0) {
                 boardState.scrollToTransactionIndex = index
             }
+        }
+    }
+
+    override fun onResetClicked() {
+        uiState.priceBoardState.apply {
+            setViewport(initViewport(), animate = true)
         }
     }
 }

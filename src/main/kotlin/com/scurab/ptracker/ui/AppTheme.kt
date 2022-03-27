@@ -80,7 +80,7 @@ object AppTheme {
         val OnBackground = Color.White
         val OnBackgroundVariant = Color.White.copy(.1f).compositeOver(Primary)
         val Content = StateColor(default = OnBackground, selected = Secondary)
-        val ToggleButtonBackground = StateColor(default = Primary)
+        val ButtonBackground = StateColor(default = Primary)
         val WindowEdge = Color.White
         val RowBackground = StateColor(
             default = Primary.copy(alpha = 0.1f),

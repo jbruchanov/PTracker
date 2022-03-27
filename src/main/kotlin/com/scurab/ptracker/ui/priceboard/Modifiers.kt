@@ -134,7 +134,7 @@ internal fun Modifier.onDoubleTap(state: PriceBoardState): Modifier {
     }
 }
 
-internal fun Modifier.onKeyboardInteractions(focusRequester: FocusRequester, state: PriceBoardState, eventDelegate: PriceBoardEventDelegate): Modifier {
+internal fun Modifier.onKeyboardInteractions(focusRequester: FocusRequester, eventDelegate: PriceBoardEventDelegate): Modifier {
     return focusable()
         .focusRequester(focusRequester)
         .onKeyEvent {

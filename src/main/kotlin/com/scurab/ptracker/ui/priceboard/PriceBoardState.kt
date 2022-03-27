@@ -100,15 +100,15 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density,
             .translate(offsetX - verticalPriceBarLeft(priceRange), y - size.height / 2)
     }
 
-    suspend fun setViewport(viewport: Rect, size: Size = this.canvasSize, animate: Boolean = false) {
+    fun setViewport(viewport: Rect, size: Size = this.canvasSize, animate: Boolean = false) = composeCoroutineScope.launch {
         require(!size.isEmpty()) { "Size has 0 values" }
         val offset = Offset(viewport.left, viewport.bottom)
         val scale = Offset(viewport.nWidth / size.width, viewport.nHeight / size.height)
         if (animate) {
             animateToOffsetScale(offset, scale)
         } else {
-            this.offset = offset
-            this.scale = scale
+            this@PriceBoardState.offset = offset
+            this@PriceBoardState.scale = scale
         }
     }
 
