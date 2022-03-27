@@ -112,10 +112,9 @@ internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
                     PointerEventType.Exit -> {
                         state.isChangingScale = false
                         state.pointer = Point.ZERO
-                        state.pointedPriceItem = null
                     }
                 }
-                state.pointedPriceItem = state.priceItems.getOrNull(state.selectedPriceItemIndex())
+                state.pointedPriceItem = if (event.type != PointerEventType.Exit) state.priceItems.getOrNull(state.selectedPriceItemIndex()) else null
             }
         }
     }
@@ -132,15 +131,4 @@ internal fun Modifier.onDoubleTap(state: PriceBoardState): Modifier {
             }
         })
     }
-}
-
-internal fun Modifier.onKeyboardInteractions(focusRequester: FocusRequester, eventDelegate: PriceBoardEventDelegate): Modifier {
-    return focusable()
-        .focusRequester(focusRequester)
-        .onKeyEvent {
-            if (it.key == Key.Spacebar) {
-                eventDelegate.onSpacePressed()
-            }
-            it.key == Key.Spacebar
-        }
 }

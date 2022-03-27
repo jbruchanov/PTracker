@@ -120,7 +120,7 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
     val colWidth = DashboardSizes.PriceItemWidth
     val firstIndex = (max(0f, viewport.left) / colWidth).toInt()
     val widthToFill = viewport.nWidth + min(viewport.left, 0f)
-    val lastIndex = firstIndex + widthToFill
+    val lastIndex = firstIndex + (widthToFill / colWidth)
     return firstIndex <= index && index <= lastIndex && viewport.bottom <= centerY && centerY <= viewport.top
 }
 
@@ -192,11 +192,9 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState, eventDelega
 
 @Composable
 private fun PriceBoard(state: PriceBoardState, eventDelegate: PriceBoardEventDelegate) {
-    val requester = remember { FocusRequester() }
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .onKeyboardInteractions(requester, eventDelegate)
             .pointerHoverIcon(state.mouseIcon)
             .background(AppColors.current.BackgroundContent)
             .onSizeChange(state)
@@ -220,9 +218,6 @@ private fun PriceBoard(state: PriceBoardState, eventDelegate: PriceBoardEventDel
         PriceSelectedDayDetail(state)
         LaunchedEffect(state.animateInitViewPort) {
             state.setViewport(state.initViewport(), animate = true)
-        }
-        LaunchedEffect(state) {
-            requester.requestFocus()
         }
     }
 }

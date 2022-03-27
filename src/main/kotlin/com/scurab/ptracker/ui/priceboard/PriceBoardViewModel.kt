@@ -3,6 +3,7 @@ package com.scurab.ptracker.ui.priceboard
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.ext.firstIndexOf
@@ -19,8 +20,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.awt.event.KeyEvent
 import java.io.File
 
 class PriceBoardUiState(localDensity: Density, grouping: GroupStrategy) {
@@ -50,6 +53,11 @@ class PriceBoardViewModel(
     init {
         launch {
             appStateRepository.selectedAsset.collect(::loadAsset)
+        }
+        launch {
+            appStateRepository.keyEvents
+                .filter { it.nativeKeyCode == KeyEvent.VK_SPACE }
+                .collect { onSpacePressed() }
         }
         launch(Dispatchers.IO) {
             ledger.value = runCatching { loadLedgerUseCase.load(File("data/output.xlsx")) }.getOrDefault(Ledger.Empty)

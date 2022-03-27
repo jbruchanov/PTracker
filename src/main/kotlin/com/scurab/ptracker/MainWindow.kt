@@ -1,5 +1,6 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -13,11 +14,17 @@ import androidx.compose.material.icons.filled.DataUsage
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterfallChart
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.App.getKoin
 import com.scurab.ptracker.AppNavTokens
@@ -36,10 +43,15 @@ import com.scurab.ptracker.ui.settings.SettingsArgs
 class MainWindowViewModel(
     private val appStateRepository: AppStateRepository,
     private val navController: NavController
-) : ViewModel(), MainWindowHandler {
+) : ViewModel(), MainWindowEventDelegate {
 
     override fun onOpenSettingsClick() {
         navController.push(AppNavTokens.Settings, SettingsArgs(2000))
+    }
+
+    override fun onKeyPressed(key: Key): Boolean {
+        appStateRepository.onKey(key)
+        return true
     }
 
     override fun onOpenPriceDashboardClick() {
@@ -47,9 +59,10 @@ class MainWindowViewModel(
     }
 }
 
-interface MainWindowHandler {
+interface MainWindowEventDelegate {
     fun onOpenPriceDashboardClick()
     fun onOpenSettingsClick()
+    fun onKeyPressed(key: Key): Boolean
 }
 
 private data class LeftMenuButton(
@@ -60,8 +73,12 @@ private data class LeftMenuButton(
 
 @Composable
 @Preview
-fun MainWindow(handler: MainWindowHandler) {
+fun MainWindow(delegate: MainWindowEventDelegate) {
     val navigation = remember { getKoin().get<NavSpecs>() }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(delegate) {
+        focusRequester.requestFocus()
+    }
     AppTheme {
         val contentPadding = 2.dp
         Box(
@@ -70,13 +87,18 @@ fun MainWindow(handler: MainWindowHandler) {
                 .background(AppColors.current.WindowEdge)
                 .padding(start = contentPadding, bottom = contentPadding, end = contentPadding)
                 .background(AppColors.current.BackgroundContent)
+                .focusable()
+                .focusRequester(focusRequester)
+                .onKeyEvent {
+                    delegate.onKeyPressed(it.key)
+                }
         ) {
             Row {
                 val buttons = remember {
                     listOf(
-                        LeftMenuButton(Icons.Default.WaterfallChart, StartNavToken, handler::onOpenPriceDashboardClick),
+                        LeftMenuButton(Icons.Default.WaterfallChart, StartNavToken, delegate::onOpenPriceDashboardClick),
                         LeftMenuButton(Icons.Default.DataUsage, AppNavTokens.PieChart, { }),
-                        LeftMenuButton(Icons.Default.Settings, AppNavTokens.Settings, handler::onOpenSettingsClick),
+                        LeftMenuButton(Icons.Default.Settings, AppNavTokens.Settings, delegate::onOpenSettingsClick),
                     )
                 }
                 Column(
