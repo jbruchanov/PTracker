@@ -3,14 +3,19 @@ package com.scurab.ptracker.ui.priceboard
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.VectorPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.ext.FloatRange
@@ -22,11 +27,17 @@ import com.scurab.ptracker.ext.scale
 import com.scurab.ptracker.ext.takeAround
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToViewPort
+import com.scurab.ptracker.icons.Circle
+import com.scurab.ptracker.icons.Rhombus
+import com.scurab.ptracker.icons.Square
+import com.scurab.ptracker.icons.TriangleDown
+import com.scurab.ptracker.icons.TriangleUp
 import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.GroupStrategy
 import com.scurab.ptracker.model.Ledger
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.Transaction
+import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
 import kotlinx.coroutines.CoroutineScope
@@ -61,6 +72,24 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density,
     var highlightTransaction by mutableStateOf<Transaction?>(null)
     var pointingTransaction by mutableStateOf<Transaction?>(null)
     private lateinit var composeCoroutineScope: CoroutineScope
+
+    @Composable
+    fun mapIconsVectorPainters(): Map<ImageVector, VectorPainter> {
+        val triangleUp = rememberVectorPainter(image = Icons.Filled.TriangleUp)
+        val triangleDown = rememberVectorPainter(image = Icons.Filled.TriangleDown)
+        val rhombus = rememberVectorPainter(image = Icons.Filled.Rhombus)
+        val square = rememberVectorPainter(image = Icons.Filled.Square)
+        val circle = rememberVectorPainter(image = Icons.Filled.Circle)
+        return remember {
+            mapOf(
+                Icons.Filled.TriangleUp to triangleUp,
+                Icons.Filled.TriangleDown to triangleDown,
+                Icons.Filled.Rhombus to rhombus,
+                Icons.Filled.Square to square,
+                Icons.Filled.Circle to circle,
+            )
+        }
+    }
 
     @Composable
     fun init() {

@@ -192,26 +192,6 @@ object AppTheme {
         val Cross = IconColor(99, Icons.Filled.Cross, stateColor(Color.Red))
         val Else = IconColor(100, Icons.Filled.Air, stateColor(Color.Cyan))
         val TriangleDownUp = Pair(TriangleDown, TriangleUp)
-
-        private var mapIconsVectorPainters: Map<ImageVector, VectorPainter>? = null
-
-        @Composable
-        fun mapIconsVectorPainters(): Map<ImageVector, VectorPainter> {
-            val triangleUp = rememberVectorPainter(image = Icons.Filled.TriangleUp)
-            val triangleDown = rememberVectorPainter(image = Icons.Filled.TriangleDown)
-            val rhombus = rememberVectorPainter(image = Icons.Filled.Rhombus)
-            val square = rememberVectorPainter(image = Icons.Filled.Square)
-            val circle = rememberVectorPainter(image = Icons.Filled.Circle)
-            return mapIconsVectorPainters ?: mapOf(
-                Icons.Filled.TriangleUp to triangleUp,
-                Icons.Filled.TriangleDown to triangleDown,
-                Icons.Filled.Rhombus to rhombus,
-                Icons.Filled.Square to square,
-                Icons.Filled.Circle to circle,
-            ).also {
-                mapIconsVectorPainters = it
-            }
-        }
     }
 
     object TextStyles {

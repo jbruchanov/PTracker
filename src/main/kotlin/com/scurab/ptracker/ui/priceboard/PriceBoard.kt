@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BorderOuter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -268,8 +269,8 @@ private fun Candles(state: PriceBoardState) {
 private fun CandleTransactions(state: PriceBoardState) {
     state.selectedAsset ?: return
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
-    val iconPaintersMap = AppTheme.TransactionIcons.mapIconsVectorPainters()
-    val scope = rememberCoroutineScope()
+    val iconPaintersMap = state.mapIconsVectorPainters()
+
     Canvas {
         withTranslateAndScale(state) {
             //transactions
