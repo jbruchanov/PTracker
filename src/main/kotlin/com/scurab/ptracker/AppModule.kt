@@ -12,7 +12,7 @@ import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
 import com.scurab.ptracker.usecase.LoadDataUseCase
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
-import com.scurab.ptracker.usecase.UpdateTransactionsUseCase
+import com.scurab.ptracker.usecase.PriceBoardDataProcessingUseCase
 import org.koin.dsl.module
 
 fun createKoinModule(appArgs: Array<String>) = module {
@@ -26,7 +26,7 @@ fun createKoinModule(appArgs: Array<String>) = module {
 
     factory { LoadDataUseCase() }
     factory { LoadLedgerUseCase() }
-    factory { UpdateTransactionsUseCase() }
+    factory { PriceBoardDataProcessingUseCase() }
 
     factory { MainWindowViewModel(get(), get()) }
     factory { PriceBoardViewModel(get(), get(), get(), get()) }

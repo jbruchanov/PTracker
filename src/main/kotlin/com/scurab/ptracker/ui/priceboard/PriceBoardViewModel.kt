@@ -6,8 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.ext.firstIf
 import com.scurab.ptracker.ext.firstIndexOf
 import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.Filter
 import com.scurab.ptracker.model.GroupStrategy
 import com.scurab.ptracker.model.Ledger
 import com.scurab.ptracker.model.PriceItem
@@ -15,7 +17,7 @@ import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.usecase.LoadDataUseCase
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
-import com.scurab.ptracker.usecase.UpdateTransactionsUseCase
+import com.scurab.ptracker.usecase.PriceBoardDataProcessingUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -29,6 +31,7 @@ import java.io.File
 class PriceBoardUiState(localDensity: Density, grouping: GroupStrategy) {
     var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping))
     var assets by mutableStateOf(emptyList<Asset>())
+    var hasTradeOnlyFilter by mutableStateOf(true)
 }
 
 interface PriceBoardEventDelegate {
@@ -37,19 +40,25 @@ interface PriceBoardEventDelegate {
     fun onTransactionHoverChanged(item: Transaction, isHovered: Boolean)
     fun onSpacePressed()
     fun onResetClicked()
+    fun onFilterClicked(filter: Filter<*>)
 }
 
 class PriceBoardViewModel(
     private val appStateRepository: AppStateRepository,
     private val loadDataUseCase: LoadDataUseCase,
     private val loadLedgerUseCase: LoadLedgerUseCase,
-    private val updateTransactionsUseCase: UpdateTransactionsUseCase
+    private val dataUseCase: PriceBoardDataProcessingUseCase
 ) : ViewModel(), PriceBoardEventDelegate {
 
+    private val filters = Pair(Filter.TradesOnly, Filter.AllTransactions)
     private val grouping = GroupStrategy.Day
     val uiState = PriceBoardUiState(Density(1f), grouping)
+
+    //state for mering, 2 different datasources for 1 output
     private val ledger = MutableStateFlow(Ledger.Empty)
     private val prices = MutableStateFlow(Asset.Empty to emptyList<PriceItem>())
+
+    private var data = PriceBoardDataProcessingUseCase.RawData(Ledger.Empty, Asset.Empty, emptyList())
 
     init {
         launch {
@@ -63,17 +72,30 @@ class PriceBoardViewModel(
         launch(Dispatchers.IO) {
             ledger.value = runCatching { loadLedgerUseCase.load(File("data/output.xlsx")) }.getOrDefault(Ledger.Empty)
         }
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Main) {
             ledger.combine(prices) { i1, i2 -> Pair(i1, i2) }.collect { (ledger, pricePair) ->
                 val (asset, prices) = pricePair
-                val transactions = ledger.getTransactions(asset)
-                updateTransactionsUseCase.fillPriceItems(transactions, prices, grouping)
-                withContext(Dispatchers.Main) {
-                    uiState.assets = ledger.assets
-                    uiState.priceBoardState.ledger = ledger
-                    uiState.priceBoardState.visibleTransactions = transactions
-                    uiState.priceBoardState.setItemsAndInitViewPort(asset, prices)
-                }
+                data = PriceBoardDataProcessingUseCase.RawData(ledger, asset, prices)
+                updateData(data, filters.firstIf(uiState.hasTradeOnlyFilter), true)
+            }
+        }
+    }
+
+    private suspend fun updateData(
+        data: PriceBoardDataProcessingUseCase.RawData,
+        filter: Filter<Transaction>,
+        resetViewport: Boolean
+    ) {
+        val result = withContext(Dispatchers.IO) { dataUseCase.prepareData(data, filter, grouping) }
+        withContext(Dispatchers.Main) {
+            with(uiState) {
+                assets = result.assets
+                hasTradeOnlyFilter = filter == Filter.TradesOnly
+            }
+            with(uiState.priceBoardState) {
+                visibleTransactions = result.transactions
+                visibleTransactionsPerPriceItem = result.transactionsPerPriceItem
+                setItems(data.asset, data.prices, resetViewport)
             }
         }
     }
@@ -119,5 +141,15 @@ class PriceBoardViewModel(
 
     override fun onTransactionHoverChanged(item: Transaction, isHovered: Boolean) {
         uiState.priceBoardState.pointingTransaction = item.takeIf { isHovered }
+    }
+
+    override fun onFilterClicked(filter: Filter<*>) {
+        when (filter) {
+            is Filter.TradesOnly -> {
+                launch {
+                    updateData(data, filters.firstIf(!uiState.hasTradeOnlyFilter), false)
+                }
+            }
+        }
     }
 }

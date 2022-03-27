@@ -24,7 +24,7 @@ fun FlatButton(
         modifier = Modifier
             .background(background)
             .clickable(onClick = onClick)
-            .defaultMinSize(minWidth = AppSizes.current.MinClickableSize, minHeight = AppSizes.current.MinClickableSize)
+            .defaultMinSize(minWidth = AppSizes.current.ClickableSize, minHeight = AppSizes.current.MinClickableSize)
             .padding(AppSizes.current.IconButtonPadding)
     ) {
         Image(

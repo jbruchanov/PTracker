@@ -1,5 +1,7 @@
 package com.scurab.ptracker.model
 
+import com.scurab.ptracker.ext.groupValue
+
 class Ledger(
     val items: List<Transaction>,
     val grouping: GroupStrategy
@@ -15,24 +17,24 @@ class Ledger(
         }
     }
 
-    fun getData(priceItem: PriceItem, onlyTrades: Boolean = true): List<Transaction> {
-        val key = KeyAssetGroupingKey(priceItem.asset, grouping.groupingKey(priceItem.dateTime), onlyTrades)
+    fun getTransactionsMap(priceItem: PriceItem, filter: Filter<Transaction>): List<Transaction> {
+        val key = KeyAssetGroupingKey(priceItem.asset, grouping.groupingKey(priceItem.dateTime), filter)
         return cacheByItemAndAsset.getOrPut(key) {
             val groupedData = getGroupedData()
             groupedData[grouping.groupingKey(priceItem.dateTime)]
                 ?.asSequence()
-                ?.filter { !onlyTrades || it is Transaction.Trade }
+                ?.filter(filter)
                 ?.filter { it.hasAsset(priceItem.asset) }
                 ?.toList()
                 ?: emptyList()
         }
     }
 
-    fun getTransactions(asset: Asset, onlyTrades: Boolean = true): List<Transaction> {
-        val key = KeyAssetTrades(asset, onlyTrades)
+    fun getTransactions(asset: Asset, filter: Filter<Transaction>): List<Transaction> {
+        val key = KeyAssetTrades(asset, filter)
         return cacheByAssets.getOrPut(key) {
             items.asSequence()
-                .filter { !onlyTrades || it is Transaction.Trade }
+                .filter(filter)
                 .filter { it.hasAsset(asset) }
                 .toList()
         }
@@ -43,10 +45,20 @@ class Ledger(
         return items.indexOfFirst { grouping.groupingKey(it.dateTime) == key }
     }
 
+    fun fillPriceItems(priceItems: List<PriceItem>, groupStrategy: GroupStrategy) {
+        val groupKeyPriceItems = priceItems.associateBy { it.groupValue(groupStrategy) }
+        require(groupKeyPriceItems.size == priceItems.size) {
+            "Invalid priceItems vs groupStrategy:${groupStrategy.name}, groupValue must generate unique values for each priceItem, priceItems:${priceItems.size}, groupedItems:${groupKeyPriceItems.size}"
+        }
+        items.forEach {
+            it.priceItem = groupKeyPriceItems[it.groupValue(groupStrategy)]
+        }
+    }
+
     companion object {
         val Empty = Ledger(emptyList(), GroupStrategy.Day)
     }
 
-    private data class KeyAssetGroupingKey(val asset: Asset, val groupingKey: Long, val onlyTrades: Boolean)
-    private data class KeyAssetTrades(val asset: Asset, val onlyTrades: Boolean)
+    private data class KeyAssetGroupingKey(val asset: Asset, val groupingKey: Long, val filter: Filter<*>)
+    private data class KeyAssetTrades(val asset: Asset, val filter: Filter<*>)
 }

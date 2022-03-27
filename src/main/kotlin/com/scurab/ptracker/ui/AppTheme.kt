@@ -7,14 +7,16 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -186,12 +188,38 @@ object AppTheme {
     object TransactionIcons {
         private fun stateColor(color: Color) = StateContainer(color, selected = Color.White)
         val Square = IconColor(0, Icons.Filled.Square, stateColor(Color.Green.copy(alpha = 0.5f)), DashboardSizes.TransctionTradeIconScale)
+        val CircleDown = IconColor(0, Icons.Filled.ArrowDownward, stateColor(Color.White), DashboardSizes.TransctionTradeIconScale)
+        val CircleUp = IconColor(0, Icons.Filled.ArrowUpward, stateColor(Color.White), DashboardSizes.TransctionTradeIconScale)
         val Rhombus = IconColor(1, Icons.Filled.Rhombus, stateColor(Color.Yellow.copy(alpha = 0.5f)), DashboardSizes.TransctionTradeIconScale)
         val TriangleDown = IconColor(2, Icons.Filled.TriangleDown, stateColor(Color.Green), offset = DpOffset(0.dp, 8.dp))
         val TriangleUp = IconColor(2, Icons.Filled.TriangleUp, stateColor(Color.Red))
         val Cross = IconColor(99, Icons.Filled.Cross, stateColor(Color.Red))
         val Else = IconColor(100, Icons.Filled.Air, stateColor(Color.Cyan))
         val TriangleDownUp = Pair(TriangleDown, TriangleUp)
+
+        @Composable
+        fun mapIconsVectorPainters(): Map<IconColor, VectorPainter> {
+            val square = rememberVectorPainter(image = Icons.Filled.Square)
+            val circleDown = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
+            val circleUp = rememberVectorPainter(image = Icons.Filled.ArrowUpward)
+            val rhombus = rememberVectorPainter(image = Icons.Filled.Rhombus)
+            val triangleDown = rememberVectorPainter(image = Icons.Filled.TriangleDown)
+            val triangleUp = rememberVectorPainter(image = Icons.Filled.TriangleUp)
+            val cross = rememberVectorPainter(image = Icons.Filled.Cross)
+            val circle = rememberVectorPainter(image = Icons.Filled.Circle)
+            return remember {
+                mapOf(
+                    Square to square,
+                    CircleDown to circleDown,
+                    CircleUp to circleUp,
+                    Rhombus to rhombus,
+                    Square to square,
+                    TriangleDown to triangleDown,
+                    TriangleUp to triangleUp,
+                    Cross to cross,
+                )
+            }
+        }
     }
 
     object TextStyles {

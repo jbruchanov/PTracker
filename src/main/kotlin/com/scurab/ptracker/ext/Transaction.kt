@@ -12,10 +12,11 @@ import com.scurab.ptracker.ui.model.TransactionTextPrices
 import kotlin.math.max
 
 fun Transaction.iconColor() = when {
-    type == "Deposit" -> AppTheme.TransactionIcons.Square
+    type == "Deposit" -> AppTheme.TransactionIcons.CircleDown
+    type == "Withdrawal" -> AppTheme.TransactionIcons.CircleUp
     type == "Lost" -> AppTheme.TransactionIcons.Cross
-    this is Transaction.Income -> AppTheme.TransactionIcons.TriangleDown
-    this is Transaction.Outcome -> AppTheme.TransactionIcons.TriangleUp
+    this is Transaction.Income -> AppTheme.TransactionIcons.Rhombus
+    this is Transaction.Outcome -> AppTheme.TransactionIcons.Rhombus
     this is Transaction.Trade -> AppTheme.TransactionIcons.TriangleDownUp.firstIf(isCryptoBuy())
     else -> AppTheme.TransactionIcons.Else
 }

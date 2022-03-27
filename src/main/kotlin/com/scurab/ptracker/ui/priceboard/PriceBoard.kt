@@ -23,11 +23,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BorderOuter
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -69,6 +68,7 @@ import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.withTranslateAndScale
+import com.scurab.ptracker.model.Filter
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.priceDetails
 import com.scurab.ptracker.ui.AppColors
@@ -139,6 +139,8 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                 Column {
                     Row {
                         FlatButton(Icons.Default.BorderOuter, onClick = { vm.onResetClicked() })
+                        VerticalDivider()
+                        ToggleButton(Icons.Default.FilterAlt, isSelected = vm.uiState.hasTradeOnlyFilter, onClick = { vm.onFilterClicked(Filter.TradesOnly) })
                         VerticalDivider()
                         val assets = vm.uiState.assets
                         assets.forEach { asset ->
@@ -269,7 +271,7 @@ private fun Candles(state: PriceBoardState) {
 private fun CandleTransactions(state: PriceBoardState) {
     state.selectedAsset ?: return
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
-    val iconPaintersMap = state.mapIconsVectorPainters()
+    val iconPaintersMap = AppTheme.TransactionIcons.mapIconsVectorPainters()
 
     Canvas {
         withTranslateAndScale(state) {
@@ -280,12 +282,12 @@ private fun CandleTransactions(state: PriceBoardState) {
                 //scaleY flipped as we want to have origin at left/Bottom
                 translate(x + priceItemWidthHalf, 0f) {
                     //draw candle transaction
-                    val iconsPrices = state.ledger.getData(priceItem).map { it.iconColor() to it }.distinct().sortedBy { it.first.drawPriority }
-                    iconsPrices.forEach { (ic, transaction) ->
+                    val iconsPrices = state.visibleTransactionsPerPriceItem[priceItem]?.map { it.iconColor() to it }?.distinct()?.sortedBy { it.first.drawPriority }
+                    iconsPrices?.forEach { (ic, transaction) ->
                         val y = transaction.unitPrice()?.toFloat() ?: priceItem.centerY
                         translate(0f, y) {
                             resetScale(state) {
-                                val painter = iconPaintersMap.getValue(ic.image)
+                                val painter = iconPaintersMap.getValue(ic)
                                 val scale = ic.scale.get(isSelected = state.pointingTransaction == transaction)
                                 draw(painter, scale, colorFilter = tint(color = ic.color.get(isSelected = state.clickedTransaction == transaction)))
                             }
