@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -74,6 +75,7 @@ import com.scurab.ptracker.ui.AppTheme.TextRendering
 import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.ToggleButton
 import com.scurab.ptracker.ui.common.TransactionRow
+import com.scurab.ptracker.ui.common.VerticalDivider
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -138,7 +140,7 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                         assets.forEach { asset ->
                             val isSelected = asset == vm.uiState.priceBoardState.selectedAsset
                             ToggleButton(onClick = { vm.onAssetSelected(asset) }, isSelected = isSelected, text = asset.text)
-                            Divider()
+                            VerticalDivider()
                         }
                     }
                     Row {
@@ -170,6 +172,7 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState) {
                 itemsIndexed(priceBoardState.visibleTransactions) { i, v ->
                     val isSelected = priceItem != null && grouping(priceItem.dateTime) == grouping(v.dateTime)
                     TransactionRow(i, v, isSelected)
+                    Divider()
                 }
             }
             VerticalScrollbar(adapter = rememberScrollbarAdapter(state), modifier = Modifier.align(Alignment.CenterEnd))
@@ -180,16 +183,20 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState) {
 @Composable
 private fun PriceBoard(state: PriceBoardState) {
     val scope = rememberCoroutineScope()
+    val requester = remember { FocusRequester() }
     Box(
         modifier = Modifier
+
             .fillMaxSize()
             .pointerHoverIcon(state.mouseIcon)
             .background(AppColors.current.BackgroundContent)
             .onSizeChange(state)
             .onMouseMove(state)
             .onMouseDrag(state)
-            .onDoubleTap(state)
+            //disabled, doesn't work properly with dragDetection
+            //.onDoubleTap(state)
             .onWheelScroll(state)
+            .onSpaceBarScrollToTransaction(requester, state)
     ) {
         Grid(state)
         Candles(state)
@@ -224,6 +231,9 @@ private fun PriceBoard(state: PriceBoardState) {
             scope.launch {
                 state.setViewport(state.initViewport(state.canvasSize), animate = true)
             }
+        }
+        LaunchedEffect(state) {
+            requester.requestFocus()
         }
     }
 }
@@ -283,14 +293,13 @@ private fun CandleTransactions(state: PriceBoardState) {
                 //scaleY flipped as we want to have origin at left/Bottom
                 translate(x, 0f) {
                     //draw candle transaction
-                    val icons = state.ledger.getData(priceItem).map { it.iconColor() }.distinct().sortedBy { it.drawPriority }
-                    if (icons.isNotEmpty()) {
-                        translate(priceItemWidthHalf, priceItem.centerY) {
+                    val iconsPrices = state.ledger.getData(priceItem).map { it.iconColor() to it.unitPrice()?.toFloat() }.distinct().sortedBy { it.first.drawPriority }
+                    iconsPrices.forEach { (ic, tradePrice) ->
+                        val y = tradePrice ?: priceItem.centerY
+                        translate(priceItemWidthHalf, y) {
                             resetScale(state) {
-                                icons.forEach { ic ->
-                                    val painter = iconPaintersMap.getValue(ic.image)
-                                    draw(painter, ic.scale, colorFilter = tint(color = ic.color))
-                                }
+                                val painter = iconPaintersMap.getValue(ic.image)
+                                draw(painter, ic.scale, colorFilter = tint(color = ic.color))
                             }
                         }
                     }

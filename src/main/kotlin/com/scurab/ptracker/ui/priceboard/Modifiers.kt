@@ -2,12 +2,18 @@
 
 package com.scurab.ptracker.ui.priceboard
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
@@ -125,4 +131,20 @@ internal fun Modifier.onDoubleTap(state: PriceBoardState): Modifier {
             }
         })
     }
+}
+
+internal fun Modifier.onSpaceBarScrollToTransaction(focusRequester: FocusRequester, state: PriceBoardState): Modifier {
+    return focusable()
+        .focusRequester(focusRequester)
+        .onKeyEvent {
+            if (it.key == Key.Spacebar) {
+                state.pointedPriceItem?.let { priceItem ->
+                    val index = state.visibleTransactions.firstIndexOf(priceItem, state.grouping)
+                    if (index >= 0) {
+                        state.scrollToIndex = index
+                    }
+                }
+            }
+            it.key == Key.Spacebar
+        }
 }

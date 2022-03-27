@@ -2,7 +2,10 @@ package com.scurab.ptracker.ui.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
@@ -25,7 +28,7 @@ fun VerticalDivider(
     val targetThickness = if (thickness == Dp.Hairline) (1f / LocalDensity.current.density).dp else thickness
     Box(
         modifier.then(indentMod)
-            .fillMaxHeight()
+            .height(IntrinsicSize.Max)
             .width(targetThickness)
             .background(color = color)
     )
@@ -42,7 +45,8 @@ fun Divider(
     val targetThickness = if (thickness == Dp.Hairline) (1f / LocalDensity.current.density).dp else thickness
     Box(
         modifier.then(indentMod)
-            .width(targetThickness)
+            .width(IntrinsicSize.Max)
+            .height(targetThickness)
             .background(color = color)
     )
 }

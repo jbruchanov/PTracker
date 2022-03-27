@@ -86,6 +86,7 @@ sealed class Transaction : HasDateTime {
             Asset(crypto, fiat)
         }
         override val assets: String = asset.text
+        fun isCryptoBuy() = FiatCurrencies.contains(sellAsset)
     }
 
     fun isTransactionWithAsset(asset: Asset) = this is Trade && hasAsset(asset)

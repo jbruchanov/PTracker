@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.component.compose.StateColor
@@ -77,6 +78,7 @@ object AppTheme {
         val BackgroundContent = Color(0xFF2B2B2B)
         val ToDo = Color.Magenta
         val OnBackground = Color.White
+        val OnBackgroundVariant = Color.White.copy(.1f).compositeOver(Primary)
         val Content = StateColor(default = OnBackground, selected = Secondary)
         val ToggleButtonBackground = StateColor(default = Primary)
         val WindowEdge = Color.White
@@ -184,10 +186,11 @@ object AppTheme {
     object TransactionIcons {
         val Square = IconColor(0, Icons.Filled.Square, Color.Green.copy(alpha = 0.5f), DashboardSizes.TransctionTradeIconScale)
         val Rhombus = IconColor(1, Icons.Filled.Rhombus, Color.Yellow.copy(alpha = 0.5f), DashboardSizes.TransctionTradeIconScale)
-        val TriangleDown = IconColor(2, Icons.Filled.TriangleDown, Color.Green)
+        val TriangleDown = IconColor(2, Icons.Filled.TriangleDown, Color.Green, offset = DpOffset(0.dp, 8.dp))
         val TriangleUp = IconColor(2, Icons.Filled.TriangleUp, Color.Red)
         val Cross = IconColor(99, Icons.Filled.Cross, Color.Red)
         val Else = IconColor(100, Icons.Filled.Air, Color.Cyan)
+        val TriangleDownUp = Pair(TriangleDown, TriangleUp)
 
         private var mapIconsVectorPainters: Map<ImageVector, VectorPainter>? = null
 
@@ -215,7 +218,7 @@ object AppTheme {
         val TransactionPrimaryVariant = TextStyle(color = Colors.Secondary, fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
         val TransactionSecondary = TextStyle(color = Colors.Secondary, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
         val TransactionDetail = TextStyle(color = Colors.Primary, fontSize = 12.sp, fontWeight = FontWeight.Light)
-        val TransactionMoneyAnnotation = TextStyle(color = Colors.PrimaryVariant, fontSize = 10.sp, fontWeight = FontWeight.Normal)
+        val TransactionMoneyAnnotation = TextStyle(color = Colors.OnBackgroundVariant, fontSize = 11.sp, fontWeight = FontWeight.Normal)
     }
 }
 
