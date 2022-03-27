@@ -34,6 +34,7 @@ class PriceBoardUiState(localDensity: Density, grouping: GroupStrategy) {
 interface PriceBoardEventDelegate {
     fun onAssetSelected(item: Asset)
     fun onTransactionClicked(item: Transaction, doubleClick: Boolean)
+    fun onTransactionHoverChanged(item: Transaction, isHovered: Boolean)
     fun onSpacePressed()
     fun onResetClicked()
 }
@@ -114,5 +115,9 @@ class PriceBoardViewModel(
         uiState.priceBoardState.apply {
             setViewport(initViewport(), animate = true)
         }
+    }
+
+    override fun onTransactionHoverChanged(item: Transaction, isHovered: Boolean) {
+        uiState.priceBoardState.pointingTransaction = item.takeIf { isHovered }
     }
 }

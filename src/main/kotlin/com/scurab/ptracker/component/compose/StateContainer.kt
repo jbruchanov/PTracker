@@ -1,12 +1,10 @@
 package com.scurab.ptracker.component.compose
 
-import androidx.compose.ui.graphics.Color
-
-data class StateColor(
-    val default: Color,
-    val disabled: Color = default,
-    val selected: Color = default,
-    val default2: Color = default
+data class StateContainer<T>(
+    val default: T,
+    val disabled: T = default,
+    val selected: T = default,
+    val default2: T = default
 ) {
     fun get(
         isEnabled: Boolean = true, isSelected: Boolean = false, isEven: Boolean = false

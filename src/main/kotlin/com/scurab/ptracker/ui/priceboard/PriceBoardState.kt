@@ -59,6 +59,7 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density,
     var animateInitViewPort by mutableStateOf(0L)
     var scrollToTransactionIndex by mutableStateOf(0)
     var highlightTransaction by mutableStateOf<Transaction?>(null)
+    var pointingTransaction by mutableStateOf<Transaction?>(null)
     private lateinit var composeCoroutineScope: CoroutineScope
 
     @Composable

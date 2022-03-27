@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.scurab.ptracker.component.compose.StateColor
+import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.ext.FloatRange
 import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.toPx
@@ -79,10 +79,10 @@ object AppTheme {
         val ToDo = Color.Magenta
         val OnBackground = Color.White
         val OnBackgroundVariant = Color.White.copy(.1f).compositeOver(Primary)
-        val Content = StateColor(default = OnBackground, selected = Secondary)
-        val ButtonBackground = StateColor(default = Primary)
+        val Content = StateContainer(default = OnBackground, selected = Secondary)
+        val ButtonBackground = StateContainer(default = Primary)
         val WindowEdge = Color.White
-        val RowBackground = StateColor(
+        val RowBackground = StateContainer(
             default = Primary.copy(alpha = 0.1f),
             default2 = Primary.copy(alpha = 0.15f),
             selected = Secondary.copy(alpha = .15f).compositeOver(Primary.copy(alpha = 0.1f))
@@ -179,12 +179,12 @@ object AppTheme {
 
         val PriceSelectedDayDetail = 12.sp
 
-        val TransctionIconScale = Offset(0.4f, 0.4f)
-        val TransctionTradeIconScale = Offset(0.6f, 0.6f)
+        val TransctionIconScale = Offset(0.4f, 0.4f).let { StateContainer(it, selected = it * 2f) }
+        val TransctionTradeIconScale = Offset(0.6f, 0.6f).let { StateContainer(it, selected = it * 2f) }
     }
 
     object TransactionIcons {
-        private fun stateColor(color: Color) = StateColor(color, selected = Color.White)
+        private fun stateColor(color: Color) = StateContainer(color, selected = Color.White)
         val Square = IconColor(0, Icons.Filled.Square, stateColor(Color.Green.copy(alpha = 0.5f)), DashboardSizes.TransctionTradeIconScale)
         val Rhombus = IconColor(1, Icons.Filled.Rhombus, stateColor(Color.Yellow.copy(alpha = 0.5f)), DashboardSizes.TransctionTradeIconScale)
         val TriangleDown = IconColor(2, Icons.Filled.TriangleDown, stateColor(Color.Green), offset = DpOffset(0.dp, 8.dp))

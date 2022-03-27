@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -180,6 +179,7 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState, eventDelega
                             priceBoardState.clickedTransaction = System.currentTimeMillis() to transaction
                             eventDelegate.onTransactionClicked(transaction, it)
                         },
+                        onHoverChange = { eventDelegate.onTransactionHoverChanged(transaction, it) },
                         index, transaction, isSelected,
                     )
                     Divider()
@@ -285,7 +285,8 @@ private fun CandleTransactions(state: PriceBoardState) {
                         translate(0f, y) {
                             resetScale(state) {
                                 val painter = iconPaintersMap.getValue(ic.image)
-                                draw(painter, ic.scale, colorFilter = tint(color = ic.color.get(isSelected = state.clickedTransaction == transaction)))
+                                val scale = ic.scale.get(isSelected = state.pointingTransaction == transaction)
+                                draw(painter, scale, colorFilter = tint(color = ic.color.get(isSelected = state.clickedTransaction == transaction)))
                             }
                         }
                     }
