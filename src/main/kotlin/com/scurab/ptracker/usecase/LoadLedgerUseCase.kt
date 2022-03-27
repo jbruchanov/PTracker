@@ -1,7 +1,7 @@
 package com.scurab.ptracker.usecase
 
 import BittyTaxParser
-import com.scurab.ptracker.model.Grouping
+import com.scurab.ptracker.model.GroupStrategy
 import com.scurab.ptracker.model.Ledger
 import okhttp3.internal.closeQuietly
 import org.apache.poi.ss.usermodel.Workbook
@@ -25,6 +25,6 @@ class LoadLedgerUseCase : BittyTaxParser {
             .flatten()
             .sortedByDescending { it.dateTime }
         workbook.closeQuietly()
-        return Ledger(items, Grouping.Day)
+        return Ledger(items, GroupStrategy.Day)
     }
 }

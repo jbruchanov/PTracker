@@ -184,12 +184,13 @@ object AppTheme {
     }
 
     object TransactionIcons {
-        val Square = IconColor(0, Icons.Filled.Square, Color.Green.copy(alpha = 0.5f), DashboardSizes.TransctionTradeIconScale)
-        val Rhombus = IconColor(1, Icons.Filled.Rhombus, Color.Yellow.copy(alpha = 0.5f), DashboardSizes.TransctionTradeIconScale)
-        val TriangleDown = IconColor(2, Icons.Filled.TriangleDown, Color.Green, offset = DpOffset(0.dp, 8.dp))
-        val TriangleUp = IconColor(2, Icons.Filled.TriangleUp, Color.Red)
-        val Cross = IconColor(99, Icons.Filled.Cross, Color.Red)
-        val Else = IconColor(100, Icons.Filled.Air, Color.Cyan)
+        private fun stateColor(color: Color) = StateColor(color, selected = Color.White)
+        val Square = IconColor(0, Icons.Filled.Square, stateColor(Color.Green.copy(alpha = 0.5f)), DashboardSizes.TransctionTradeIconScale)
+        val Rhombus = IconColor(1, Icons.Filled.Rhombus, stateColor(Color.Yellow.copy(alpha = 0.5f)), DashboardSizes.TransctionTradeIconScale)
+        val TriangleDown = IconColor(2, Icons.Filled.TriangleDown, stateColor(Color.Green), offset = DpOffset(0.dp, 8.dp))
+        val TriangleUp = IconColor(2, Icons.Filled.TriangleUp, stateColor(Color.Red))
+        val Cross = IconColor(99, Icons.Filled.Cross, stateColor(Color.Red))
+        val Else = IconColor(100, Icons.Filled.Air, stateColor(Color.Cyan))
         val TriangleDownUp = Pair(TriangleDown, TriangleUp)
 
         private var mapIconsVectorPainters: Map<ImageVector, VectorPainter>? = null

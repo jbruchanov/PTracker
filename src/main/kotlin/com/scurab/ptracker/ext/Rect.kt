@@ -9,7 +9,6 @@ fun Rect.scale(scaleX: Float = 1f, scaleY: Float = 1f, pivot: Offset = Offset.Ze
     return translate(pivot).scale(scaleX, scaleY).translate(-pivot)
 }
 
-
 fun Rect.scale(scaleX: Float = 1f, scaleY: Float = scaleX) = Rect(
     left * scaleX, top * scaleY, right * scaleX, bottom * scaleY
 )

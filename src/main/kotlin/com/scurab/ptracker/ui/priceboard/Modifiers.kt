@@ -112,9 +112,10 @@ internal fun Modifier.onMouseMove(state: PriceBoardState): Modifier {
                     PointerEventType.Exit -> {
                         state.isChangingScale = false
                         state.pointer = Point.ZERO
+                        state.pointedPriceItem = null
                     }
                 }
-                state.pointedPriceItem = state.items.getOrNull(state.selectedPriceItemIndex())
+                state.pointedPriceItem = state.priceItems.getOrNull(state.selectedPriceItemIndex())
             }
         }
     }
@@ -126,24 +127,19 @@ internal fun Modifier.onDoubleTap(state: PriceBoardState): Modifier {
             state.pointedPriceItem?.let {
                 val index = state.visibleTransactions.firstIndexOf(it, state.grouping)
                 if (index >= 0) {
-                    state.scrollToIndex = index
+                    state.scrollToTransactionIndex = index
                 }
             }
         })
     }
 }
 
-internal fun Modifier.onSpaceBarScrollToTransaction(focusRequester: FocusRequester, state: PriceBoardState): Modifier {
+internal fun Modifier.onKeyboardInteractions(focusRequester: FocusRequester, state: PriceBoardState, eventDelegate: PriceBoardEventDelegate): Modifier {
     return focusable()
         .focusRequester(focusRequester)
         .onKeyEvent {
             if (it.key == Key.Spacebar) {
-                state.pointedPriceItem?.let { priceItem ->
-                    val index = state.visibleTransactions.firstIndexOf(priceItem, state.grouping)
-                    if (index >= 0) {
-                        state.scrollToIndex = index
-                    }
-                }
+                eventDelegate.onSpacePressed()
             }
             it.key == Key.Spacebar
         }

@@ -2,6 +2,8 @@
 
 package com.scurab.ptracker.ui.priceboard
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -37,6 +39,7 @@ import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
@@ -61,6 +64,7 @@ import com.scurab.ptracker.ext.resetScale
 import com.scurab.ptracker.ext.size
 import com.scurab.ptracker.ext.toLTRBWH
 import com.scurab.ptracker.ext.toLabelPrice
+import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.ext.transformNormToReal
 import com.scurab.ptracker.ext.transformNormToViewPort
 import com.scurab.ptracker.ext.withTranslateAndScale
@@ -98,6 +102,9 @@ object PriceDashboardConfig {
     const val AxisYContentCoef = 0.5f
     const val DefaultMinColumns = 100
     const val AxisXStep = 5
+    const val ViewportAnimationDuration = 300
+    const val FocusInitRadius = 100f
+    const val FocusAnimationDuration = 300
 }
 
 private fun PriceBoardState.columns() = (viewport().nWidth / DashboardSizes.PriceItemWidth).roundToInt()
@@ -119,16 +126,16 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
     val firstIndex = (max(0f, viewport.left) / colWidth).toInt()
     val widthToFill = viewport.nWidth + min(viewport.left, 0f)
     val lastIndex = firstIndex + widthToFill
-    //TODO: add vertically
-    return firstIndex <= index && index <= lastIndex
+    return firstIndex <= index && index <= lastIndex && viewport.bottom <= centerY && centerY <= viewport.top
 }
 
 @Composable
 fun PriceBoard(vm: PriceBoardViewModel) {
+    vm.uiState.priceBoardState.init()
     val priceBoardState = vm.uiState.priceBoardState
     when {
-        priceBoardState.items.isEmpty() -> Text("Select Asset")
-        priceBoardState.items.isNotEmpty() -> {
+        priceBoardState.priceItems.isEmpty() -> Text("Select Asset")
+        priceBoardState.priceItems.isNotEmpty() -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -145,10 +152,10 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                     }
                     Row {
                         Box(modifier = Modifier.weight(1f)) {
-                            PriceBoard(priceBoardState)
+                            PriceBoard(priceBoardState, vm)
                         }
                         Column(modifier = Modifier.width(width = 220.dp)) {
-                            PriceBoardTransactions(priceBoardState)
+                            PriceBoardTransactions(priceBoardState, vm)
                         }
                     }
                 }
@@ -158,20 +165,26 @@ fun PriceBoard(vm: PriceBoardViewModel) {
 }
 
 @Composable
-private fun PriceBoardTransactions(priceBoardState: PriceBoardState) {
+private fun PriceBoardTransactions(priceBoardState: PriceBoardState, eventDelegate: PriceBoardEventDelegate) {
     val selectedAsset = priceBoardState.selectedAsset
     if (selectedAsset != null) {
         val state = remember(selectedAsset) { LazyListState(0, 0) }
-        LaunchedEffect(selectedAsset, priceBoardState.scrollToIndex) {
-            state.animateScrollToItem(priceBoardState.scrollToIndex)
+        LaunchedEffect(selectedAsset, priceBoardState.scrollToTransactionIndex) {
+            state.animateScrollToItem(priceBoardState.scrollToTransactionIndex)
         }
         Box {
             val priceItem = priceBoardState.pointedPriceItem
             val grouping = priceBoardState.grouping.groupingKey
             LazyColumn(modifier = Modifier.fillMaxWidth(), state = state) {
-                itemsIndexed(priceBoardState.visibleTransactions) { i, v ->
-                    val isSelected = priceItem != null && grouping(priceItem.dateTime) == grouping(v.dateTime)
-                    TransactionRow(i, v, isSelected)
+                itemsIndexed(priceBoardState.visibleTransactions) { index, transaction ->
+                    val isSelected = priceItem != null && grouping(priceItem.dateTime) == grouping(transaction.dateTime)
+                    TransactionRow(
+                        onClick = {
+                            priceBoardState.clickedTransaction = System.currentTimeMillis() to transaction
+                            eventDelegate.onTransactionClicked(transaction)
+                        },
+                        index, transaction, isSelected,
+                    )
                     Divider()
                 }
             }
@@ -181,12 +194,11 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState) {
 }
 
 @Composable
-private fun PriceBoard(state: PriceBoardState) {
+private fun PriceBoard(state: PriceBoardState, eventDelegate: PriceBoardEventDelegate) {
     val scope = rememberCoroutineScope()
     val requester = remember { FocusRequester() }
     Box(
         modifier = Modifier
-
             .fillMaxSize()
             .pointerHoverIcon(state.mouseIcon)
             .background(AppColors.current.BackgroundContent)
@@ -196,7 +208,7 @@ private fun PriceBoard(state: PriceBoardState) {
             //disabled, doesn't work properly with dragDetection
             //.onDoubleTap(state)
             .onWheelScroll(state)
-            .onSpaceBarScrollToTransaction(requester, state)
+            .onKeyboardInteractions(requester, state, eventDelegate)
     ) {
         Grid(state)
         Candles(state)
@@ -212,13 +224,13 @@ private fun PriceBoard(state: PriceBoardState) {
             Button(onClick = { scope.launch { state.reset() } }) {
                 Text("R")
             }
-            Button(onClick = { scope.launch { state.setViewport(state.initViewport(state.canvasSize), animate = true) } }) {
+            Button(onClick = { scope.launch { state.setViewport(state.initViewport(), animate = true) } }) {
                 Text("I")
             }
             Button(onClick = {
                 scope.launch {
-                    state.items = randomPriceData(Random, Random.nextInt(500, 1000), Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
-                    state.setViewport(state.initViewport(state.canvasSize), animate = true)
+                    state.priceItems = randomPriceData(Random, Random.nextInt(500, 1000), Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
+                    state.setViewport(state.initViewport(), animate = true)
                 }
             }
             ) {
@@ -229,7 +241,7 @@ private fun PriceBoard(state: PriceBoardState) {
         PriceSelectedDayDetail(state)
         LaunchedEffect(state.animateInitViewPort) {
             scope.launch {
-                state.setViewport(state.initViewport(state.canvasSize), animate = true)
+                state.setViewport(state.initViewport(), animate = true)
             }
         }
         LaunchedEffect(state) {
@@ -261,7 +273,7 @@ private fun Candles(state: PriceBoardState) {
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
     Canvas {
         withTranslateAndScale(state) {
-            val filterVisible = state.items.filterVisible(state, endOffset = 1)
+            val filterVisible = state.priceItems.filterVisible(state, endOffset = 1)
             filterVisible.forEach { priceItem ->
                 val x = priceItem.index * DashboardSizes.PriceItemWidth
                 //scaleY flipped as we want to have origin at left/Bottom
@@ -285,22 +297,47 @@ private fun CandleTransactions(state: PriceBoardState) {
     state.selectedAsset ?: return
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
     val iconPaintersMap = AppTheme.TransactionIcons.mapIconsVectorPainters()
+    val scope = rememberCoroutineScope()
     Canvas {
         withTranslateAndScale(state) {
-            val filterVisible = state.items.filterVisible(state, endOffset = 1)
+            //transactions
+            val filterVisible = state.priceItems.filterVisible(state, endOffset = 1)
             filterVisible.forEach { priceItem ->
                 val x = priceItem.index * DashboardSizes.PriceItemWidth
                 //scaleY flipped as we want to have origin at left/Bottom
-                translate(x, 0f) {
+                translate(x + priceItemWidthHalf, 0f) {
                     //draw candle transaction
-                    val iconsPrices = state.ledger.getData(priceItem).map { it.iconColor() to it.unitPrice()?.toFloat() }.distinct().sortedBy { it.first.drawPriority }
-                    iconsPrices.forEach { (ic, tradePrice) ->
-                        val y = tradePrice ?: priceItem.centerY
-                        translate(priceItemWidthHalf, y) {
+                    val iconsPrices = state.ledger.getData(priceItem).map { it.iconColor() to it }.distinct().sortedBy { it.first.drawPriority }
+                    iconsPrices.forEach { (ic, transaction) ->
+                        val y = transaction.unitPrice()?.toFloat() ?: priceItem.centerY
+                        translate(0f, y) {
                             resetScale(state) {
                                 val painter = iconPaintersMap.getValue(ic.image)
-                                draw(painter, ic.scale, colorFilter = tint(color = ic.color))
+                                draw(painter, ic.scale, colorFilter = tint(color = ic.color.get(isSelected = state.clickedTransaction == transaction)))
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //transaction highlight
+    state.clickedTransaction?.let { (timestamp, transaction) ->
+        transaction.priceItem?.let { priceItem ->
+            val radius = remember(timestamp, transaction) { Animatable(PriceDashboardConfig.FocusInitRadius) }
+            LaunchedEffect(timestamp, transaction) {
+                radius.animateTo(0f, tween(delayMillis = PriceDashboardConfig.ViewportAnimationDuration, durationMillis = PriceDashboardConfig.FocusAnimationDuration))
+            }
+            val density = LocalDensity.current.density
+            val drawStyle = remember { Stroke(width = 8.dp.toPx(density)) }
+            Canvas {
+                withTranslateAndScale(state) {
+                    val x = priceItem.index * DashboardSizes.PriceItemWidth
+                    //scaleY flipped as we want to have origin at left/Bottom
+                    val y = transaction.unitPrice()?.toFloat() ?: priceItem.centerY
+                    translate(x + priceItemWidthHalf, y) {
+                        resetScale(state) {
+                            drawCircle(AppTheme.Colors.Secondary, radius = radius.value, center = Offset.Zero, style = drawStyle)
                         }
                     }
                 }
@@ -355,7 +392,7 @@ private fun AxisEdgeLines(state: PriceBoardState) {
 
 @Composable
 private fun AxisContent(state: PriceBoardState) {
-    val items = state.items
+    val items = state.priceItems
     val metrics = remember { TextRendering.fontAxis.metrics }
     val canvasSize = state.canvasSize
     val viewport = state.viewport()
@@ -388,7 +425,7 @@ private fun AxisContent(state: PriceBoardState) {
 
 @Composable
 private fun Grid(state: PriceBoardState) {
-    val items = state.items
+    val items = state.priceItems
     val canvasSize = state.canvasSize
     val steps = state.verticalSteps()
     val offsetYStep = state.canvasSize.height / steps
@@ -446,7 +483,7 @@ private fun PriceAxisContentTemplate(
 @Composable
 private fun Mouse(state: PriceBoardState) {
     if (state.pointer.isEmpty) return
-    val items = state.items
+    val items = state.priceItems
     val density = LocalDensity.current.density
     val effect = remember { PathEffect.dashPathEffect(floatArrayOf(10f * density, 10f * density)) }
     val bottomAxisBarHeight = state.bottomAxisBarHeight(TextRendering.fontAxis.metrics)
@@ -533,7 +570,7 @@ private fun PriceBoardDebug(state: PriceBoardState) {
             "Scale:[${state.scale.x.f3},${state.scale.y.f3}]",
             "ViewPort:[${viewPort.toLTRBWH()}]",
             "Mouse: Index=${state.selectedPriceItemIndex()}, Price:${state.mousePrice()}",
-            "Data: Items:${state.items.size}, LastItemPriceCenter:${state.items.lastOrNull()?.centerY?.f3}",
+            "Data: Items:${state.priceItems.size}, LastItemPriceCenter:${state.priceItems.lastOrNull()?.centerY?.f3}",
         )
         drawIntoCanvas {
             translate(left = 2f, top = 60.dp.toPx()) {
@@ -543,8 +580,9 @@ private fun PriceBoardDebug(state: PriceBoardState) {
             }
         }
 
+        val verticalPriceBarLeft = state.verticalPriceBarLeft()
         drawLine(Color.Magenta, start = Offset(0f, canvasSize.height / 2), end = Offset(canvasSize.width, canvasSize.height / 2))
-        drawLine(Color.Magenta, start = Offset(canvasSize.width / 2, 0f), end = Offset(canvasSize.width / 2, canvasSize.height))
+        drawLine(Color.Magenta, start = Offset(verticalPriceBarLeft / 2, 0f), end = Offset(verticalPriceBarLeft / 2, canvasSize.height))
 
         withTranslateAndScale(state) {
             val size = 100f

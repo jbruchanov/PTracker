@@ -1,6 +1,7 @@
 package com.scurab.ptracker.ui.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -28,13 +29,14 @@ import com.scurab.ptracker.ui.DateTimeFormats
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun TransactionRow(index: Int, item: Transaction, isSelected: Boolean) {
+fun TransactionRow(onClick: () -> Unit, index: Int, item: Transaction, isSelected: Boolean, modifier: Modifier = Modifier) {
     val formatter = remember { KoinJavaComponent.getKoin().get<DateTimeFormats>() }
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = AppSizes.current.Space)
             .background(AppColors.current.RowBackground.get(isSelected = isSelected, isEven = index % 2 == 0))
+            .clickable(onClick = onClick)
             .padding(vertical = AppSizes.current.Space, horizontal = AppSizes.current.Space2)
     ) {
         val prices = item.formattedPrices()
@@ -47,7 +49,7 @@ fun TransactionRow(index: Int, item: Transaction, isSelected: Boolean) {
                 Icon(
                     iconColor.image,
                     contentDescription = "",
-                    tint = iconColor.color,
+                    tint = iconColor.color.default,
                     modifier = Modifier
                         .size(size.dp)
                         .offset(iconColor.offset.x, -iconColor.offset.y * (size / iconColor.image.defaultHeight.value))

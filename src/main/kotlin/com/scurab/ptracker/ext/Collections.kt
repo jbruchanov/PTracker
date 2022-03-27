@@ -1,16 +1,16 @@
 package com.scurab.ptracker.ext
 
-import com.scurab.ptracker.model.Grouping
+import com.scurab.ptracker.model.GroupStrategy
 import com.scurab.ptracker.model.HasDateTime
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import kotlinx.datetime.toJavaLocalDateTime
-import java.lang.Float.max
-import java.lang.Float.min
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
 
 fun List<PriceItem>.filterVisibleIndexes(state: PriceBoardState, step: Int = 1, startOffset: Int = 0, endOffset: Int = 0): IntProgression {
     val vp = state.viewport()
@@ -40,7 +40,24 @@ fun List<PriceItem>.getHorizontalAxisText(index: Int, step: Int): String {
     return formatter.format(item.dateTime.toJavaLocalDateTime())
 }
 
-fun List<HasDateTime>.firstIndexOf(other: HasDateTime, grouping: Grouping): Int {
+fun List<HasDateTime>.firstIndexOf(other: HasDateTime, grouping: GroupStrategy): Int {
     val v = grouping.groupingKey(other.dateTime)
     return indexOfFirst { grouping.groupingKey(it.dateTime) == v }
+}
+
+fun <T> List<T>.takeAround(index: Int, n: Int): List<T> {
+    require(index in indices) { "Invalid index:$index, must be in indices:${indices}" }
+    val l = floor(n / 2f).toInt()
+    val r = ceil(n / 2f).toInt()
+    val le = index - l
+    val re = index + r
+    return when {
+        n == 0 -> emptyList()
+        n == 1 -> listOf(get(index))
+        n >= size -> this.toList()
+        le >= 0 && re < size -> this.subList(le, re)
+        le < 0 -> subList(0, (re - le).coerceAtLeast(min(n, size)))
+        re > size -> subList((le - (re - size)).coerceAtLeast(0), size)
+        else -> TODO("size:$size, index:$index, n:$n")
+    }
 }

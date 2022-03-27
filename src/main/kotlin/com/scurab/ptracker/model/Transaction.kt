@@ -15,7 +15,8 @@ interface HasOutcome {
     val sellAsset: String
 }
 
-sealed class Transaction : HasDateTime, WithCache by MapCache() {
+sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMapOf()) :
+    HasDateTime, WithCache by MapCache(cache) {
     abstract val exchange: String
     abstract val type: String
     abstract override val dateTime: LocalDateTime
@@ -28,7 +29,9 @@ sealed class Transaction : HasDateTime, WithCache by MapCache() {
     abstract fun hasAsset(asset: Asset): Boolean
     abstract val assets: String
 
-    data class Income(
+    var priceItem: PriceItem? by cache
+
+    class Income(
         override val exchange: String,
         override val type: String,
         override val dateTime: LocalDateTime,
@@ -96,4 +99,20 @@ sealed class Transaction : HasDateTime, WithCache by MapCache() {
         val (fiat, crypto) = Pair(buyQuantity, sellQuantity).sameElseSwap(FiatCurrencies.contains(buyAsset))
         return (fiat / crypto).round(true)
     }
+
+    private val debugString by lazy {
+        buildString {
+            append("Transaction(dateTime=$dateTime")
+            (this@Transaction as? HasIncome)?.apply {
+                append(",${buyQuantity.toPlainString()} $buyAsset")
+            }
+            (this@Transaction as? HasOutcome)?.apply {
+                append(",${sellQuantity.toPlainString()} $sellQuantity")
+            }
+            append(",${feeQuantity.toPlainString()} $feeAsset")
+            append(", wallet='$wallet', exchange='$exchange', type='$type')")
+        }
+    }
+
+    override fun toString(): String = debugString
 }
