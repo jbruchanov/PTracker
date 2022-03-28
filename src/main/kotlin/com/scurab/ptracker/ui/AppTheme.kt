@@ -2,39 +2,36 @@ package com.scurab.ptracker.ui
 
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.defaultScrollbarStyle
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.WbCloudy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.VectorPainter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.ext.FloatRange
 import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.toPx
-import com.scurab.ptracker.icons.Circle
-import com.scurab.ptracker.icons.Cross
-import com.scurab.ptracker.icons.Rhombus
-import com.scurab.ptracker.icons.Square
 import com.scurab.ptracker.icons.TriangleDown
 import com.scurab.ptracker.icons.TriangleUp
 import com.scurab.ptracker.ui.model.IconColor
@@ -107,7 +104,7 @@ object AppTheme {
     }
 
     object Shapes {
-
+        val RoundedCorners = RoundedCornerShape(8.dp)
     }
 
     object Sizes {
@@ -176,50 +173,36 @@ object AppTheme {
         val VerticalAxisHorizontalPadding = 8.dp
 
         //depends on fontAxis size
-        val VerticalPriceBarWidth = 60.dp
         val BottomAxisContentMinHeight = 30.dp
-
         val PriceSelectedDayDetail = 12.sp
-
-        val TransctionIconScale = Offset(0.4f, 0.4f).let { StateContainer(it, selected = it * 2f) }
-        val TransctionTradeIconScale = Offset(0.6f, 0.6f).let { StateContainer(it, selected = it * 2f) }
     }
 
     object TransactionIcons {
-        private fun stateColor(color: Color) = StateContainer(color, selected = Color.White)
-        val Square = IconColor(0, Icons.Filled.Square, stateColor(Color.Green.copy(alpha = 0.5f)), DashboardSizes.TransctionTradeIconScale)
-        val CircleDown = IconColor(0, Icons.Filled.ArrowDownward, stateColor(Color.White), DashboardSizes.TransctionTradeIconScale)
-        val CircleUp = IconColor(0, Icons.Filled.ArrowUpward, stateColor(Color.White), DashboardSizes.TransctionTradeIconScale)
-        val Rhombus = IconColor(1, Icons.Filled.Rhombus, stateColor(Color.Yellow.copy(alpha = 0.5f)), DashboardSizes.TransctionTradeIconScale)
-        val TriangleDown = IconColor(2, Icons.Filled.TriangleDown, stateColor(Color.Green), offset = DpOffset(0.dp, 8.dp))
-        val TriangleUp = IconColor(2, Icons.Filled.TriangleUp, stateColor(Color.Red))
-        val Cross = IconColor(99, Icons.Filled.Cross, stateColor(Color.Red))
-        val Else = IconColor(100, Icons.Filled.Air, stateColor(Color.Cyan))
-        val TriangleDownUp = Pair(TriangleDown, TriangleUp)
+        private val ColorGreen = Color(0xFF00FF00)
+        private val ColorRed = Color(0xFFFF0000)
+        private val ColorWhite = Color(0xFFFFFFFFF)
+        private val ColorGray = Color.LightGray
+        private val ColorOrange = Color(0xFFFFC100)
+        private val ColorBlack = Color.Black
+        val IconsMap = mapOf(
+            "Deposit" to IconColor(0, Icons.Default.ArrowDownward, ColorWhite, Offset(0f, 4f)),
+            "Withdrawal" to IconColor(1, Icons.Default.ArrowUpward, ColorWhite, Offset(0f, -4f)),
+            "Airdrop" to IconColor(2, Icons.Outlined.WbCloudy, ColorGreen),
+            "Mining" to IconColor(3, Icons.Outlined.Star, ColorRed),
+            "Staking" to IconColor(4, Icons.Outlined.Star, ColorOrange),
+            "Interest" to IconColor(5, Icons.Outlined.Star, ColorGray),
+            "Dividend" to IconColor(6, Icons.Outlined.Star, ColorGray),
+            "Income" to IconColor(7, Icons.Outlined.Star, ColorWhite),
+            //heart
+            "Gift-Received" to IconColor(8, Icons.Outlined.FavoriteBorder, ColorGreen),
+            "Gift-Sent" to IconColor(9, Icons.Outlined.FavoriteBorder, ColorRed),
+            "Charity-Sent" to IconColor(10, Icons.Outlined.FavoriteBorder, ColorOrange),
+            "Gift-Spouse" to IconColor(11, Icons.Filled.Favorite, ColorWhite),
 
-        @Composable
-        fun mapIconsVectorPainters(): Map<IconColor, VectorPainter> {
-            val square = rememberVectorPainter(image = Icons.Filled.Square)
-            val circleDown = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
-            val circleUp = rememberVectorPainter(image = Icons.Filled.ArrowUpward)
-            val rhombus = rememberVectorPainter(image = Icons.Filled.Rhombus)
-            val triangleDown = rememberVectorPainter(image = Icons.Filled.TriangleDown)
-            val triangleUp = rememberVectorPainter(image = Icons.Filled.TriangleUp)
-            val cross = rememberVectorPainter(image = Icons.Filled.Cross)
-            val circle = rememberVectorPainter(image = Icons.Filled.Circle)
-            return remember {
-                mapOf(
-                    Square to square,
-                    CircleDown to circleDown,
-                    CircleUp to circleUp,
-                    Rhombus to rhombus,
-                    Square to square,
-                    TriangleDown to triangleDown,
-                    TriangleUp to triangleUp,
-                    Cross to cross,
-                )
-            }
-        }
+            "Lost" to IconColor(12, Icons.Default.Clear, ColorBlack),
+            "TradeIn" to IconColor(98, Icons.Default.TriangleDown, ColorGreen, Offset(0f, 4f), candleScale = IconColor.CandleScaleTrade),
+            "TradeOut" to IconColor(99, Icons.Default.TriangleUp, ColorRed, Offset(0f, -4f), candleScale = IconColor.CandleScaleTrade),
+        )
     }
 
     object TextStyles {
@@ -230,4 +213,3 @@ object AppTheme {
         val TransactionMoneyAnnotation = TextStyle(color = Colors.OnBackgroundVariant, fontSize = 11.sp, fontWeight = FontWeight.Normal)
     }
 }
-

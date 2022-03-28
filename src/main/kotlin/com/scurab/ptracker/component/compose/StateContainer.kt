@@ -15,4 +15,6 @@ data class StateContainer<T>(
         !isEnabled -> disabled
         else -> default
     }
+
+    val count = setOf(default, disabled, selected, default2).size
 }

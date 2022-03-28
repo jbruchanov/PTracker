@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
@@ -73,12 +72,10 @@ fun TransactionRow(
                 val iconColor = item.iconColor()
                 val size = 16f
                 Icon(
-                    iconColor.image,
+                    iconColor.imageVector.get(),
                     contentDescription = "",
                     tint = iconColor.color.default,
-                    modifier = Modifier
-                        .size(size.dp)
-                        .offset(iconColor.offset.x, -iconColor.offset.y * (size / iconColor.image.defaultHeight.value))
+                    modifier = Modifier.size(size.dp)
                 )
             }
             if (prices.buy != null) {

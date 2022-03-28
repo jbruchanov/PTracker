@@ -12,8 +12,8 @@ public val Icons.Filled.TriangleUp: ImageVector
         }
         _triangleUp = materialIcon(name = "Filled.TriangleUp") {
             materialPath {
-                moveTo(1f, 12f)
-                lineToRelative(23f, 0f)
+                moveTo(3f, 20f)
+                lineToRelative(20f, 0f)
                 lineTo(12f, 1f)
                 close()
             }

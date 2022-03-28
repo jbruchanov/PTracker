@@ -12,9 +12,9 @@ public val Icons.Filled.TriangleDown: ImageVector
         }
         _triangleDown = materialIcon(name = "Filled.TriangleDown") {
             materialPath {
-                moveTo(1f, 12f)
-                lineToRelative(23f, 0f)
-                lineTo(12f, 23f)
+                moveTo(3f, 3f)
+                lineToRelative(20f, 0f)
+                lineTo(12f, 20f)
                 close()
             }
         }

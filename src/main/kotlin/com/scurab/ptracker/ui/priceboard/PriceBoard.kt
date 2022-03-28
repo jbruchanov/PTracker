@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BorderOuter
@@ -44,9 +46,11 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.ext.clipRectSafe
 import com.scurab.ptracker.ext.draw
@@ -72,6 +76,7 @@ import com.scurab.ptracker.model.Filter
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.priceDetails
 import com.scurab.ptracker.ui.AppColors
+import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
@@ -219,6 +224,7 @@ private fun PriceBoard(state: PriceBoardState, eventDelegate: PriceBoardEventDel
         }
 
         PriceSelectedDayDetail(state)
+        PriceSelectedDayTransactionTypes(state)
         LaunchedEffect(state.animateInitViewPort) {
             state.setViewport(state.initViewport(), animate = true)
         }
@@ -230,11 +236,12 @@ private fun PriceSelectedDayDetail(state: PriceBoardState) {
     val item = state.pointedPriceItem
     if (item != null) {
         val text = remember(item) { item.priceDetails() }
+        val sizes = AppSizes.current
         Text(
             text, modifier = Modifier
-                .offset(8.dp, 4.dp)
+                .offset(sizes.Space2, sizes.Space)
                 .background(DashboardColors.BackgroundAxis, shape = RoundedCornerShape(2.dp))
-                .padding(2.dp),
+                .padding(sizes.Space05),
             color = DashboardColors.OnBackground,
             fontSize = DashboardSizes.PriceSelectedDayDetail,
             fontFamily = FontFamily.Monospace
@@ -242,6 +249,32 @@ private fun PriceSelectedDayDetail(state: PriceBoardState) {
     }
 }
 
+@Composable
+private fun BoxScope.PriceSelectedDayTransactionTypes(state: PriceBoardState) {
+    val item = state.pointedPriceItem
+    if (item != null) {
+        val iconsPrices = state.visibleTransactionsPerPriceItem[item]
+            ?.map { it.iconColor() }
+            ?.distinct()
+            ?.sortedBy { it.priority }
+            ?: return
+
+        val offsetX = AppSizes.current.Space + Dp(state.verticalPriceBarWidth() / LocalDensity.current.density)
+        if (iconsPrices.size > 1) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(-offsetX, AppSizes.current.Space)
+                    .background(DashboardColors.BackgroundAxis, AppTheme.Shapes.RoundedCorners)
+                    .padding(AppSizes.current.Space2)
+            ) {
+                iconsPrices.forEach { ic ->
+                    Icon(imageVector = ic.imageVector.get(), contentDescription = "", tint = ic.color.get())
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun Candles(state: PriceBoardState) {
@@ -271,24 +304,22 @@ private fun Candles(state: PriceBoardState) {
 private fun CandleTransactions(state: PriceBoardState) {
     state.selectedAsset ?: return
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
-    val iconPaintersMap = AppTheme.TransactionIcons.mapIconsVectorPainters()
 
-    Canvas {
-        withTranslateAndScale(state) {
-            //transactions
-            val filterVisible = state.priceItems.filterVisible(state, endOffset = 1)
-            filterVisible.forEach { priceItem ->
-                val x = priceItem.index * DashboardSizes.PriceItemWidth
-                //scaleY flipped as we want to have origin at left/Bottom
-                translate(x + priceItemWidthHalf, 0f) {
-                    //draw candle transaction
-                    val iconsPrices = state.visibleTransactionsPerPriceItem[priceItem]?.map { it.iconColor() to it }?.distinct()?.sortedBy { it.first.drawPriority }
-                    iconsPrices?.forEach { (ic, transaction) ->
-                        val y = transaction.unitPrice()?.toFloat() ?: priceItem.centerY
-                        translate(0f, y) {
-                            resetScale(state) {
-                                val painter = iconPaintersMap.getValue(ic)
-                                val scale = ic.scale.get(isSelected = state.pointingTransaction == transaction)
+    val filterVisible = state.priceItems.filterVisible(state, endOffset = 1)
+    filterVisible.forEach { priceItem ->
+        val iconsPrices = state.visibleTransactionsPerPriceItem[priceItem]?.map { it.iconColor() to it }?.distinct()
+            ?.sortedBy { if (state.pointingTransaction == it.second) Int.MAX_VALUE else it.first.priority }
+        //draw candle transaction
+        iconsPrices?.forEach { (ic, transaction) ->
+            val painter = rememberVectorPainter(image = ic.imageVector.get())
+            Canvas {
+                withTranslateAndScale(state) {
+                    val x = priceItem.index * DashboardSizes.PriceItemWidth
+                    val y = transaction.unitPrice()?.toFloat() ?: priceItem.centerY
+                    translate(x + priceItemWidthHalf, y) {
+                        resetScale(state) {
+                            translate(ic.candleOffset.x, ic.candleOffset.y) {
+                                val scale = ic.candleScale.get(isSelected = state.pointingTransaction == transaction)
                                 draw(painter, scale, colorFilter = tint(color = ic.color.get(isSelected = state.clickedTransaction == transaction)))
                             }
                         }
