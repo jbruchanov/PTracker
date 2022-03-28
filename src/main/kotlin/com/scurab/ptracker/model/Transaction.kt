@@ -114,5 +114,30 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         }
     }
 
+    val isImportant by lazy { !UnImportantType.contains(type) }
+
     override fun toString(): String = debugString
+
+    companion object {
+        val TypeDeposit = "Deposit"
+        val TypeWithdrawal = "Withdrawal"
+        val TypeAirdrop = "Airdrop"
+        val TypeMining = "Mining"
+        val TypeStaking = "Staking"
+        val TypeInterest = "Interest"
+        val TypeDividend = "Dividend"
+        val TypeIncome = "Income"
+        val TypeGiftReceived = "Gift-Received"
+        val TypeGiftSent = "Gift-Sent"
+        val TypeCharitySent = "Charity-Sent"
+        val TypeGiftSpouse = "Gift-Spouse"
+        val TypeLost = "Lost"
+        val TypeTrade = "Trade"
+        val _TypeTradeIn = "TradeIn"
+        val _TypeTradeOut = "TradeOut"
+
+        private val UnImportantType = setOf(
+            TypeDeposit, TypeWithdrawal
+        )
+    }
 }

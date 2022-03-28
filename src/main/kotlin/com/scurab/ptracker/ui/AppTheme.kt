@@ -34,6 +34,7 @@ import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.icons.TriangleDown
 import com.scurab.ptracker.icons.TriangleUp
+import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.ui.model.IconColor
 import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontStyle
@@ -185,23 +186,21 @@ object AppTheme {
         private val ColorOrange = Color(0xFFFFC100)
         private val ColorBlack = Color.Black
         val IconsMap = mapOf(
-            "Deposit" to IconColor(0, Icons.Default.ArrowDownward, ColorWhite, Offset(0f, 4f)),
-            "Withdrawal" to IconColor(1, Icons.Default.ArrowUpward, ColorWhite, Offset(0f, -4f)),
-            "Airdrop" to IconColor(2, Icons.Outlined.WbCloudy, ColorGreen),
-            "Mining" to IconColor(3, Icons.Outlined.Star, ColorRed),
-            "Staking" to IconColor(4, Icons.Outlined.Star, ColorOrange),
-            "Interest" to IconColor(5, Icons.Outlined.Star, ColorGray),
-            "Dividend" to IconColor(6, Icons.Outlined.Star, ColorGray),
-            "Income" to IconColor(7, Icons.Outlined.Star, ColorWhite),
-            //heart
-            "Gift-Received" to IconColor(8, Icons.Outlined.FavoriteBorder, ColorGreen),
-            "Gift-Sent" to IconColor(9, Icons.Outlined.FavoriteBorder, ColorRed),
-            "Charity-Sent" to IconColor(10, Icons.Outlined.FavoriteBorder, ColorOrange),
-            "Gift-Spouse" to IconColor(11, Icons.Filled.Favorite, ColorWhite),
-
-            "Lost" to IconColor(12, Icons.Default.Clear, ColorBlack),
-            "TradeIn" to IconColor(98, Icons.Default.TriangleDown, ColorGreen, Offset(0f, 4f), candleScale = IconColor.CandleScaleTrade),
-            "TradeOut" to IconColor(99, Icons.Default.TriangleUp, ColorRed, Offset(0f, -4f), candleScale = IconColor.CandleScaleTrade),
+            Transaction.TypeDeposit to IconColor(0, Icons.Default.ArrowDownward, ColorWhite, Offset(0f, 4f)),
+            Transaction.TypeWithdrawal to IconColor(1, Icons.Default.ArrowUpward, ColorWhite, Offset(0f, -4f)),
+            Transaction.TypeAirdrop to IconColor(2, Icons.Outlined.WbCloudy, ColorGreen),
+            Transaction.TypeMining to IconColor(3, Icons.Outlined.Star, ColorRed),
+            Transaction.TypeStaking to IconColor(4, Icons.Outlined.Star, ColorOrange),
+            Transaction.TypeInterest to IconColor(5, Icons.Outlined.Star, ColorGray),
+            Transaction.TypeDividend to IconColor(6, Icons.Outlined.Star, ColorGray),
+            Transaction.TypeIncome to IconColor(7, Icons.Outlined.Star, ColorWhite),
+            Transaction.TypeGiftReceived to IconColor(8, Icons.Outlined.FavoriteBorder, ColorGreen),
+            Transaction.TypeGiftSent to IconColor(9, Icons.Outlined.FavoriteBorder, ColorRed),
+            Transaction.TypeCharitySent to IconColor(10, Icons.Outlined.FavoriteBorder, ColorOrange),
+            Transaction.TypeGiftSpouse to IconColor(11, Icons.Filled.Favorite, ColorWhite),
+            Transaction.TypeLost to IconColor(12, Icons.Default.Clear, ColorBlack),
+            Transaction._TypeTradeIn to IconColor(98, Icons.Default.TriangleDown, ColorGreen, Offset(0f, 4f), candleScale = IconColor.CandleScaleTrade),
+            Transaction._TypeTradeOut to IconColor(99, Icons.Default.TriangleUp, ColorRed, Offset(0f, -4f), candleScale = IconColor.CandleScaleTrade),
         )
     }
 

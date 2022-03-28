@@ -13,8 +13,8 @@ import kotlin.math.max
 
 fun Transaction.iconColor() = getOrPut("TransactionIcon") {
     when {
-        this is Transaction.Trade && this.isCryptoBuy() -> AppTheme.TransactionIcons.IconsMap.getValue("TradeIn")
-        this is Transaction.Trade && !this.isCryptoBuy() -> AppTheme.TransactionIcons.IconsMap.getValue("TradeOut")
+        this is Transaction.Trade && this.isCryptoBuy() -> AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeTradeIn)
+        this is Transaction.Trade && !this.isCryptoBuy() -> AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeTradeOut)
         else -> AppTheme.TransactionIcons.IconsMap.getValue(type)
     }
 }

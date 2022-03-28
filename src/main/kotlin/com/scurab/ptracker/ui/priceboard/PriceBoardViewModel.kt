@@ -50,7 +50,7 @@ class PriceBoardViewModel(
     private val dataUseCase: PriceBoardDataProcessingUseCase
 ) : ViewModel(), PriceBoardEventDelegate {
 
-    private val filters = Pair(Filter.TradesOnly, Filter.AllTransactions)
+    private val filters = Pair(Filter.ImportantTransactions, Filter.AllTransactions)
     private val grouping = GroupStrategy.Day
     val uiState = PriceBoardUiState(Density(1f), grouping)
 
@@ -90,7 +90,7 @@ class PriceBoardViewModel(
         withContext(Dispatchers.Main) {
             with(uiState) {
                 assets = result.assets
-                hasTradeOnlyFilter = filter == Filter.TradesOnly
+                hasTradeOnlyFilter = filter == Filter.ImportantTransactions
             }
             with(uiState.priceBoardState) {
                 visibleTransactions = result.transactions
@@ -145,7 +145,7 @@ class PriceBoardViewModel(
 
     override fun onFilterClicked(filter: Filter<*>) {
         when (filter) {
-            is Filter.TradesOnly -> {
+            is Filter.ImportantTransactions -> {
                 launch {
                     updateData(data, filters.firstIf(!uiState.hasTradeOnlyFilter), false)
                 }
