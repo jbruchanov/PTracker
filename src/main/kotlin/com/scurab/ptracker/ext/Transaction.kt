@@ -36,34 +36,38 @@ private fun String.annotatedPrice(prefix: String? = null, suffix: String? = null
     }
 }
 
-private const val unitPriceOffset = 2
-
 fun Transaction.formattedPrices(): TransactionTextPrices {
     return getOrPut("formattedPrices") {
         val ba = (this as? HasIncome)?.buyAsset
         val bq = (this as? HasIncome)?.buyQuantity?.round(ba)
+        val bl = ba?.length ?: 0
         val sa = (this as? HasOutcome)?.sellAsset
         val sq = (this as? HasOutcome)?.sellQuantity?.round(sa)
+        val sl = sa?.length ?: 0
         val fq = feeQuantity.round(feeAsset).takeIf { !it.isZero() }
+        val fa = feeAsset
+        val fl = feeAsset.length
+        val ua = " ".repeat(3)
 
         val bn = bq?.base()?.coerceAtLeast(1) ?: 0
         val sn = sq?.base()?.coerceAtLeast(1) ?: 0
         val fn = fq?.base()?.coerceAtLeast(1) ?: 0
         val up = this.unitPrice()
         //minus to shrink little but, unitPrice doesn't have currency symbol
-        val un = up?.base()?.minus(unitPriceOffset)?.coerceAtLeast(1) ?: 0
+        val un = up?.base()?.coerceAtLeast(1) ?: 0
 
-        val max = max(max(max(bn, sn), fn), un)
-        val buy = bq?.toPlainString()?.let { " ".repeat(max(0, max - bn)) + "+" + it }
-        val sell = sq?.toPlainString()?.let { " ".repeat(max(0, max - sn)) + "-" + it }
-        val fee = fq?.toPlainString()?.let { " ".repeat(max(0, max - fn)) + "-" + it }
-        val price = up?.toPlainString()?.let { " ".repeat(max(0, max - un)) + it }
+        val maxn = max(max(max(bn, sn), fn), un)
+        val maxa = max(max(bl, sl), fl)
+        val buy = bq?.toPlainString()?.let { " ".repeat(max(0, maxn - bn)) + "+" + it }
+        val sell = sq?.toPlainString()?.let { " ".repeat(max(0, maxn - sn)) + "-" + it }
+        val fee = fq?.toPlainString()?.let { " ".repeat(max(0, maxn - fn)) + "-" + it }
+        val price = up?.toPlainString()?.let { " ".repeat(max(0, maxn - un )) + " " + it }
 
         TransactionTextPrices(
             buy = buy?.annotatedPrice(ba),
             sell = sell?.annotatedPrice(sa),
             fee = fee?.annotatedPrice(feeAsset),
-            unitPrice = price?.annotatedPrice(" ".repeat(unitPriceOffset))
+            unitPrice = price?.annotatedPrice(ua)
         )
     }
 }
