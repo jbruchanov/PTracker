@@ -1,9 +1,9 @@
 package com.scurab.ptracker.usecase
 
 import com.scurab.ptracker.model.Asset
-import com.scurab.ptracker.model.CryptoComparePriceItem
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.randomPriceData
+import com.scurab.ptracker.net.model.CryptoComparePriceItem
 import com.scurab.ptracker.serialisation.JsonBridge
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone

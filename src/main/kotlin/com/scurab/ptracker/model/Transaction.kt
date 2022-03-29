@@ -27,7 +27,8 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     abstract val note: String?
 
     abstract fun hasAsset(asset: Asset): Boolean
-    abstract val assets: String
+    abstract val assetsLabel: String
+    abstract val assets: Set<String>
 
     var priceItem: PriceItem? by cache
 
@@ -44,8 +45,9 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val wallet: String,
         override val note: String?,
     ) : Transaction(), HasIncome {
-        override val assets: String = buyAsset
+        override val assetsLabel: String = buyAsset
         override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset)
+        override val assets: Set<String> = setOf(buyAsset)
     }
 
     data class Outcome(
@@ -61,8 +63,9 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val wallet: String,
         override val note: String?,
     ) : Transaction(), HasOutcome {
-        override val assets: String = sellAsset
+        override val assetsLabel: String = sellAsset
         override fun hasAsset(asset: Asset): Boolean = asset.has(sellAsset)
+        override val assets: Set<String> = setOf(sellAsset)
     }
 
     data class Trade(
@@ -88,8 +91,9 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
             val crypto = if (!isBuyAssetFiat) buyAsset else sellAsset
             Asset(crypto, fiat)
         }
-        override val assets: String = asset.text
+        override val assetsLabel: String = asset.text
         fun isCryptoBuy() = FiatCurrencies.contains(sellAsset)
+        override val assets: Set<String> = setOf(buyAsset, sellAsset)
     }
 
     fun isTransactionWithAsset(asset: Asset) = this is Trade && hasAsset(asset)

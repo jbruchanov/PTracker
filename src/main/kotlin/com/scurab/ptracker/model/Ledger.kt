@@ -9,7 +9,10 @@ class Ledger(
     private val cacheByGroupStrategy = mutableMapOf<GroupStrategy, Map<Long, List<Transaction>>>()
     private val cacheByItemAndAsset = mutableMapOf<KeyAssetGroupingKey, List<Transaction>>()
     private val cacheByAssets = mutableMapOf<KeyAssetTrades, List<Transaction>>()
-    val assets = items.mapNotNull { (it as? Transaction.Trade)?.asset }.toSet().sortedBy { it.text }
+    val coins by lazy { items.mapNotNull { (it as? Transaction.Trade)?.assets }.toSet().flatten().sorted() }
+    val fiatCoins by lazy { coins.filter { FiatCurrencies.contains(it) }.toSet() }
+    val cryptoCoins by lazy { coins - fiatCoins }
+    val assets by lazy { cryptoCoins.map { c -> fiatCoins.map { f -> Asset(c, f) } }.flatten() }
 
     fun getGroupedData(by: GroupStrategy = grouping): Map<Long, List<Transaction>> {
         return cacheByGroupStrategy.getOrPut(by) {

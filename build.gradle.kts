@@ -41,6 +41,8 @@ dependencies {
 
     implementation("io.insert-koin:koin-core:$koinVersion")
 
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:$junit")
 }

@@ -1,8 +1,11 @@
 @file:UseSerializers(BigDecimalSerializer::class)
 
-package com.scurab.ptracker.model
+package com.scurab.ptracker.net.model
 
 import com.scurab.ptracker.json.BigDecimalSerializer
+import com.scurab.ptracker.model.IPriceItem
+import com.scurab.ptracker.model.MapCache
+import com.scurab.ptracker.model.WithCache
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -44,4 +47,17 @@ data class CryptoComparePriceItem(
     val localDateTime by lazy(LazyThreadSafetyMode.NONE) { Instant.fromEpochMilliseconds(time * 1000).toLocalDateTime(TimeZone.currentSystemDefault()) }
     val localDate by lazy(LazyThreadSafetyMode.NONE) { localDateTime.date }
     override val dateTime: LocalDateTime = localDateTime
+}
+
+@Serializable
+data class CryptoCoinDetail(
+    @SerialName("Id") val id: String,
+    @SerialName("ImageUrl") val imageUrl: String,
+    @SerialName("CoinName") val coinName: String,
+    @SerialName("Symbol") val symbol: String,
+    @SerialName("TotalCoinsMined") val totalCoinsMined: BigDecimal,
+    @SerialName("CirculatingSupply") val circulatingSupply: BigDecimal,
+    @SerialName("AssetLaunchDate") val assetLaunchDate: String,
+) {
+    val fullImageUrl by lazy { "https://www.cryptocompare.com$imageUrl" }
 }
