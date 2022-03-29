@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scurab.ptracker.App
 import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.ext.FloatRange
 import com.scurab.ptracker.ext.toLabelPrice
@@ -36,6 +37,7 @@ import com.scurab.ptracker.icons.TriangleDown
 import com.scurab.ptracker.icons.TriangleUp
 import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.ui.model.IconColor
+import org.jetbrains.skia.Data
 import org.jetbrains.skia.Font
 import org.jetbrains.skia.FontStyle
 import org.jetbrains.skia.Paint
@@ -149,6 +151,11 @@ object AppTheme {
             val max = range.endInclusive.toLabelPrice(range)
             val v = max.takeIf { max.length > min.length } ?: min
             return TextLine.make(v, fontAxis).width
+        }
+
+        fun flagFont(): Font {
+            val bytes = App::class.java.classLoader.getResourceAsStream("babelstoneflags.ttf").readBytes()
+            return Font(Typeface.makeFromData(Data.makeFromBytes(bytes)))
         }
     }
 

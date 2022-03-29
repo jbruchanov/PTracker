@@ -23,7 +23,7 @@ class LoadIconsUseCase(
     suspend fun loadIcons(cryptoAssets: Collection<String>): List<Pair<String, File?>> {
         location.mkdirs()
         val downloads = cryptoAssets
-            .map { c -> c to File(location, "${c}.png") }
+            .map { c -> c to File(location, "${c.lowercase()}.png") }
             .filterNot { (_, f) -> f.exists() && f.length() > 0L }
             .parallelMapIndexed { _, (c, f) ->
                 val fullImageUrl = kotlin.runCatching { cryptoCompareClient.getCoinData(c).data[c]?.fullImageUrl }.getOrNull()

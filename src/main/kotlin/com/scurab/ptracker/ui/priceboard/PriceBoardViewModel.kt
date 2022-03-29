@@ -15,6 +15,7 @@ import com.scurab.ptracker.model.Ledger
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.repository.AppStateRepository
+import com.scurab.ptracker.ui.model.AssetIcon
 import com.scurab.ptracker.usecase.LoadDataUseCase
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
 import com.scurab.ptracker.usecase.PriceBoardDataProcessingUseCase
@@ -30,7 +31,7 @@ import java.io.File
 
 class PriceBoardUiState(localDensity: Density, grouping: GroupStrategy) {
     var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping))
-    var assets by mutableStateOf(emptyList<Asset>())
+    var assets by mutableStateOf(emptyList<AssetIcon>())
     var hasTradeOnlyFilter by mutableStateOf(true)
 }
 

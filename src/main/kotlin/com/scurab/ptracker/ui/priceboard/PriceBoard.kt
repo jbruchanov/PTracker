@@ -148,9 +148,9 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                         ToggleButton(Icons.Default.FilterAlt, isSelected = vm.uiState.hasTradeOnlyFilter, onClick = { vm.onFilterClicked(Filter.ImportantTransactions) })
                         VerticalDivider()
                         val assets = vm.uiState.assets
-                        assets.forEach { asset ->
-                            val isSelected = asset == vm.uiState.priceBoardState.selectedAsset
-                            ToggleButton(onClick = { vm.onAssetSelected(asset) }, isSelected = isSelected, text = asset.text)
+                        assets.forEach { assetIcon ->
+                            val isSelected = assetIcon.asset == vm.uiState.priceBoardState.selectedAsset
+                            ToggleButton(text = assetIcon.asset.label, onClick = { vm.onAssetSelected(assetIcon.asset) }, isSelected = isSelected)
                             VerticalDivider()
                         }
                     }

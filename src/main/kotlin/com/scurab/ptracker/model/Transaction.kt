@@ -91,7 +91,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
             val crypto = if (!isBuyAssetFiat) buyAsset else sellAsset
             Asset(crypto, fiat)
         }
-        override val assetsLabel: String = asset.text
+        override val assetsLabel: String = asset.label
         fun isCryptoBuy() = FiatCurrencies.contains(sellAsset)
         override val assets: Set<String> = setOf(buyAsset, sellAsset)
     }
