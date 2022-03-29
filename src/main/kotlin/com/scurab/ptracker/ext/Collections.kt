@@ -6,6 +6,10 @@ import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.priceboard.PriceBoardState
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -60,4 +64,42 @@ fun <T> List<T>.takeAround(index: Int, n: Int): List<T> {
         re > size -> subList((le - (re - size)).coerceAtLeast(0), size)
         else -> TODO("size:$size, index:$index, n:$n")
     }
+}
+
+/**
+ * Execute "map" operation on collection in parallel.
+ *
+ * @param I
+ * @param O
+ * @param parallelism - number indicates how many map ops can be run in altogether
+ * @param map
+ * @return
+ */
+suspend fun <I, O> Collection<I>.parallelMapIndexed(parallelism: Int = 4, map: suspend (Int, I) -> O): List<O> {
+    require(parallelism > 0) { "Invalid parallelism:$parallelism, must be at least 1" }
+    val input = Channel<Pair<Int, I>>()
+    val result = ArrayList<O>(size).also {
+        @Suppress("UNCHECKED_CAST")
+        //fill the arrayList with nulls, so we can call simple set[i] = value later in map
+        //to preserve the order of elements, this list is writeOnly as this breaks nullability check!
+        (it as ArrayList<Any?>).let { nullable ->
+            repeat(size) { nullable.add(null) }
+        }
+    }
+
+    coroutineScope {
+        launch {
+            forEachIndexed { i, v -> input.send(Pair(i, v)) }
+            input.close()
+        }
+
+        (0 until parallelism).map {
+            launch {
+                for ((i, v) in input) {
+                    result[i] = map(i, v)
+                }
+            }
+        }.joinAll()
+    }
+    return result
 }
