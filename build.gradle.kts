@@ -18,30 +18,33 @@ repositories {
 }
 
 dependencies {
-    val ktorVersion = "1.6.7"
-    val logbackVersion = "1.2.3"
+    val ktorVersion = "1.6.8"
+    val logbackVersion = "1.2.11"
     val ktSerialization = "1.3.2"
     val junit = "5.8.2"
     val koinVersion = "3.1.5"
     val composeVersion = "1.2.0-alpha01-dev620"
+    val mockKVersion = "1.12.3"
 
     implementation(compose.desktop.currentOs)
     implementation("org.jetbrains.compose.material:material-icons-core-desktop:$composeVersion")
     implementation("org.jetbrains.compose.material:material-icons-extended-desktop:$composeVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
-    implementation("org.apache.poi:poi-ooxml:5.2.0")
+    implementation("org.apache.poi:poi-ooxml:5.2.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$ktSerialization")
 
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-client-websockets:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$ktSerialization")
 
     implementation("io.insert-koin:koin-core:$koinVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("io.mockk:mockk:$mockKVersion")
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:$junit")
