@@ -27,12 +27,8 @@ class LoadIconsUseCase(
             .filterNot { (_, f) -> f.exists() && f.length() > 0L }
             .parallelMapIndexed { _, (c, f) ->
                 val fullImageUrl = kotlin.runCatching { cryptoCompareClient.getCoinData(c).data[c]?.fullImageUrl }.getOrNull()
+                fullImageUrl?.let { kotlin.runCatching { httpClient.get<HttpResponse>(it).content.copyTo(f.writeChannel()) }.getOrNull() }
                 Triple(c, f, fullImageUrl)
-            }
-            .parallelMapIndexed { i, triple ->
-                val (_, f, url) = triple
-                url?.let { httpClient.get<HttpResponse>(url).content.copyTo(f.writeChannel()) }
-                triple
             }
         val downloadsMap = downloads.associateBy(keySelector = { it.first }, valueTransform = { it.second })
         return cryptoAssets.map { it to downloadsMap[it]?.takeIf { f -> f.exists() && f.length() > 0 } }

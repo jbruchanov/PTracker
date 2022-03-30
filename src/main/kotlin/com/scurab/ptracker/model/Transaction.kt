@@ -85,12 +85,6 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val note: String?,
     ) : Transaction(), HasIncome, HasOutcome {
         override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset, sellAsset)
-        val asset by lazy {
-            val isBuyAssetFiat = FiatCurrencies.contains(buyAsset)
-            val fiat = if (isBuyAssetFiat) buyAsset else sellAsset
-            val crypto = if (!isBuyAssetFiat) buyAsset else sellAsset
-            Asset(crypto, fiat)
-        }
         override val assetsLabel: String = asset.label
         fun isCryptoBuy() = FiatCurrencies.contains(sellAsset)
         override val assets: Set<String> = setOf(buyAsset, sellAsset)
@@ -119,6 +113,18 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     }
 
     val isImportant by lazy { !UnImportantType.contains(type) }
+
+    val asset by lazy {
+        val buyAsset = (this as? HasIncome)?.buyAsset ?: ""
+        val sellAsset = (this as? HasOutcome)?.sellAsset ?: ""
+        val isBuyAssetFiat = FiatCurrencies.contains(buyAsset)
+        val fiat = if (isBuyAssetFiat) buyAsset else sellAsset
+        val crypto = if (!isBuyAssetFiat) buyAsset else sellAsset
+        require(fiat.isNotEmpty() || crypto.isNotEmpty()) {
+            "$this, fiat:$fiat, crypto:$crypto, both are empty"
+        }
+        Asset(crypto, fiat)
+    }
 
     override fun toString(): String = debugString
 

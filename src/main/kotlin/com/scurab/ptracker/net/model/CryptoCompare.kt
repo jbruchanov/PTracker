@@ -1,11 +1,15 @@
-@file:UseSerializers(BigDecimalSerializer::class)
+@file:UseSerializers(BigDecimalAsStringSerializer::class)
 
 package com.scurab.ptracker.net.model
 
-import com.scurab.ptracker.json.BigDecimalSerializer
+import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.IPriceItem
 import com.scurab.ptracker.model.MapCache
 import com.scurab.ptracker.model.WithCache
+import com.scurab.ptracker.serialisation.BigDecimalAsDoubleSerializer
+import com.scurab.ptracker.serialisation.BigDecimalAsStringSerializer
+import com.scurab.ptracker.serialisation.CryptoCompareResultSerializer
+import com.scurab.ptracker.serialisation.SecondsLongAsDateTimeSerializer
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -50,7 +54,7 @@ data class CryptoComparePriceItem(
 }
 
 @Serializable
-data class CryptoCoinDetail(
+data class CryptoCompareCoinDetail(
     @SerialName("Id") val id: String,
     @SerialName("ImageUrl") val imageUrl: String,
     @SerialName("CoinName") val coinName: String,
@@ -60,4 +64,43 @@ data class CryptoCoinDetail(
     @SerialName("AssetLaunchDate") val assetLaunchDate: String,
 ) {
     val fullImageUrl by lazy { "https://www.cryptocompare.com$imageUrl" }
+}
+
+@Serializable
+data class CryptoCompareWssSubscription(
+    @SerialName("action") val action: String,
+    @SerialName("subs") val subs: List<String>,
+) {
+    constructor(args: List<CryptoCompareWssSubscriptionArg>) : this(
+        "SubAdd", args.map { (exchange, asset) -> "2~${exchange}~${asset.crypto}~${asset.fiat}" }
+    )
+}
+
+data class CryptoCompareWssSubscriptionArg(
+    val exchange: String,
+    val asset: Asset
+)
+
+@Serializable(with = CryptoCompareResultSerializer::class)
+sealed class CryptoCompareWssResponse {
+
+    @Serializable
+    data class UnspecificMessage(
+        @SerialName("MESSAGE") val message: String
+    ) : CryptoCompareWssResponse()
+
+    @Serializable
+    data class MarketTicker(
+        @SerialName("MARKET") val market: String,
+        @SerialName("FROMSYMBOL") val cryptoCoin: String,
+        @SerialName("TOSYMBOL") val fiatCoin: String,
+        @SerialName("PRICE") @Serializable(with = BigDecimalAsDoubleSerializer::class) val price: BigDecimal,
+        @SerialName("LASTUPDATE") @Serializable(with = SecondsLongAsDateTimeSerializer::class) val lastUpdate: LocalDateTime,
+        @SerialName("HIGHDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val high: BigDecimal? = null,
+        @SerialName("LOWDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val low: BigDecimal? = null,
+        @SerialName("OPENDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val open: BigDecimal? = null
+    ) : CryptoCompareWssResponse() {
+        @kotlinx.serialization.Transient
+        val asset = Asset(cryptoCoin, fiatCoin)
+    }
 }

@@ -1,14 +1,19 @@
 package com.scurab.ptracker.net
 
 import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.serialisation.JsonBridge
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
-@Disabled
+//@Disabled
 internal class CryptoCompareClientTest {
 
     private val testAssets by lazy {
@@ -19,7 +24,7 @@ internal class CryptoCompareClientTest {
 
     @Test
     fun getCoinData() {
-        val client = CryptoCompareClient()
+        val client = CryptoCompareClient(defaultHttpClient(), mockk(), JsonBridge)
         val coins = listOf("BTC", "ETH")
         runBlocking {
             coins.forEach {
@@ -35,9 +40,23 @@ internal class CryptoCompareClientTest {
         val symbols = ledger?.assets?.takeIf { it.isNotEmpty() } ?: testAssets
         runBlocking {
             symbols.forEach { (c, f) ->
-                val historyData = CryptoCompareClient().getHistoryData(c, f, 1000)
+                val historyData = CryptoCompareClient(defaultHttpClient(), mockk(), JsonBridge).getHistoryData(c, f, 1000)
                 File("data/$c-$f.json").writeText(JsonBridge.serialize(historyData.data.items))
             }
         }
+    }
+
+    @Test
+    fun wss() {
+        val client = CryptoCompareClient(defaultHttpClient(), mockk(), JsonBridge)
+        val assets = listOf(Asset("BTC", "GBP"), Asset("ETH", "USD"))
+        val channel = client.subscribeTicker(assets.map { CryptoCompareWssSubscriptionArg("Coinbase", it) })
+        val job = GlobalScope.launch(Dispatchers.IO) {
+            channel.consumeEach {
+                println("Receive:$it")
+            }
+        }
+        Thread.sleep(30000)
+        job.cancel()
     }
 }
