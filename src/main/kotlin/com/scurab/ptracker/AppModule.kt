@@ -7,7 +7,10 @@ import com.scurab.ptracker.component.navigation.DefaultNavSpecs
 import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.net.defaultHttpClient
+import com.scurab.ptracker.repository.AppSettings
+import com.scurab.ptracker.repository.AppSettingsJsonRepository
 import com.scurab.ptracker.repository.AppStateRepository
+import com.scurab.ptracker.serialisation.JsonBridge
 import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
@@ -21,11 +24,13 @@ fun createKoinModule(appArgs: Array<String>) = module {
     single { AppStateRepository() }
     single<ComponentFactory> { KoinViewModelFactory() }
 
+    single { JsonBridge }
     single { defaultNavSpecs(appArgs, get()) }
     single<NavSpecs> { get<DefaultNavSpecs>() }
     single<NavController> { get<DefaultNavSpecs>() }
     single { DateTimeFormats }
     single { defaultHttpClient() }
+    single<AppSettings> { AppSettingsJsonRepository.default(get()) }
 
     factory { LoadDataUseCase() }
     factory { LoadLedgerUseCase() }
@@ -36,5 +41,3 @@ fun createKoinModule(appArgs: Array<String>) = module {
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { args -> SettingsViewModel(args.get(), get()) }
 }
-
-
