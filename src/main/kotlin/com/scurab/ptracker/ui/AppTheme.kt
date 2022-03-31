@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.App
 import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.ext.FloatRange
+import com.scurab.ptracker.ext.scaled
 import com.scurab.ptracker.ext.toLabelPrice
 import com.scurab.ptracker.ext.toPx
 import com.scurab.ptracker.icons.TriangleDown
@@ -111,15 +112,22 @@ object AppTheme {
     }
 
     object Sizes {
-        val MinClickableSize = 40.dp
-        val ClickableSize = 48.dp
+        private val MinClickableSize = 40.dp
+        private val ClickableSize = 48.dp
         val IconButtonPadding = 8.dp
+        val IconTransactionType = 16.dp
 
         val Hairline = 1.dp
         val Space05 = 2.dp
         val Space = 4.dp
         val Space2 = 8.dp
         val Space4 = 16.dp
+
+        @Composable
+        fun minClickableSize() = MinClickableSize.scaled()
+
+        @Composable
+        fun clickableSize() = ClickableSize.scaled()
     }
 
     object Values {

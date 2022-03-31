@@ -25,7 +25,7 @@ fun VerticalTabButton(
         modifier = Modifier
             .background(background)
             .clickable(onClick = onClick)
-            .defaultMinSize(minWidth = AppSizes.current.MinClickableSize, minHeight = AppSizes.current.MinClickableSize)
+            .defaultMinSize(minWidth = AppSizes.current.minClickableSize(), minHeight = AppSizes.current.minClickableSize())
             .padding(AppSizes.current.IconButtonPadding)
     ) {
         Image(

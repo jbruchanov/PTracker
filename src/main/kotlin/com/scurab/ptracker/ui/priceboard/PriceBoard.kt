@@ -60,6 +60,7 @@ import com.scurab.ptracker.ext.filterVisible
 import com.scurab.ptracker.ext.getHorizontalAxisText
 import com.scurab.ptracker.ext.getLabelPriceDecimals
 import com.scurab.ptracker.ext.iconColor
+import com.scurab.ptracker.ext.maxValue
 import com.scurab.ptracker.ext.nHeight
 import com.scurab.ptracker.ext.nWidth
 import com.scurab.ptracker.ext.nativeCanvas
@@ -158,7 +159,8 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                         Box(modifier = Modifier.weight(1f)) {
                             PriceBoard(priceBoardState, vm)
                         }
-                        Column(modifier = Modifier.width(width = 220.dp)) {
+                        val scale = LocalDensity.current.maxValue()
+                        Column(modifier = Modifier.width(width = 220.dp * scale)) {
                             PriceBoardTransactions(priceBoardState, vm)
                         }
                     }
@@ -303,6 +305,7 @@ private fun Candles(state: PriceBoardState) {
 @Composable
 private fun CandleTransactions(state: PriceBoardState) {
     state.selectedAsset ?: return
+    val densityScale = LocalDensity.current.maxValue()
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
 
     val filterVisible = state.priceItems.filterVisible(state, endOffset = 1)
@@ -319,7 +322,7 @@ private fun CandleTransactions(state: PriceBoardState) {
                     translate(x + priceItemWidthHalf, y) {
                         resetScale(state) {
                             translate(ic.candleOffset.x, ic.candleOffset.y) {
-                                val scale = ic.candleScale.get(isSelected = state.pointingTransaction == transaction)
+                                val scale = ic.candleScale.get(isSelected = state.pointingTransaction == transaction) * densityScale
                                 draw(painter, scale, colorFilter = tint(color = ic.color.get(isSelected = state.clickedTransaction == transaction)))
                             }
                         }

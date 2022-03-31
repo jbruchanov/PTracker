@@ -51,8 +51,8 @@ fun ToggleButton(
             contentDescription = "",
             colorFilter = ColorFilter.tint(color = tint),
             modifier = Modifier
+                .matchParentSize()
                 .align(Alignment.Center)
-                .defaultMinSize(minWidth = AppSizes.current.ClickableSize, minHeight = AppSizes.current.MinClickableSize)
                 .padding(AppSizes.current.IconButtonPadding)
                 .background(background)
         )
@@ -93,7 +93,7 @@ private fun ToggleButton(isSelected: Boolean, onClick: () -> Unit, content: @Com
         modifier = Modifier
             .background(background)
             .clickable(onClick = onClick)
-            .defaultMinSize(minWidth = AppSizes.current.MinClickableSize, minHeight = AppSizes.current.MinClickableSize)
+            .defaultMinSize(minWidth = AppSizes.current.minClickableSize(), minHeight = AppSizes.current.minClickableSize())
     ) {
         content()
     }

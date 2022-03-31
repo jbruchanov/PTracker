@@ -21,7 +21,7 @@ import com.scurab.ptracker.usecase.PriceBoardDataProcessingUseCase
 import org.koin.dsl.module
 
 fun createKoinModule(appArgs: Array<String>) = module {
-    single { AppStateRepository() }
+    single { AppStateRepository(get()) }
     single<ComponentFactory> { KoinViewModelFactory() }
 
     single { JsonBridge }

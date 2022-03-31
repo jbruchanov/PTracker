@@ -24,9 +24,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.ext.formattedPrices
 import com.scurab.ptracker.ext.iconColor
+import com.scurab.ptracker.ext.scaled
 import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
@@ -70,12 +70,12 @@ fun TransactionRow(
                 Text(text = formatter.fullDateTime(item.dateTime), style = AppTheme.TextStyles.TransactionSecondary)
                 Spacer(modifier = Modifier.weight(1f))
                 val iconColor = item.iconColor()
-                val size = 16f
+                val size = AppSizes.current.IconTransactionType.scaled()
                 Icon(
                     iconColor.imageVector.get(),
                     contentDescription = "",
                     tint = iconColor.color.default,
-                    modifier = Modifier.size(size.dp)
+                    modifier = Modifier.size(size)
                 )
             }
             if (prices.buy != null) {

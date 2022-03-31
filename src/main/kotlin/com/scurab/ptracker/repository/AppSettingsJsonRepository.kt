@@ -43,6 +43,7 @@ class AppSettingsJsonRepository(
     }
 
     override var cryptoCompareApiKey: String? by data::cryptoCompareApiKey.notifying()
+    override var fontScale: Float by data::fontScale.notifying()
 
     companion object {
 

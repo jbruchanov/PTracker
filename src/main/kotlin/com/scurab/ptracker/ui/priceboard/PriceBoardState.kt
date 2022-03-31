@@ -118,13 +118,13 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density,
     fun selectedPriceItem() = priceItems.getOrNull(selectedPriceItemIndex())
     fun selectedPriceItemIndex() = ceil(viewportPointer().x / DashboardSizes.PriceItemWidth).toInt() - 1
     fun verticalPriceBarWidth(priceRange: FloatRange = visiblePriceRange()): Float = max(
-        0f, TextRendering.measureAxisWidth(priceRange) + (2 * DashboardSizes.VerticalAxisHorizontalPadding.toPx(localDensity.density))
+        0f, TextRendering.measureAxisWidth(priceRange) + (2 * DashboardSizes.VerticalAxisHorizontalPadding.toPx(localDensity.maxValue()))
     )
 
     fun verticalPriceBarLeft(priceRange: FloatRange = visiblePriceRange()): Float = max(0f, canvasSize.width - verticalPriceBarWidth(priceRange))
 
     fun bottomAxisBarHeight(metrics: FontMetrics = TextRendering.fontLabels.metrics): Float =
-        max(metrics.height + metrics.bottom, DashboardSizes.BottomAxisContentMinHeight.toPx(localDensity.density))
+        max(metrics.height + metrics.bottom, DashboardSizes.BottomAxisContentMinHeight.toPx(localDensity.maxValue()))
 
     suspend fun animateToOffsetScale(offset: Offset = this.offset, scale: Offset = this.scale) {
         withContext(composeCoroutineScope.coroutineContext) {

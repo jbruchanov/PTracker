@@ -2,6 +2,7 @@ package com.scurab.ptracker.ext
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -16,3 +17,6 @@ fun TextUnit.toPx(provider: ProvidableCompositionLocal<Density>): Float {
     require(isSp) { "This is not Sp, it's $type" }
     return value * provider.current.maxValue()
 }
+
+@Composable
+fun Dp.scaled(scale: Float = LocalDensity.current.maxValue()) = this * scale

@@ -45,6 +45,8 @@ class MainWindowViewModel(
     private val navController: NavController
 ) : ViewModel(), MainWindowEventDelegate {
 
+    fun density() = appStateRepository.density
+
     override fun onOpenSettingsClick() {
         navController.push(AppNavTokens.Settings, SettingsArgs(2000))
     }
