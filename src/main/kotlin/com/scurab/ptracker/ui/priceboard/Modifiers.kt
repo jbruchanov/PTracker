@@ -45,7 +45,8 @@ internal fun Modifier.onSizeChange(state: PriceBoardState): Modifier {
         if (state.canvasSize == size) return@onSizeChanged
         if (!state.canvasSize.isEmpty()) {
             val diffX = intSize.width - state.canvasSize.width
-            state.offset = state.offset.translate(-diffX, 0f)
+            val diffY = (intSize.height - state.canvasSize.height)
+            state.offset = state.offset.translate(-diffX, -0.5f/*unclear constant*/ * diffY)
             state.pointer = Point.ZERO
         }
         state.canvasSize = size

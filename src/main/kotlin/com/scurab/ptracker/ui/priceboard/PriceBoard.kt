@@ -587,7 +587,7 @@ private fun PriceBoardDebug(state: PriceBoardState) {
         val rPointer = nPointer2.transformNormToReal(canvasSize)
 
         val rows = listOf(
-            "Offset:[${state.offset.x.toInt()}, ${state.offset.y.toInt()}]",
+            "Offset:[${state.offset.x.f3}, ${state.offset.y.f3}]",
             "Mouse:[${state.pointer.x.toInt()}, ${(canvasSize.height - state.pointer.y).toInt()}] " +
                     "N[${nPointer.x.f3}, ${nPointer.y.f3}] =>" +
                     "V[${vPointer.x.f3}, ${vPointer.y.f3}] => " +
