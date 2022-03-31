@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.event.KeyEvent
-import java.io.File
 
 class PriceBoardUiState(localDensity: Density, grouping: GroupStrategy) {
     var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping))
@@ -55,8 +54,8 @@ class PriceBoardViewModel(
     private val grouping = GroupStrategy.Day
     val uiState = PriceBoardUiState(appStateRepository.density.value, grouping)
 
-    //state for mering, 2 different datasources for 1 output
-    private val ledger = MutableStateFlow(Ledger.Empty)
+    //state for merigng, 2 different datasources for 1 output
+    private val ledger = appStateRepository.ledger
     private val prices = MutableStateFlow(Asset.Empty to emptyList<PriceItem>())
 
     private var data = PriceBoardDataProcessingUseCase.RawData(Ledger.Empty, Asset.Empty, emptyList())
@@ -70,9 +69,7 @@ class PriceBoardViewModel(
                 .filter { it.nativeKeyCode == KeyEvent.VK_SPACE }
                 .collect { onSpacePressed() }
         }
-        launch(Dispatchers.IO) {
-            ledger.value = runCatching { loadLedgerUseCase.load(File("data/output.xlsx")) }.getOrDefault(Ledger.Empty)
-        }
+
         launch(Dispatchers.Main) {
             ledger.combine(prices) { i1, i2 -> Pair(i1, i2) }.collect { (ledger, pricePair) ->
                 val (asset, prices) = pricePair

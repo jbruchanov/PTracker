@@ -1,15 +1,11 @@
 package com.scurab.ptracker.component
 
-import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.structuralEqualityPolicy
 import com.scurab.ptracker.App.getKoin
 import com.scurab.ptracker.component.navigation.ComponentFactory
 import com.scurab.ptracker.component.navigation.LifecycleComponent
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
 import kotlin.reflect.KClass
-
-val LocalKoin = compositionLocalOf(structuralEqualityPolicy()) { getKoin() }
 
 inline fun <reified T> get(): T = getKoin().get(T::class)
 

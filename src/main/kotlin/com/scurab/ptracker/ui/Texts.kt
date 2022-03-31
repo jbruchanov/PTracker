@@ -10,6 +10,7 @@ interface Texts {
     val FontScaling: String
     val CryptoCompareApiKey: String
     val Test: String
+    val AppTitle: String
 }
 
 object English : Texts {
@@ -17,4 +18,5 @@ object English : Texts {
     override val FontScaling: String = "Font scaling"
     override val CryptoCompareApiKey: String = "CryptoCompare API Key"
     override val Test: String = "Test"
+    override val AppTitle: String = "PTracker-dev"
 }

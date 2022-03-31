@@ -1,6 +1,5 @@
 package com.scurab.ptracker
 
-import MainWindowViewModel
 import com.scurab.ptracker.component.KoinViewModelFactory
 import com.scurab.ptracker.component.navigation.ComponentFactory
 import com.scurab.ptracker.component.navigation.DefaultNavSpecs
@@ -13,8 +12,10 @@ import com.scurab.ptracker.repository.AppSettingsJsonRepository
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.serialisation.JsonBridge
 import com.scurab.ptracker.ui.DateTimeFormats
+import com.scurab.ptracker.ui.main.MainViewModel
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
+import com.scurab.ptracker.ui.stats.StatsViewModel
 import com.scurab.ptracker.usecase.LoadDataUseCase
 import com.scurab.ptracker.usecase.LoadIconsUseCase
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
@@ -41,7 +42,8 @@ fun createKoinModule(appArgs: Array<String>) = module {
     factory { LoadIconsUseCase(get(), get()) }
     factory { TestCryptoCompareKeyUseCase(get()) }
 
-    factory { MainWindowViewModel(get(), get()) }
+    factory { MainViewModel(get(), get(), get()) }
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), get(), get()) }
+    factory { StatsViewModel(get()) }
 }
