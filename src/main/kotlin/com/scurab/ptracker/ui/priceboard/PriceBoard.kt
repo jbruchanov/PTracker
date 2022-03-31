@@ -4,11 +4,15 @@ package com.scurab.ptracker.ui.priceboard
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.HorizontalScrollbar
+import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -52,6 +57,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.scurab.ptracker.ext.clipRectSafe
 import com.scurab.ptracker.ext.draw
 import com.scurab.ptracker.ext.f
@@ -143,19 +149,30 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                     .background(AppColors.current.BackgroundContent)
             ) {
                 Column {
-                    Row {
-                        FlatButton(Icons.Default.BorderOuter, onClick = { vm.onResetClicked() })
-                        VerticalDivider()
-                        ToggleButton(Icons.Default.FilterAlt, isSelected = vm.uiState.hasTradeOnlyFilter, onClick = { vm.onFilterClicked(Filter.ImportantTransactions) })
-                        VerticalDivider()
-                        val assets = vm.uiState.assets
-                        assets.forEach { assetIcon ->
-                            val isSelected = assetIcon.asset == vm.uiState.priceBoardState.selectedAsset
-                            ToggleButton(text = assetIcon.asset.label, onClick = { vm.onAssetSelected(assetIcon.asset) }, isSelected = isSelected)
+                    Box(modifier = Modifier.zIndex(1f)) {
+                        val scrollState = rememberScrollState()
+                        Row(
+                            modifier = Modifier
+                                .width(IntrinsicSize.Max)
+                                .horizontalScroll(scrollState)
+                        ) {
+                            FlatButton(Icons.Default.BorderOuter, onClick = { vm.onResetClicked() })
                             VerticalDivider()
+                            ToggleButton(Icons.Default.FilterAlt, isSelected = vm.uiState.hasTradeOnlyFilter, onClick = { vm.onFilterClicked(Filter.ImportantTransactions) })
+                            VerticalDivider()
+                            val assets = vm.uiState.assets
+                            assets.forEach { assetIcon ->
+                                val isSelected = assetIcon.asset == vm.uiState.priceBoardState.selectedAsset
+                                ToggleButton(text = assetIcon.asset.label, onClick = { vm.onAssetSelected(assetIcon.asset) }, isSelected = isSelected)
+                                VerticalDivider()
+                            }
                         }
+                        HorizontalScrollbar(adapter = rememberScrollbarAdapter(scrollState), modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .offset(0.dp, LocalScrollbarStyle.current.thickness / 2f)
+                        )
                     }
-                    Row {
+                    Row(modifier = Modifier.zIndex(0f)) {
                         Box(modifier = Modifier.weight(1f)) {
                             PriceBoard(priceBoardState, vm)
                         }

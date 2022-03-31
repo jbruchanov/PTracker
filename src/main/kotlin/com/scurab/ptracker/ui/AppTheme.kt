@@ -58,8 +58,8 @@ fun AppTheme(block: @Composable () -> Unit) {
             AppShapes provides AppTheme.Shapes,
             AppSizes provides AppTheme.Sizes,
             LocalScrollbarStyle provides defaultScrollbarStyle().copy(
-                hoverColor = AppTheme.Colors.Primary,
-                unhoverColor = AppTheme.Colors.PrimaryVariant,
+                hoverColor = AppTheme.Colors.Secondary,
+                unhoverColor = AppTheme.Colors.SecondaryVariant,
             )
         ) {
             block()
@@ -78,6 +78,7 @@ object AppTheme {
         val Primary = Color(0xFF546E7A)
         val PrimaryVariant = Color(0xFF546E7A).copy(alpha = .75f)
         val Secondary = Color(0xFFFF7F00)
+        val SecondaryVariant = Color(0xFFFF7F00).copy(alpha = .75f)
         val BackgroundContent = Color(0xFF2B2B2B)
         val ToDo = Color.Magenta
         val OnBackground = Color.White
