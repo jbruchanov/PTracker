@@ -18,6 +18,7 @@ fun BigDecimal.align(scale: Int) = setScale(scale, RoundingMode.HALF_UP)
 
 val BigDecimal.isPositive get() = this > ZERO
 val BigDecimal.isNegative get() = this < ZERO
+fun BigDecimal.safeDiv(divisor: BigDecimal): BigDecimal = if (divisor.isZero()) BigDecimal.ZERO else this / divisor
 
 object BigDecimalFormats {
     val formats = (0..8).map {

@@ -1,5 +1,7 @@
 package com.scurab.ptracker.net
 
+import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.CoinPrice
 import com.scurab.ptracker.net.model.CryptoCompareCoinDetail
 import com.scurab.ptracker.net.model.CryptoCompareHistoryData
 import com.scurab.ptracker.net.model.CryptoCompareResult
@@ -19,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import kotlin.coroutines.CoroutineContext
 
 class CryptoCompareClient(
@@ -36,6 +39,18 @@ class CryptoCompareClient(
 
     suspend fun getCoinData(cryptoSymbol: String): CryptoCompareResult<Map<String, CryptoCompareCoinDetail>> {
         return httpClient.get(coinUrl(cryptoSymbol))
+    }
+
+    suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {
+        val cryptoSyms = assets.map { it.crypto }.distinct().joinToString(separator = ",")
+        val fiatSyms = assets.map { it.fiat }.distinct().joinToString(separator = ",")
+        val rawData = httpClient.get<Map<String, Map<String, Double>>>(pricesUrl(cryptoSyms, fiatSyms))
+        val result = rawData.map { (c1, v) -> v.map { (c2, price) -> Asset.fromUnknownPairOrNull(c1, c2) to price.toBigDecimal() } }
+            .flatten()
+            .filter { it.first != null }
+            .let { it as List<Pair<Asset, BigDecimal>> }
+            .map { CoinPrice(it.first, it.second) }
+        return result
     }
 
     fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>): Channel<CryptoCompareWssResponse.MarketTicker> {
@@ -59,11 +74,16 @@ class CryptoCompareClient(
                     when (val frame = incoming.receive()) {
                         is Frame.Text -> {
                             val message = frame.data.decodeToString()
-                            val obj = jsonBridge.deserialize<CryptoCompareWssResponse>(message)
-                            if (obj is CryptoCompareWssResponse.MarketTicker) {
-                                channel.trySend(obj)
+                            val obj = runCatching { jsonBridge.deserialize<CryptoCompareWssResponse>(message) }.getOrNull()
+                            when (obj) {
+                                is CryptoCompareWssResponse.MarketTicker -> channel.trySend(obj)
+                                is CryptoCompareWssResponse.UnspecificMessage -> {
+                                    //nothing
+                                }
+                                else -> {
+                                    System.err.println(message)
+                                }
                             }
-
                         }
                     }
                 }
@@ -83,7 +103,8 @@ class CryptoCompareClient(
         private const val mainUrl = "https://min-api.cryptocompare.com"
         private const val wsUrl = "streamer.cryptocompare.com"
         private fun historyUrl(fsym: String, tsym: String, limit: Int, toTs: Long) = "${mainUrl}/data/v2/histoday?fsym=$fsym&tsym=$tsym&limit=$limit&toTs=$toTs"
-        private fun coinUrl(fsym: String) = "${wsUrl}/data/all/coinlist?fsym=$fsym"
+        private fun coinUrl(fsym: String) = "${mainUrl}/data/all/coinlist?fsym=$fsym"
+        private fun pricesUrl(cryptoSyms: String, fiatSyms: String) = "${mainUrl}/data/pricemulti?fsyms=${cryptoSyms}&tsyms=${fiatSyms}"
         private fun webSocketPath(key: String) = "/v2?api_key=${key}"
     }
 }

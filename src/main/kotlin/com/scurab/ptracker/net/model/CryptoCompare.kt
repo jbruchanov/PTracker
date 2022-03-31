@@ -5,6 +5,7 @@ package com.scurab.ptracker.net.model
 import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.IPriceItem
 import com.scurab.ptracker.model.MapCache
+import com.scurab.ptracker.model.MarketPrice
 import com.scurab.ptracker.model.WithCache
 import com.scurab.ptracker.serialisation.BigDecimalAsDoubleSerializer
 import com.scurab.ptracker.serialisation.BigDecimalAsStringSerializer
@@ -94,13 +95,13 @@ sealed class CryptoCompareWssResponse {
         @SerialName("MARKET") val market: String,
         @SerialName("FROMSYMBOL") val cryptoCoin: String,
         @SerialName("TOSYMBOL") val fiatCoin: String,
-        @SerialName("PRICE") @Serializable(with = BigDecimalAsDoubleSerializer::class) val price: BigDecimal,
+        @SerialName("PRICE") @Serializable(with = BigDecimalAsDoubleSerializer::class) override val price: BigDecimal,
         @SerialName("LASTUPDATE") @Serializable(with = SecondsLongAsDateTimeSerializer::class) val lastUpdate: LocalDateTime,
         @SerialName("HIGHDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val high: BigDecimal? = null,
         @SerialName("LOWDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val low: BigDecimal? = null,
         @SerialName("OPENDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val open: BigDecimal? = null
-    ) : CryptoCompareWssResponse() {
+    ) : CryptoCompareWssResponse(), MarketPrice {
         @kotlinx.serialization.Transient
-        val asset = Asset(cryptoCoin, fiatCoin)
+        override val asset = Asset(cryptoCoin, fiatCoin)
     }
 }
