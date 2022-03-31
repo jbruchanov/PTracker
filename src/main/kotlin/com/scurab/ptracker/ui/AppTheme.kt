@@ -214,6 +214,8 @@ object AppTheme {
             Transaction.TypeCharitySent to IconColor(10, Icons.Outlined.FavoriteBorder, ColorOrange),
             Transaction.TypeGiftSpouse to IconColor(11, Icons.Filled.Favorite, ColorWhite),
             Transaction.TypeLost to IconColor(12, Icons.Default.Clear, ColorBlack),
+            Transaction._TypeCryptoDeposit to IconColor(91, Icons.Default.ArrowDownward, ColorGreen, Offset(0f, 4f)),
+            Transaction._TypeCryptoWithdrawal to IconColor(92, Icons.Default.ArrowUpward, ColorRed, Offset(0f, -4f)),
             Transaction._TypeTradeIn to IconColor(98, Icons.Default.TriangleDown, ColorGreen, Offset(0f, 4f), candleScale = IconColor.CandleScaleTrade),
             Transaction._TypeTradeOut to IconColor(99, Icons.Default.TriangleUp, ColorRed, Offset(0f, -4f), candleScale = IconColor.CandleScaleTrade),
         )

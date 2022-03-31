@@ -84,13 +84,21 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val wallet: String,
         override val note: String?,
     ) : Transaction(), HasIncome, HasOutcome {
-        override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset, sellAsset)
+        override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset, sellAsset) || isRelatedAsset(asset)
+        private fun isRelatedAsset(asset: Asset) = (sellAsset.isEmpty() && asset.has(buyAsset)) || (buyAsset.isEmpty() && asset.has(sellAsset))
         override val assetsLabel: String = asset.label
-        fun isCryptoBuy() = FiatCurrencies.contains(sellAsset)
+
         override val assets: Set<String> = setOf(buyAsset, sellAsset)
     }
 
     fun isTransactionWithAsset(asset: Asset) = this is Trade && hasAsset(asset)
+
+    fun hasCoin(coin: String) = (this is HasIncome && this.buyAsset == coin) || (this is Outcome && this.sellAsset == coin)
+
+    val isCryptoBuy by lazy { (this as? Trade)?.let { FiatCurrencies.contains(sellAsset) } ?: false }
+    val isCryptoSell by lazy { (this as? Trade)?.let { !FiatCurrencies.contains(sellAsset) } ?: false }
+    val isCryptoDeposit by lazy { (this as? HasIncome)?.let { type == TypeDeposit && !FiatCurrencies.contains(it.buyAsset) } ?: false }
+    val isCryptoWithdrawal by lazy { (this as? HasOutcome)?.let { type == TypeWithdrawal && !FiatCurrencies.contains(it.sellAsset) } ?: false }
 
     fun unitPrice(): BigDecimal? {
         if (this !is Trade) return null
@@ -112,7 +120,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         }
     }
 
-    val isImportant by lazy { !UnImportantType.contains(type) }
+    val isImportant by lazy { isCryptoWithdrawal || isCryptoDeposit || !UnImportantType.contains(type) }
 
     val asset by lazy {
         val buyAsset = (this as? HasIncome)?.buyAsset ?: ""
@@ -145,6 +153,8 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         val TypeTrade = "Trade"
         val _TypeTradeIn = "TradeIn"
         val _TypeTradeOut = "TradeOut"
+        val _TypeCryptoDeposit = "CryptoDeposit"
+        val _TypeCryptoWithdrawal = "CryptoWithdrawal"
 
         private val UnImportantType = setOf(
             TypeDeposit, TypeWithdrawal

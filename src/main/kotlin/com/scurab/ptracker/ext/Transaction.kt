@@ -13,8 +13,10 @@ import kotlin.math.max
 
 fun Transaction.iconColor() = getOrPut("TransactionIcon") {
     when {
-        this is Transaction.Trade && this.isCryptoBuy() -> AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeTradeIn)
-        this is Transaction.Trade && !this.isCryptoBuy() -> AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeTradeOut)
+        isCryptoBuy -> AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeTradeIn)
+        isCryptoSell -> AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeTradeOut)
+        isCryptoDeposit -> AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeCryptoDeposit)
+        isCryptoWithdrawal -> AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeCryptoWithdrawal)
         else -> AppTheme.TransactionIcons.IconsMap.getValue(type)
     }
 }
@@ -61,7 +63,7 @@ fun Transaction.formattedPrices(): TransactionTextPrices {
         val buy = bq?.toPlainString()?.let { " ".repeat(max(0, maxn - bn)) + "+" + it }
         val sell = sq?.toPlainString()?.let { " ".repeat(max(0, maxn - sn)) + "-" + it }
         val fee = fq?.toPlainString()?.let { " ".repeat(max(0, maxn - fn)) + "-" + it }
-        val price = up?.toPlainString()?.let { " ".repeat(max(0, maxn - un )) + " " + it }
+        val price = up?.toPlainString()?.let { " ".repeat(max(0, maxn - un)) + " " + it }
 
         TransactionTextPrices(
             buy = buy?.annotatedPrice(ba),
