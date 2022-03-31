@@ -10,6 +10,7 @@ import com.scurab.ptracker.net.model.CryptoCompareWssSubscription
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.repository.AppSettings
 import com.scurab.ptracker.serialisation.JsonBridge
+import com.scurab.ptracker.ui.model.Validity
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.wss
 import io.ktor.client.request.get
@@ -32,6 +33,10 @@ class CryptoCompareClient(
 
     private var job = Job()
     override var coroutineContext: CoroutineContext = job + Dispatchers.IO
+
+    suspend fun testKey(key: String): Validity {
+        TODO()
+    }
 
     suspend fun getHistoryData(cryptoSymbol: String, fiatSymbol: String, limit: Int = 1000, toTs: Long = -1): CryptoCompareResult<CryptoCompareHistoryData> {
         return httpClient.get(historyUrl(cryptoSymbol, fiatSymbol, limit, toTs))
@@ -56,11 +61,15 @@ class CryptoCompareClient(
     fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>): Channel<CryptoCompareWssResponse.MarketTicker> {
         val apiKey = settings.cryptoCompareApiKey
         requireNotNull(apiKey) { "cryptoCompareApiKey is null" }
-        var wss: Job? = null
+        return subscribeTicker(args, apiKey)
+    }
 
+    private fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>, apiKey: String): Channel<CryptoCompareWssResponse.MarketTicker> {
+        var wss: Job? = null
         val channel = Channel<CryptoCompareWssResponse.MarketTicker>().apply {
             invokeOnClose {
                 wss?.cancel()
+                println("Ended channel")
             }
         }
 
@@ -88,6 +97,7 @@ class CryptoCompareClient(
                     }
                 }
                 wss?.cancel()
+                println("End of WS")
             }
         }
         return channel
@@ -103,7 +113,7 @@ class CryptoCompareClient(
         private const val mainUrl = "https://min-api.cryptocompare.com"
         private const val wsUrl = "streamer.cryptocompare.com"
         private fun historyUrl(fsym: String, tsym: String, limit: Int, toTs: Long) = "${mainUrl}/data/v2/histoday?fsym=$fsym&tsym=$tsym&limit=$limit&toTs=$toTs"
-        private fun coinUrl(fsym: String) = "${mainUrl}/data/all/coinlist?fsym=$fsym"
+        private fun coinUrl(fsym: String, apiKey: String? = null) = "${mainUrl}/data/all/coinlist?fsym=$fsym" + (apiKey?.let { "&api_key=${apiKey}" } ?: "")
         private fun pricesUrl(cryptoSyms: String, fiatSyms: String) = "${mainUrl}/data/pricemulti?fsyms=${cryptoSyms}&tsyms=${fiatSyms}"
         private fun webSocketPath(key: String) = "/v2?api_key=${key}"
     }

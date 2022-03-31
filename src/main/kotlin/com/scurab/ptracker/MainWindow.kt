@@ -26,6 +26,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.scurab.ptracker.App.getKoin
 import com.scurab.ptracker.AppNavTokens
 import com.scurab.ptracker.component.ViewModel
@@ -38,7 +39,6 @@ import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.common.VerticalDivider
 import com.scurab.ptracker.ui.common.VerticalTabButton
-import com.scurab.ptracker.ui.settings.SettingsArgs
 
 class MainWindowViewModel(
     private val appStateRepository: AppStateRepository,
@@ -48,7 +48,7 @@ class MainWindowViewModel(
     fun density() = appStateRepository.density
 
     override fun onOpenSettingsClick() {
-        navController.push(AppNavTokens.Settings, SettingsArgs(2000))
+        navController.push(AppNavTokens.Settings)
     }
 
     override fun onKeyPressed(key: Key): Boolean {
@@ -104,7 +104,9 @@ fun MainWindow(delegate: MainWindowEventDelegate) {
                     )
                 }
                 Column(
-                    modifier = Modifier.width(IntrinsicSize.Max)
+                    modifier = Modifier
+                        .width(IntrinsicSize.Max)
+                        .zIndex(1000f)
                 ) {
                     val navToken by navigation.activeScreen.collectAsState()
                     buttons.forEach { (icon, token, handler) ->
@@ -113,7 +115,11 @@ fun MainWindow(delegate: MainWindowEventDelegate) {
                     }
                 }
                 VerticalDivider()
-                Box(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .zIndex(1f)
+                        .weight(1f)
+                ) {
                     navigation.render()
                 }
             }

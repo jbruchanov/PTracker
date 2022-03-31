@@ -123,6 +123,8 @@ object AppTheme {
         val Space = 4.dp
         val Space2 = 8.dp
         val Space4 = 16.dp
+        val Space6 = 24.dp
+        val Space8 = 32.dp
 
         @Composable
         fun minClickableSize() = MinClickableSize.scaled()
@@ -223,6 +225,9 @@ object AppTheme {
     }
 
     object TextStyles {
+        val Header = TextStyle(color = Colors.OnBackground, fontSize = 21.sp, fontWeight = FontWeight.SemiBold)
+        val Monospace = TextStyle(color = Colors.OnBackground, fontSize = 16.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
+
         val TransactionPrimary = TextStyle(color = Colors.OnBackground, fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
         val TransactionPrimaryVariant = TextStyle(color = Colors.Secondary, fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
         val TransactionSecondary = TextStyle(color = Colors.Secondary, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
