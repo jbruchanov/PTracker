@@ -1,14 +1,18 @@
 package com.scurab.ptracker.ext
 
+import com.scurab.ptracker.model.FiatCoin
 import com.scurab.ptracker.model.OnlineHoldingStats
 
-fun Collection<OnlineHoldingStats>.totalMarketValue() = sumOf { it.marketValue }
-fun Collection<OnlineHoldingStats>.totalCost() = sumOf { it.cost }
-fun Collection<OnlineHoldingStats>.totalGains() = sumOf { it.gain }
+fun Collection<OnlineHoldingStats>.totalMarketValue(fiatCoin: FiatCoin? = null) = sumOf { it.marketValue(fiatCoin) }
+fun Collection<OnlineHoldingStats>.totalCost(fiatCoin: FiatCoin? = null) = sumOf { it.cost(fiatCoin) }
+fun Collection<OnlineHoldingStats>.totalGains(fiatCoin: FiatCoin? = null) = sumOf { it.gain(fiatCoin) }
 fun Collection<OnlineHoldingStats>.marketPercentage() {
     val totalMarketValue = totalMarketValue()
     associateBy(
-        keySelector = { it.marketPrice.asset },
+        keySelector = { it.asset },
         valueTransform = { it.marketValue.safeDiv(totalMarketValue) }
     )
 }
+
+fun Collection<OnlineHoldingStats>.totalRoi(fiatCoin: FiatCoin? = null) = totalMarketValue(fiatCoin).safeDiv(totalCost(fiatCoin)).roi()
+fun Collection<OnlineHoldingStats>.fiatCoins() = map { it.asset.fiat }.distinct().sorted().map { FiatCoin(it) }

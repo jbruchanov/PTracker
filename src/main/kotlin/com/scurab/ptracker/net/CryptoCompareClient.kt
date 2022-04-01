@@ -16,9 +16,11 @@ import io.ktor.client.features.websocket.wss
 import io.ktor.client.request.get
 import io.ktor.http.HttpMethod
 import io.ktor.http.cio.websocket.Frame
+import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -32,7 +34,7 @@ class CryptoCompareClient(
 ) : CoroutineScope {
 
     private var job = Job()
-    override var coroutineContext: CoroutineContext = job + Dispatchers.IO
+    override val coroutineContext: CoroutineContext get() = SupervisorJob(job) + Dispatchers.IO
 
     suspend fun testKey(key: String): Validity {
         TODO()
@@ -47,6 +49,7 @@ class CryptoCompareClient(
     }
 
     suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {
+        if (assets.isEmpty()) return emptyList()
         val cryptoSyms = assets.map { it.crypto }.distinct().joinToString(separator = ",")
         val fiatSyms = assets.map { it.fiat }.distinct().joinToString(separator = ",")
         val rawData = httpClient.get<Map<String, Map<String, Double>>>(pricesUrl(cryptoSyms, fiatSyms))
@@ -68,8 +71,7 @@ class CryptoCompareClient(
         var wss: Job? = null
         val channel = Channel<CryptoCompareWssResponse.MarketTicker>().apply {
             invokeOnClose {
-                wss?.cancel()
-                println("Ended channel")
+                requireNotNull(wss).cancel()
             }
         }
 
@@ -86,19 +88,21 @@ class CryptoCompareClient(
                             val obj = runCatching { jsonBridge.deserialize<CryptoCompareWssResponse>(message) }.getOrNull()
                             when (obj) {
                                 is CryptoCompareWssResponse.MarketTicker -> channel.trySend(obj)
+                                is CryptoCompareWssResponse.Error -> throw IllegalStateException(message)
                                 is CryptoCompareWssResponse.UnspecificMessage -> {
                                     //nothing
                                 }
-                                else -> {
-                                    System.err.println(message)
-                                }
+                                else -> System.err.println(message)
                             }
                         }
                     }
                 }
-                wss?.cancel()
-                println("End of WS")
             }
+        }.also { job ->
+            job.invokeOnCompletion { ex ->
+                channel.cancel(cause = ex?.let { CancellationException("Cancel, ${it.message}") })
+            }
+
         }
         return channel
     }
@@ -106,7 +110,6 @@ class CryptoCompareClient(
     fun stop() {
         job.cancel()
         job = Job()
-        coroutineContext = job + Dispatchers.Default
     }
 
     companion object {

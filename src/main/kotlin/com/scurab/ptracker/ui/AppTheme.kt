@@ -117,6 +117,7 @@ object AppTheme {
         private val ClickableSize = 48.dp
         val IconButtonPadding = 8.dp
         val IconTransactionType = 16.dp
+        val StatsIconSize = 36.dp
 
         val Hairline = 1.dp
         val Space05 = 2.dp
@@ -125,6 +126,8 @@ object AppTheme {
         val Space4 = 16.dp
         val Space6 = 24.dp
         val Space8 = 32.dp
+
+        val ThickLine = 2.dp
 
         @Composable
         fun minClickableSize() = MinClickableSize.scaled()
@@ -179,6 +182,7 @@ object AppTheme {
         val MouseCross = Color.White
         val CandleRed = Color(0xFFEF5350)
         val CandleGreen = Color(0xFF26A69A)
+        val Candle = StateContainer(CandleGreen, default2 = CandleRed)
         val CandleTransaction = Colors.Primary
     }
 
@@ -226,6 +230,10 @@ object AppTheme {
 
     object TextStyles {
         val Header = TextStyle(color = Colors.OnBackground, fontSize = 21.sp, fontWeight = FontWeight.SemiBold)
+        val Normal = TextStyle(color = Colors.OnBackground, fontSize = 14.sp, fontWeight = FontWeight.Normal)
+        val Small = TextStyle(color = Colors.OnBackground, fontSize = 12.sp, fontWeight = FontWeight.Normal)
+        val Tiny = TextStyle(color = Colors.OnBackground, fontSize = 10.sp, fontWeight = FontWeight.Normal)
+        val NormalMonospace = TextStyle(color = Colors.OnBackground, fontSize = 14.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
         val Monospace = TextStyle(color = Colors.OnBackground, fontSize = 16.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
 
         val TransactionPrimary = TextStyle(color = Colors.OnBackground, fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)

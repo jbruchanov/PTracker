@@ -1,5 +1,12 @@
 package com.scurab.ptracker.model
 
+import com.scurab.ptracker.serialisation.BigDecimalAsStringSerializer
+import kotlinx.serialization.SerialName
 import java.math.BigDecimal
+import kotlinx.serialization.Serializable
 
-data class CoinPrice(override val asset: Asset, override val price: BigDecimal) : MarketPrice
+@Serializable
+data class CoinPrice(
+    @SerialName("asset") override val asset: Asset,
+    @SerialName("price") @Serializable(with = BigDecimalAsStringSerializer::class) override val price: BigDecimal
+) : MarketPrice

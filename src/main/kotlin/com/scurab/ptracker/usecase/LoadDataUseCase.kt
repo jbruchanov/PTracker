@@ -15,7 +15,7 @@ import kotlin.time.Duration.Companion.days
 
 class LoadDataUseCase {
     fun loadData(asset: Asset): List<PriceItem> {
-        val f = File("${Locations.Data}/${asset.label}.json")
+        val f = File("${Locations.Daily}/${asset.label}.json")
         val items = if (f.exists()) {
             JsonBridge.deserialize<List<CryptoComparePriceItem>>(f.readText()).mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, asset, cryptoComparePriceItem) }
         } else {

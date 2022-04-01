@@ -1,6 +1,7 @@
 package com.scurab.ptracker.net
 
 import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.Locations
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.serialisation.JsonBridge
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
@@ -10,10 +11,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
-//@Disabled
+@Disabled
 internal class CryptoCompareClientTest {
 
     private val testAssets by lazy {
@@ -38,10 +40,12 @@ internal class CryptoCompareClientTest {
     fun getHistoryData() {
         val ledger = kotlin.runCatching { LoadLedgerUseCase().load(File("data/output.xlsx")) }.getOrNull()
         val symbols = ledger?.assets?.takeIf { it.isNotEmpty() } ?: testAssets
+        val folder = File(Locations.Daily)
+        folder.mkdirs()
         runBlocking {
             symbols.forEach { (c, f) ->
                 val historyData = CryptoCompareClient(defaultHttpClient(), mockk(), JsonBridge).getHistoryData(c, f, 1000)
-                File("data/$c-$f.json").writeText(JsonBridge.serialize(historyData.data.items))
+                File(folder, "$c-$f.json").writeText(JsonBridge.serialize(historyData.data.items))
             }
         }
     }

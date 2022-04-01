@@ -1,10 +1,15 @@
 package com.scurab.ptracker.model
 
 import java.io.File
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
-data class Asset(val crypto: String, val fiat: String) {
+@Serializable
+data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
     fun has(value: String) = crypto == value || fiat == value
     fun has(value1: String, value2: String) = (value1 == crypto && value2 == fiat) || (value2 == crypto && value1 == fiat)
+
+    @Transient
     val label = buildString {
         append(crypto)
         if (isNotEmpty() && fiat.isNotEmpty()) {
@@ -13,11 +18,17 @@ data class Asset(val crypto: String, val fiat: String) {
         append(fiat)
     }
 
-    override fun toString(): String = label
-
+    @Transient
     val isEmpty = this == Empty
 
+    @Transient
+    val isTradingAsset = crypto.isNotEmpty() && fiat.isNotEmpty()
+
+    fun cryptoLabelOnlyIf(value: Boolean) = if (value) crypto else label
+
     fun iconCrypto() = File(Locations.Icons, crypto.lowercase() + ".png")
+
+    override fun toString(): String = label
 
     companion object {
         val Empty = Asset("", "")
@@ -35,4 +46,6 @@ data class Asset(val crypto: String, val fiat: String) {
 
         fun fromUnknownPairOrNull(coin1: String, coin2: String) = kotlin.runCatching { fromUnknownPair(coin1, coin2) }.getOrNull()
     }
+
+    override fun compareTo(other: Asset): Int = label.compareTo(other.label)
 }

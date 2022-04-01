@@ -12,8 +12,14 @@ object DateTimeFormats {
     val monthYear = DateTimeFormatter.ofPattern("MM/yyyy")
     val dayNumber = DateTimeFormatter.ofPattern("d")
 
+    val fullTime = DateTimeFormatter.ofPattern("HH:mm:ss")
     val fullDateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    val fullDateTime2Lines = DateTimeFormatter.ofPattern("yyyy-MM-dd\nHH:mm:ss")
     fun fullDateTime(localDateTime: LocalDateTime): String = localDateTime.toJavaLocalDateTime().format(fullDateTime)
+    val debugFullDateTime = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+    val debugFullDate = DateTimeFormatter.ofPattern("yyyyMMdd")
+    fun fullDateTime2Lines(localDateTime: LocalDateTime): String = localDateTime.toJavaLocalDateTime().format(fullDateTime2Lines)
+    fun fullTime(localDateTime: LocalDateTime): String = localDateTime.toJavaLocalDateTime().format(fullTime)
 }
 
 

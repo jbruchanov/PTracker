@@ -91,6 +91,12 @@ sealed class CryptoCompareWssResponse {
     ) : CryptoCompareWssResponse()
 
     @Serializable
+    data class Error(
+        @SerialName("MESSAGE") val message: String,
+        @SerialName("PARAMETER") val params: String
+    ) : CryptoCompareWssResponse()
+
+    @Serializable
     data class MarketTicker(
         @SerialName("MARKET") val market: String,
         @SerialName("FROMSYMBOL") val cryptoCoin: String,

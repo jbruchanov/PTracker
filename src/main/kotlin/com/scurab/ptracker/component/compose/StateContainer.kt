@@ -16,5 +16,7 @@ data class StateContainer<T>(
         else -> default
     }
 
+    fun default2If(value: Boolean = false) = if (value) default2 else default
+
     val count = setOf(default, disabled, selected, default2).size
 }

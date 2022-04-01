@@ -69,7 +69,7 @@ fun AssetToggleButton(
         Row {
             //unfinished
             Box(modifier = Modifier.background(Color.Black).padding(4.dp)) {
-                Flag(code = item.asset.fiat, size = 12.sp, modifier = Modifier)
+                Flag(code = item.asset.fiat, size = 12.dp, modifier = Modifier)
                 if (item.icon != null) {
                     Image(item.icon, contentDescription = item.asset.crypto, modifier = Modifier.size(24.dp))
                 }

@@ -1,8 +1,11 @@
 package com.scurab.ptracker.ui.common
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -11,6 +14,7 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import com.scurab.ptracker.ext.One
 import com.scurab.ptracker.ext.nativeCanvas
@@ -21,7 +25,7 @@ import org.jetbrains.skia.TextLine
 import org.jetbrains.skia.shaper.ShapingOptions
 
 @Composable
-fun Flag(code: String, size: TextUnit, modifier: Modifier = Modifier) {
+fun Flag(code: String, size: Dp, modifier: Modifier = Modifier) {
     val sizePx = size.value * LocalDensity.current.fontScale
     val font = remember { AppTheme.TextRendering.flagFont() }.also {
         it.size = sizePx
@@ -51,11 +55,13 @@ fun Flag(code: String, size: TextUnit, modifier: Modifier = Modifier) {
         val centerY = 0f + textLineF.height / 2 - (textLineF.descent + textLineF.ascent) / 2
         val offsetX = if (isSquare) (canvasSize.maxDimension - originalCanvasSize.width) / 2 else 0f
         val offset = Offset(x = -start.x + offsetX, y = -start.y + centerY)
-        translate(left = offset.x, top = offset.y) {
-            val scale = if (isSquare) Offset(1.1f, 1.1f) else Offset.One
-            val pivot = if (isSquare) -offset + this.center else Offset.Zero
-            scale(scaleX = scale.x, scaleY = scale.y, pivot = pivot) {
-                nativeCanvas.drawTextLine(textLineF, 0f, 0f, paint)
+        translate(left = 0f, top = centerY / 2) {
+            translate(left = offset.x, top = offset.y) {
+                val scale = if (isSquare) Offset(1.1f, 1.1f) else Offset.One
+                val pivot = if (isSquare) -offset + this.center else Offset.Zero
+                scale(scaleX = scale.x, scaleY = scale.y, pivot = pivot) {
+                    nativeCanvas.drawTextLine(textLineF, 0f, 0f, paint)
+                }
             }
         }
     }
