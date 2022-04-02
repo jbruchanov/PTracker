@@ -108,7 +108,7 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density,
     }
 
     fun setViewport(viewport: Rect, size: Size = this.canvasSize, animate: Boolean = false) = composeCoroutineScope.launch {
-        require(!size.isEmpty()) { "Size has 0 values" }
+        if (size.isEmpty()) return@launch
         val offset = Offset(viewport.left, viewport.bottom)
         val scale = Offset(viewport.nWidth / size.width, viewport.nHeight / size.height)
         if (animate) {

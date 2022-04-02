@@ -47,6 +47,9 @@ class PricesRepository(
     private val _subscriptions = mutableSetOf<Subscription>()
     val subscriptions: Collection<Subscription> = _subscriptions
 
+    private val _latestPrices = mutableMapOf<Asset, MarketPrice>()
+    val latestPrices: Map<Asset, MarketPrice> = _latestPrices
+
     suspend fun getPrices(ledger: Ledger) = client.getPrices(ledger.assets)
 
     suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {
@@ -57,6 +60,8 @@ class PricesRepository(
             client.getPrices(assets).also {
                 file.writeText(JsonBridge.serialize(it, beautify = true))
             }
+        }.also { prices ->
+            _latestPrices.putAll(prices.associateBy(keySelector = { it.asset }, valueTransform = { it }))
         }
     }
 
@@ -75,7 +80,10 @@ class PricesRepository(
                 try {
                     flowPrices(data).consumeEach {
                         when (it) {
-                            is WsExchangeResponse.MarketPrice -> _wsMarketPrice.tryEmit(it)
+                            is WsExchangeResponse.MarketPrice -> {
+                                _wsMarketPrice.tryEmit(it)
+                                _latestPrices[it.asset] = it
+                            }
                             is WsExchangeResponse.Subscription -> _subscriptions.add(Subscription(it.exchangeWallet, it.asset))
                         }
                         _wsTickToken.tryEmit(WsMessageToken(System.currentTimeMillis(), it.client))
@@ -94,14 +102,17 @@ class PricesRepository(
         _wsSubscriptionJob = ProcessScope.launch(Dispatchers.IO) {
             val prices = getPrices(data.map { it.value }.flatten().distinct()).toMutableList()
             while (isActive) {
-                prices.forEachIndexed { index, coinPrice ->
-                    if (Random.nextBoolean()) return@forEachIndexed
-                    val offset = 1 + (Random.nextInt(1, 5) / 100f * Random.nextBoolean().sign())
-                    val marketPrice = coinPrice.copy(price = coinPrice.price * offset.toBigDecimal())
-                    _wsMarketPrice.tryEmit(marketPrice)
-                    _wsTickToken.tryEmit(WsMessageToken(System.currentTimeMillis(), "Demo"))
-                    prices[index] = marketPrice
-                    delay(Random.nextLong(4000, 6000))
+                repeat((prices.size / 2)) {
+                    prices.forEachIndexed { index, coinPrice ->
+                        if (Random.nextBoolean()) return@forEachIndexed
+                        val offset = 1 + (Random.nextInt(1, 5) / 100f * Random.nextBoolean().sign())
+                        val marketPrice = coinPrice.copy(price = coinPrice.price * offset.toBigDecimal())
+                        _wsMarketPrice.tryEmit(marketPrice)
+                        _wsTickToken.tryEmit(WsMessageToken(System.currentTimeMillis(), "Demo"))
+                        _latestPrices[marketPrice.asset] = marketPrice
+                        prices[index] = marketPrice
+                        delay(Random.nextLong(500, 1500))
+                    }
                 }
             }
         }

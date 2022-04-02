@@ -2,6 +2,7 @@ package com.scurab.ptracker.serialisation
 
 import com.scurab.ptracker.ext.align
 import com.scurab.ptracker.ext.toLong
+import com.scurab.ptracker.model.Asset
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -71,5 +72,18 @@ object SecondsLongAsDateTimeSerializer : KSerializer<LocalDateTime> {
 
     override fun serialize(encoder: Encoder, value: LocalDateTime) {
         encoder.encodeLong(value.toLong() / 1000)
+    }
+}
+
+object AssetAsStringSerializer : KSerializer<Asset> {
+
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("com.scurab.ptracker.model.Asset", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): Asset {
+        return Asset.fromString(decoder.decodeString())
+    }
+
+    override fun serialize(encoder: Encoder, value: Asset) {
+        encoder.encodeString(value.label)
     }
 }

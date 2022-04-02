@@ -15,13 +15,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DataUsage
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterfallChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -75,7 +74,7 @@ private fun Main(uiState: MainUiState, eventHandler: MainEventHandler) {
         eventHandler.onKeyPressed(it.key)
     }) {
         Row {
-            val navToken = navigation.activeScreen.collectAsState()
+            val navToken by navigation.activeScreen.collectAsState()
             Column(
                 modifier = Modifier.width(IntrinsicSize.Max).zIndex(1000f)
             ) {
@@ -92,7 +91,7 @@ private fun Main(uiState: MainUiState, eventHandler: MainEventHandler) {
 }
 
 @Composable
-private fun ColumnScope.Menu(navToken: Any, tick: WsMessageToken?, eventHandler: MainEventHandler) {
+private fun ColumnScope.Menu(navToken: NavToken<*>, tick: WsMessageToken?, eventHandler: MainEventHandler) {
     val buttons = remember {
         listOf(
             LeftMenuButton(Icons.Default.WaterfallChart, AppNavTokens.PriceDashboard, eventHandler::onOpenPriceDashboardClick),

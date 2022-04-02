@@ -89,6 +89,7 @@ import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
+import com.scurab.ptracker.ui.common.AssetToggleButton
 import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.FlatButton
 import com.scurab.ptracker.ui.common.ToggleButton
@@ -140,7 +141,8 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
 @Composable
 fun PriceBoard(vm: PriceBoardViewModel) {
     vm.uiState.priceBoardState.init()
-    val priceBoardState = vm.uiState.priceBoardState
+    val uiState = vm.uiState
+    val priceBoardState = uiState.priceBoardState
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -162,7 +164,9 @@ fun PriceBoard(vm: PriceBoardViewModel) {
                     val assets = vm.uiState.assets
                     assets.forEach { assetIcon ->
                         val isSelected = assetIcon.asset == vm.uiState.priceBoardState.selectedAsset
-                        ToggleButton(text = assetIcon.asset.label, onClick = { vm.onAssetSelected(assetIcon.asset) }, isSelected = isSelected)
+                        AssetToggleButton(
+                            assetIcon.asset, uiState.prices[assetIcon.asset], isSelected = isSelected, onClick = { vm.onAssetSelected(assetIcon.asset) }
+                        )
                         VerticalDivider()
                     }
                 }

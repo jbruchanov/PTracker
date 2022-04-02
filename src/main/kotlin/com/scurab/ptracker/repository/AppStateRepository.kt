@@ -43,5 +43,10 @@ class AppStateRepository(private val appSettings: AppSettings) {
     fun setAppData(appData: AppData) {
         this.appData = appData
         _ledger.tryEmit(appData.ledger)
+        appSettings.lastSelectedAsset
+            ?.takeIf { appData.ledger.assets.contains(it) }
+            ?.let {
+                _selectedAsset.tryEmit(it)
+            }
     }
 }

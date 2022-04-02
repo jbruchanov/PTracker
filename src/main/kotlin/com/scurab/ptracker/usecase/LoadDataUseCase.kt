@@ -27,13 +27,15 @@ class LoadDataUseCase(
         val historyDef = async(Dispatchers.IO) { loadPriceHistoryUseCase.loadAll(ledger.assets) }
         val iconsDef = async(Dispatchers.IO) { loadIconsUseCase.loadIcons(ledger.assets) }
         val statsDef = async(Dispatchers.IO) { statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions) }
+        val pricesDef = async(Dispatchers.IO) { pricesRepository.getPrices(ledger.assets) }
 
         val history = historyDef.await().mapValues { it.value.getOrNull() }.mapValues { it.value ?: emptyList() }
         val stats = statsDef.await()
+        val prices = pricesDef.await()
         iconsDef.await()
 
         return@coroutineScope AppData(
-            ledger, history, stats
+            ledger, prices, history, stats
         )
     }
 

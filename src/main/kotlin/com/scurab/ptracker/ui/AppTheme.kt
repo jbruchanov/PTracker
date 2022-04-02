@@ -237,6 +237,8 @@ object AppTheme {
         val Small = TextStyle(color = Colors.OnBackground, fontSize = 12.sp, fontWeight = FontWeight.Normal)
         val Tiny = TextStyle(color = Colors.OnBackground, fontSize = 10.sp, fontWeight = FontWeight.Normal)
         val NormalMonospace = TextStyle(color = Colors.OnBackground, fontSize = 14.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
+        val SmallMonospace = TextStyle(color = Colors.OnBackground, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
+        val TinyMonospace = TextStyle(color = Colors.OnBackground, fontSize = 10.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
         val Monospace = TextStyle(color = Colors.OnBackground, fontSize = 16.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
 
         val TransactionPrimary = TextStyle(color = Colors.OnBackground, fontSize = 13.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)

@@ -1,6 +1,7 @@
 package com.scurab.ptracker.ui.priceboard
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.nativeKeyCode
@@ -12,9 +13,11 @@ import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.Filter
 import com.scurab.ptracker.model.GroupStrategy
 import com.scurab.ptracker.model.Ledger
+import com.scurab.ptracker.model.MarketPrice
 import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.repository.AppStateRepository
+import com.scurab.ptracker.repository.PricesRepository
 import com.scurab.ptracker.ui.model.AssetIcon
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
 import com.scurab.ptracker.usecase.LoadPriceHistoryUseCase
@@ -28,10 +31,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.event.KeyEvent
 
-class PriceBoardUiState(localDensity: Density, grouping: GroupStrategy) {
+class PriceBoardUiState(
+    localDensity: Density,
+    grouping: GroupStrategy
+) {
     var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping))
     var assets by mutableStateOf(emptyList<AssetIcon>())
     var hasTradeOnlyFilter by mutableStateOf(true)
+    val prices = mutableStateMapOf<Asset, MarketPrice>()
 }
 
 interface PriceBoardEventDelegate {
@@ -46,7 +53,7 @@ interface PriceBoardEventDelegate {
 class PriceBoardViewModel(
     private val appStateRepository: AppStateRepository,
     private val loadPriceHistoryUseCase: LoadPriceHistoryUseCase,
-    private val loadLedgerUseCase: LoadLedgerUseCase,
+    private val pricesRepository: PricesRepository,
     private val dataUseCase: PriceBoardDataProcessingUseCase
 ) : ViewModel(), PriceBoardEventDelegate {
 
@@ -78,6 +85,13 @@ class PriceBoardViewModel(
                 data = PriceBoardDataProcessingUseCase.RawData(ledger, asset, prices)
                 updateData(data, filters.firstIf(uiState.hasTradeOnlyFilter), true)
             }
+        }
+        launch(Dispatchers.Main) {
+            uiState.prices.putAll(pricesRepository.latestPrices)
+            pricesRepository.wsMarketPrice
+                .collect {
+                    uiState.prices[it.asset] = it
+                }
         }
     }
 

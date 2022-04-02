@@ -1,10 +1,11 @@
 package com.scurab.ptracker.model
 
+import com.scurab.ptracker.serialisation.AssetAsStringSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.io.File
 
-@Serializable
+@Serializable(with = AssetAsStringSerializer::class)
 data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
     fun has(value: String) = crypto == value || fiat == value
     fun has(value1: String, value2: String) = (value1 == crypto && value2 == fiat) || (value2 == crypto && value1 == fiat)
@@ -30,7 +31,7 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
 
     fun ensureFiatOrNull() = fiat.takeIf { FiatCurrencies.contains(fiat) } ?: crypto.takeIf { FiatCurrencies.contains(crypto) }
 
-    override fun toString(): String = label
+    override fun toString(): String = "$crypto-$fiat"
 
     companion object {
         val Empty = Asset("", "")
@@ -49,6 +50,13 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
         }
 
         fun fromUnknownPairOrNull(coin1: String?, coin2: String?) = kotlin.runCatching { fromUnknownPair(coin1, coin2) }.getOrNull()
+
+        fun fromString(value: String): Asset {
+            require(value.isNotEmpty())
+            val items = value.split("-")
+            require(items.size == 2) { "Invalid input:${value}, must be 'COIN1-COIN2'" }
+            return fromUnknownPair(items[0], items[1])
+        }
     }
 
     override fun compareTo(other: Asset): Int = label.compareTo(other.label)

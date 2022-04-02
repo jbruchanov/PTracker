@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -19,10 +21,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.scurab.ptracker.ext.f4
+import com.scurab.ptracker.ext.gf4
+import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.MarketPrice
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.model.AssetIcon
+import org.apache.xmlbeans.xml.stream.Space
 
 @Composable
 fun ToggleButton(
@@ -59,7 +66,7 @@ fun ToggleButton(
 }
 
 @Composable
-fun AssetToggleButton(
+fun FlatToggleButton(
     item: AssetIcon, isSelected: Boolean, onClick: () -> Unit
 ) {
     val color = AppColors.current.Content.get(isSelected = isSelected)
@@ -80,6 +87,34 @@ fun AssetToggleButton(
             ) {
                 Text(text = item.asset.crypto, fontSize = AppTheme.TextRendering.small, color = color, modifier = Modifier)
                 Text(text = item.asset.fiat, fontSize = AppTheme.TextRendering.small, color = color, modifier = Modifier)
+            }
+        }
+    }
+}
+
+@Composable
+fun AssetToggleButton(asset: Asset, price: MarketPrice?, isSelected: Boolean, onClick: () -> Unit) {
+    ToggleButton(isSelected, onClick) {
+        val textColor = AppColors.current.Content.get(isSelected = isSelected)
+        Column(modifier = Modifier.align(Alignment.Center)) {
+            Text(
+                text = asset.label,
+                style = AppTheme.TextStyles.Small,
+                color = textColor,
+                modifier = Modifier
+                    .padding(horizontal = AppSizes.current.Space4)
+                    .align(Alignment.CenterHorizontally)
+            )
+            if (price != null) {
+                Spacer(modifier = Modifier.height(AppSizes.current.Space05))
+                Text(
+                    text = price.price.gf4,
+                    color = textColor,
+                    style = AppTheme.TextStyles.TinyMonospace,
+                    modifier = Modifier
+                        .padding(horizontal = AppSizes.current.Space4)
+                        .align(Alignment.CenterHorizontally)
+                )
             }
         }
     }

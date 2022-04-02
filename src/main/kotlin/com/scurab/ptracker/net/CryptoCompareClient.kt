@@ -88,7 +88,9 @@ class CryptoCompareClient(
                             val obj = runCatching { jsonBridge.deserialize<CryptoCompareWsResponse>(message) }.getOrNull()
                             when (obj) {
                                 is CryptoCompareWsResponse.Error -> throw IllegalStateException(message)
-                                null -> throw IllegalStateException("Parsing error? json:${message}")
+                                null -> {
+                                    System.err.println("Parsing error?\njson:${message}")
+                                }
                                 else -> channel.trySend(obj)
                             }
                         }
