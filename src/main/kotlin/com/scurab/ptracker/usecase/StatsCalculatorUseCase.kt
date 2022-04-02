@@ -22,16 +22,31 @@ class StatsCalculatorUseCase {
         val allCoins = data.map { it.assets }.flatten().toSet()
         val fiatCoins = allCoins.filter { FiatCurrencies.contains(it) }.toSet()
         val cryptoCoins = allCoins - fiatCoins
-        val tradingAssets = data.map { it.asset }.filter { it.isTradingAsset }.toSet()
+        val tradingAssets = data.map { it.asset }.filter { it.isCryptoTradingAsset }.toSet()
         val exchanges = data.map { it.exchange }.toSet()
         val transactionTypes = data.map { it.type }.toSet()
         val transactionsByExchange = data.groupBy { it.exchange }
+        val assetsByExchange = exchanges
+            .mapNotNull { exchange -> exchange.normalizedExchange()?.let { normalized -> exchange to normalized }}
+            .associateBy(
+                keySelector = { ExchangeWallet(it.second) },
+                valueTransform = { (exchange, normalized) ->
+                    data.asSequence()
+                        .filterIsInstance<Transaction.Trade>()
+                        .filter { it.exchange == exchange }
+                        .filter { it.asset.isCryptoTradingAsset }
+                        .map { it.asset }.toSet().sorted()
+                })
 
         //currently, what I have on exchange/wallet
         val actualOwnership = tradingAssets.associateWith { asset -> CoinCalculation(asset, ledger.items.filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.crypto) }) }
         //traded amounts => values what I'd have had if without losts/gifts/etc => value used for price per unit
         val tradedAmount =
-            tradingAssets.associateWith { asset -> CoinCalculation(asset, ledger.items.filterIsInstance<Transaction.Trade>().filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.crypto) }) }
+            tradingAssets.associateWith { asset ->
+                CoinCalculation(
+                    asset,
+                    ledger.items.filterIsInstance<Transaction.Trade>().filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.crypto) })
+            }
         val spentFiatByCrypto = tradingAssets.associateWith { asset ->
             CoinCalculation(CryptoCoin(asset.crypto), data.filter { it.hasAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.fiat) })
         }
@@ -55,7 +70,18 @@ class StatsCalculatorUseCase {
                 }
             }
 
-        return LedgerStats(tradingAssets.toList(), holdings, exchangeSumOfCoins, transactionsPerAssetPerType)
+        return LedgerStats(tradingAssets.toList(), assetsByExchange, holdings, exchangeSumOfCoins, transactionsPerAssetPerType)
+    }
+
+    private fun String.normalizedExchange(): String? {
+        val name = this.lowercase()
+        return when {
+            name.contains("kraken") -> "Kraken"
+            name.contains("coinbase") -> "Coinbase"
+            name.contains("binance") -> "Binance"
+            name.contains("trezor") -> null
+            else -> null
+        }
     }
 }
 

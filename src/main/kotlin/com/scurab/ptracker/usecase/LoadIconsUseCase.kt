@@ -2,6 +2,7 @@ package com.scurab.ptracker.usecase
 
 import com.scurab.ptracker.ext.parallelMapIndexed
 import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.FiatCurrencies
 import com.scurab.ptracker.model.Locations
 import com.scurab.ptracker.net.CryptoCompareClient
 import io.ktor.client.HttpClient
@@ -18,19 +19,23 @@ class LoadIconsUseCase(
 
     private val location = File(Locations.Icons)
 
-    suspend fun loadIconsForCryptoCoins(assets: Collection<Asset>): List<Pair<String, File?>> = loadIcons(assets.map { it.crypto }.distinct())
-
-    suspend fun loadIcons(cryptoAssets: Collection<String>): List<Pair<String, File?>> {
+    suspend fun loadIcons(cryptoAssets: List<Asset>): List<Pair<String, File?>> {
+        val allCoins = (cryptoAssets.map { it.fiat } + cryptoAssets.map { it.crypto }).toSet()
         location.mkdirs()
-        val downloads = cryptoAssets
+
+        val result = allCoins
             .map { c -> c to File(location, "${c.lowercase()}.png") }
             .filterNot { (_, f) -> f.exists() && f.length() > 0L }
             .parallelMapIndexed { _, (c, f) ->
-                val fullImageUrl = kotlin.runCatching { cryptoCompareClient.getCoinData(c).data[c]?.fullImageUrl }.getOrNull()
+                val fullImageUrl = if (FiatCurrencies.contains(c)) {
+                    "${Locations.IconsUrl}${c.take(2).lowercase()}.png"
+                } else {
+                    kotlin.runCatching { cryptoCompareClient.getCoinData(c).data[c]?.fullImageUrl }.getOrNull()
+                }
                 fullImageUrl?.let { kotlin.runCatching { httpClient.get<HttpResponse>(it).content.copyTo(f.writeChannel()) }.getOrNull() }
                 Triple(c, f, fullImageUrl)
             }
-        val downloadsMap = downloads.associateBy(keySelector = { it.first }, valueTransform = { it.second })
-        return cryptoAssets.map { it to downloadsMap[it]?.takeIf { f -> f.exists() && f.length() > 0 } }
+        val downloadsMap = result.associateBy(keySelector = { it.first }, valueTransform = { it.second })
+        return allCoins.map { it to downloadsMap[it]?.takeIf { f -> f.exists() && f.length() > 0 } }
     }
 }

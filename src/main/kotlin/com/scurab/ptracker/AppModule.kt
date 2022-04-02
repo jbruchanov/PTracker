@@ -15,11 +15,13 @@ import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.main.MainViewModel
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
+import com.scurab.ptracker.repository.PricesRepository
 import com.scurab.ptracker.ui.stats.StatsViewModel
 import com.scurab.ptracker.usecase.LoadDataUseCase
 import com.scurab.ptracker.usecase.LoadIconsUseCase
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
 import com.scurab.ptracker.usecase.PriceBoardDataProcessingUseCase
+import com.scurab.ptracker.usecase.StatsCalculatorUseCase
 import com.scurab.ptracker.usecase.TestCryptoCompareKeyUseCase
 import org.koin.dsl.module
 
@@ -35,15 +37,17 @@ fun createKoinModule(appArgs: Array<String>) = module {
     single { defaultHttpClient() }
     single<AppSettings> { AppSettingsJsonRepository.default(get()) }
     single { CryptoCompareClient(get(), get(), get()) }
+    single { PricesRepository(get()) }
 
     factory { LoadDataUseCase() }
     factory { LoadLedgerUseCase() }
     factory { PriceBoardDataProcessingUseCase() }
     factory { LoadIconsUseCase(get(), get()) }
     factory { TestCryptoCompareKeyUseCase(get()) }
+    factory { StatsCalculatorUseCase() }
 
     factory { MainViewModel(get(), get(), get()) }
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), get(), get()) }
-    factory { StatsViewModel(get()) }
+    factory { StatsViewModel(get(), get(), get()) }
 }
