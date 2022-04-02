@@ -101,6 +101,7 @@ fun AssetToggleButton(asset: Asset, price: MarketPrice?, isSelected: Boolean, on
                 text = asset.label,
                 style = AppTheme.TextStyles.Small,
                 color = textColor,
+                maxLines = 1,
                 modifier = Modifier
                     .padding(horizontal = AppSizes.current.Space4)
                     .align(Alignment.CenterHorizontally)
@@ -111,6 +112,7 @@ fun AssetToggleButton(asset: Asset, price: MarketPrice?, isSelected: Boolean, on
                     text = price.price.gf4,
                     color = textColor,
                     style = AppTheme.TextStyles.TinyMonospace,
+                    maxLines = 1,
                     modifier = Modifier
                         .padding(horizontal = AppSizes.current.Space4)
                         .align(Alignment.CenterHorizontally)

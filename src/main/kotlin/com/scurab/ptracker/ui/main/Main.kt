@@ -17,11 +17,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DataUsage
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Looks3
+import androidx.compose.material.icons.filled.LooksOne
+import androidx.compose.material.icons.filled.LooksTwo
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterfallChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,7 +39,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.scurab.ptracker.App.getKoin
 import com.scurab.ptracker.AppNavTokens
@@ -56,6 +58,7 @@ private data class LeftMenuButton(
 
 class MainUiState {
     var latestPriceTick by mutableStateOf<WsMessageToken?>(null)
+    var ledgers by mutableStateOf<List<String>>(emptyList())
 }
 
 @Composable
@@ -70,15 +73,20 @@ private fun Main(uiState: MainUiState, eventHandler: MainEventHandler) {
     LaunchedEffect(eventHandler) {
         focusRequester.requestFocus()
     }
-    Box(modifier = Modifier.focusable().focusRequester(focusRequester).onKeyEvent {
-        eventHandler.onKeyPressed(it.key)
-    }) {
+    Box(
+        modifier = Modifier
+            .focusable()
+            .focusRequester(focusRequester)
+            .onKeyEvent {
+                eventHandler.onKeyPressed(it.key)
+            }
+    ) {
         Row {
             val navToken by navigation.activeScreen.collectAsState()
             Column(
                 modifier = Modifier.width(IntrinsicSize.Max).zIndex(1000f)
             ) {
-                Menu(navToken, uiState.latestPriceTick, eventHandler)
+                Menu(navToken, uiState.latestPriceTick, uiState.ledgers, eventHandler)
             }
             VerticalDivider()
             Box(
@@ -91,7 +99,7 @@ private fun Main(uiState: MainUiState, eventHandler: MainEventHandler) {
 }
 
 @Composable
-private fun ColumnScope.Menu(navToken: NavToken<*>, tick: WsMessageToken?, eventHandler: MainEventHandler) {
+private fun ColumnScope.Menu(navToken: NavToken<*>, tick: WsMessageToken?, ledgers: List<String>, eventHandler: MainEventHandler) {
     val buttons = remember {
         listOf(
             LeftMenuButton(Icons.Default.WaterfallChart, AppNavTokens.PriceDashboard, eventHandler::onOpenPriceDashboardClick),
@@ -104,6 +112,11 @@ private fun ColumnScope.Menu(navToken: NavToken<*>, tick: WsMessageToken?, event
         Divider(color = AppTheme.Colors.PrimaryVariant)
     }
     Spacer(modifier = Modifier.weight(1f))
+    val ledgerIcons = remember { listOf(Icons.Default.LooksOne, Icons.Default.LooksTwo, Icons.Default.Looks3) }
+    ledgers.forEachIndexed { index, s ->
+        VerticalTabButton(ledgerIcons[index], isSelected = false, onClick = { eventHandler.onLedgerClicked(s) })
+    }
+    VerticalTabButton(Icons.Default.FolderOpen, isSelected = false, onClick = { eventHandler.onOpenFileClicked() })
     PriceTickShape(tick)
 }
 

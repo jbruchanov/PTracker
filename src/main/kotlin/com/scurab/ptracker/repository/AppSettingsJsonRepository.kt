@@ -24,7 +24,7 @@ class AppSettingsJsonRepository(
     //extra buffer & replay to catch all events even if subscribed after
     private val flow = MutableSharedFlow<String>(extraBufferCapacity = 16, replay = 16)
 
-    fun flowChanges(emitOnStart: String?): Flow<String> {
+    override fun flowChanges(emitOnStart: String?): Flow<String> {
         return flow.onStart { if (emitOnStart != null) emit(emitOnStart) else Unit }
     }
 

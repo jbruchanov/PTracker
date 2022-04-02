@@ -12,6 +12,7 @@ interface NavController {
     fun <T : NavArgs> replaceAll(token: NavToken<T>, args: T)
 
     fun pop(steps: Int = 1): Int
+    fun popAll(): Int = pop(Integer.MAX_VALUE)
     fun popToTop() = pop(steps = activeRecords - 1)
     fun popTo(token: NavToken<*>): Int
 }

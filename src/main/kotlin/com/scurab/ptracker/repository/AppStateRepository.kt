@@ -40,6 +40,11 @@ class AppStateRepository(private val appSettings: AppSettings) {
         _ledger.tryEmit(ledger)
     }
 
+    fun setDensity(value: Float) {
+        val d = _density.value
+        _density.tryEmit(Density(d.density, value))
+    }
+
     fun setAppData(appData: AppData) {
         this.appData = appData
         _ledger.tryEmit(appData.ledger)

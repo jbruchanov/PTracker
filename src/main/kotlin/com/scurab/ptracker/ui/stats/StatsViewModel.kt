@@ -27,6 +27,7 @@ class StatsViewModel(
             appStateRepository.ledger
                 .filter { it != Ledger.Empty }
                 .collect {
+                    uiState.holdings.clear()
                     latestLedger = it
                     ledgerStats = statsCalculatorUseCase.calculateStats(it, Filter.AllTransactions)
                     val prices = pricesRepository.getPrices(it.assets)

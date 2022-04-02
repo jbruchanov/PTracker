@@ -1,6 +1,7 @@
 package com.scurab.ptracker.component.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.scurab.ptracker.ext.peekOrNull
@@ -51,6 +52,7 @@ class DefaultNavSpecs(
             needInitRecord = false
             init()
         }
+
         val token by activeScreen.collectAsState()
         //reading of token necessary to make it working, otherwise recomposition not triggered
         println(token)
@@ -93,7 +95,8 @@ class DefaultNavSpecs(
     }
 
     private fun notifyPeekStackChanged() {
-        _activeScreenTokens.tryEmit(stack.peek().navigationRecord.navToken)
+        val token = stack.peekOrNull()?.navigationRecord?.navToken ?: InitNavToken
+        _activeScreenTokens.tryEmit(token)
     }
 
     private fun popAndDestroy(steps: Int): Int {
@@ -109,8 +112,8 @@ class DefaultNavSpecs(
     }
 
     private fun startPeek() {
-        val peek = stack.peek()
-        peek.lifecycleComponent.start()
+        val peek = stack.peekOrNull()
+        peek?.lifecycleComponent?.start()
     }
 
     private fun stopPeek(required: Boolean) {

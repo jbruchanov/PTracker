@@ -18,6 +18,9 @@ interface Texts {
     val MarketValue: String
     val ROI: String
     val Asset: String
+    val Save: String
+    val Ledgers: String
+    val RestartNeeded: String
 }
 
 object English : Texts {
@@ -33,4 +36,7 @@ object English : Texts {
     override val MarketValue: String = "Market value"
     override val ROI: String = "ROI"
     override val Asset: String = "Asset"
+    override val Save: String = "Save"
+    override val Ledgers: String = "Ledgers"
+    override val RestartNeeded: String = "Restart needed"
 }
