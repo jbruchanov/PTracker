@@ -22,18 +22,22 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
     val isEmpty = this == Empty
 
     @Transient
-    val isTradingAsset = crypto.isNotEmpty() && fiat.isNotEmpty()
+    val isCryptoTradingAsset = crypto.isNotEmpty() && fiat.isNotEmpty()/* && !FiatCurrencies.contains(crypto) && FiatCurrencies.contains(fiat)*/
 
     fun cryptoLabelOnlyIf(value: Boolean) = if (value) crypto else label
 
     fun iconCrypto() = File(Locations.Icons, crypto.lowercase() + ".png")
+
+    fun ensureFiatOrNull() = fiat.takeIf { FiatCurrencies.contains(fiat) } ?: crypto.takeIf { FiatCurrencies.contains(crypto) }
 
     override fun toString(): String = label
 
     companion object {
         val Empty = Asset("", "")
 
-        fun fromUnknownPair(coin1: String, coin2: String): Asset {
+        fun fromUnknownPair(coin1: String?, coin2: String?): Asset {
+            requireNotNull(coin1) { "Coin1 is null" }
+            requireNotNull(coin2) { "Coin2 is null" }
             require(coin1 != coin2) { "Invalid pair:$coin1, $coin2" }
             val isCoin1Fiat = FiatCurrencies.contains(coin1)
             val isCoin2Fiat = FiatCurrencies.contains(coin2)
@@ -44,7 +48,7 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
             )
         }
 
-        fun fromUnknownPairOrNull(coin1: String, coin2: String) = kotlin.runCatching { fromUnknownPair(coin1, coin2) }.getOrNull()
+        fun fromUnknownPairOrNull(coin1: String?, coin2: String?) = kotlin.runCatching { fromUnknownPair(coin1, coin2) }.getOrNull()
     }
 
     override fun compareTo(other: Asset): Int = label.compareTo(other.label)

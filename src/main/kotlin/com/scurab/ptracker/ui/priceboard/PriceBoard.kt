@@ -286,7 +286,7 @@ private fun BoxScope.PriceSelectedDayTransactionTypes(state: PriceBoardState) {
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(-offsetX, AppSizes.current.Space)
-                    .background(DashboardColors.BackgroundAxis, AppTheme.Shapes.RoundedCorners)
+                    .background(DashboardColors.BackgroundAxis, AppTheme.Shapes.RoundedCornersSize2)
                     .padding(AppSizes.current.Space2)
             ) {
                 iconsPrices.forEach { ic ->

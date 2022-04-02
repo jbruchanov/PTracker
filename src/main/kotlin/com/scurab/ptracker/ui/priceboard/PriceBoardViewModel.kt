@@ -54,7 +54,7 @@ class PriceBoardViewModel(
     private val grouping = GroupStrategy.Day
     val uiState = PriceBoardUiState(appStateRepository.density.value, grouping)
 
-    //state for merigng, 2 different datasources for 1 output
+    //state for merging, 2 different datasources for 1 output
     private val ledger = appStateRepository.ledger
     private val prices = MutableStateFlow(Asset.Empty to emptyList<PriceItem>())
 

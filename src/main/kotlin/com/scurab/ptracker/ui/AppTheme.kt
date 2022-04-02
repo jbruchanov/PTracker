@@ -80,6 +80,7 @@ object AppTheme {
         val Secondary = Color(0xFFFF7F00)
         val SecondaryVariant = Color(0xFFFF7F00).copy(alpha = .75f)
         val BackgroundContent = Color(0xFF2B2B2B)
+        val BackgroundAssetIcon = Color.White.copy(.85f)
         val ToDo = Color.Magenta
         val OnBackground = Color.White
         val OnBackgroundVariant = Color.White.copy(.1f).compositeOver(Primary)
@@ -109,7 +110,8 @@ object AppTheme {
     }
 
     object Shapes {
-        val RoundedCorners = RoundedCornerShape(8.dp)
+        val RoundedCornersSize2 = RoundedCornerShape(Sizes.Space2)
+        val RoundedCornersSize4 = RoundedCornerShape(Sizes.Space4)
     }
 
     object Sizes {
@@ -117,9 +119,9 @@ object AppTheme {
         private val ClickableSize = 48.dp
         val IconButtonPadding = 8.dp
         val IconTransactionType = 16.dp
-        val StatsIconSize = 36.dp
+        val StatsIconSize = 42.dp
 
-        val Hairline = 1.dp
+        val Space025 = 1.dp
         val Space05 = 2.dp
         val Space = 4.dp
         val Space2 = 8.dp
@@ -127,6 +129,7 @@ object AppTheme {
         val Space6 = 24.dp
         val Space8 = 32.dp
 
+        val ThinLine = 1.dp
         val ThickLine = 2.dp
 
         @Composable
@@ -190,9 +193,9 @@ object AppTheme {
         //no dp, this basically means 10px per a price candle, scale handles proper scaling
         const val PriceItemWidth = 10f
 
-        val GridLineStrokeWidth = Sizes.Hairline
-        val SpikeLineStrokeWidth = Sizes.Hairline
-        val MouseCrossStrokeWidth = Sizes.Hairline
+        val GridLineStrokeWidth = Sizes.Space025
+        val SpikeLineStrokeWidth = Sizes.Space025
+        val MouseCrossStrokeWidth = Sizes.Space025
         val VerticalAxisHorizontalPadding = 8.dp
 
         //depends on fontAxis size

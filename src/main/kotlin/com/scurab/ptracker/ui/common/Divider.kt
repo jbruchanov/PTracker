@@ -2,7 +2,6 @@ package com.scurab.ptracker.ui.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +20,7 @@ import com.scurab.ptracker.ui.AppTheme
 fun VerticalDivider(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onSurface.copy(alpha = AppTheme.Values.DividerDefaultAlpha),
-    thickness: Dp = AppTheme.Sizes.Hairline,
+    thickness: Dp = AppTheme.Sizes.ThinLine,
     startIndent: Dp = 0.dp
 ) {
     val indentMod = if (startIndent.value != 0f) Modifier.padding(start = startIndent) else Modifier
@@ -38,7 +37,7 @@ fun VerticalDivider(
 fun Divider(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onSurface.copy(alpha = AppTheme.Values.DividerDefaultAlpha),
-    thickness: Dp = AppTheme.Sizes.Hairline,
+    thickness: Dp = AppTheme.Sizes.ThinLine,
     startIndent: Dp = 0.dp
 ) {
     val indentMod = if (startIndent.value != 0f) Modifier.padding(start = startIndent) else Modifier

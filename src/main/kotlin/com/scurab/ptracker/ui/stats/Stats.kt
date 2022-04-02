@@ -16,13 +16,11 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -49,7 +50,7 @@ import com.scurab.ptracker.ext.fiatCoins
 import com.scurab.ptracker.ext.firstIf
 import com.scurab.ptracker.ext.gf2
 import com.scurab.ptracker.ext.gf4
-import com.scurab.ptracker.ext.image
+import com.scurab.ptracker.ext.imageOrNull
 import com.scurab.ptracker.ext.isPositive
 import com.scurab.ptracker.ext.scaled
 import com.scurab.ptracker.ext.totalCost
@@ -62,16 +63,22 @@ import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.LocalTexts
+import com.scurab.ptracker.ui.common.ColorMatrixGreyScale
 import com.scurab.ptracker.ui.common.Divider
-import com.scurab.ptracker.ui.common.Flag
+import kotlinx.coroutines.delay
 
 class StatsUiState {
     var isLoading by mutableStateOf(false)
     var holdings = mutableStateListOf<OnlineHoldingStats>()
+
+    companion object {
+        val IconToGrayscaleDelay = 60_000L
+    }
 }
 
 private object ColumnWidths {
     val Icon = AppTheme.Sizes.StatsIconSize
+    val IconCoinGap = 16.dp
     val Coin = StateContainer(40.dp, default2 = 64.dp)
     val Balance = 96.dp
     val Cost = 96.dp
@@ -115,7 +122,7 @@ private fun HoldingRowHeader(hasMultipleFiatCoins: Boolean) {
             .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
             .defaultMinSize(minHeight = 40.dp)
     ) {
-        val col1Width = ColumnWidths.Icon + AppSizes.current.Space + ColumnWidths.Coin.default2If(hasMultipleFiatCoins).scaled()
+        val col1Width = ColumnWidths.Icon + ColumnWidths.IconCoinGap + ColumnWidths.Coin.default2If(hasMultipleFiatCoins).scaled()
         HoldingsText(texts.Asset, isMonoSpace = false, textAlign = TextAlign.Center, width = col1Width)
         HoldingsText(texts.Balance, isMonoSpace = false, width = ColumnWidths.Balance.scaled())
         HoldingsText(texts.Cost, isMonoSpace = false, width = ColumnWidths.Cost.scaled())
@@ -133,10 +140,8 @@ private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, hold
         modifier = Modifier
             .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
     ) {
-        Box(modifier = Modifier.width(ColumnWidths.Icon).align(alignment = Alignment.CenterVertically)) {
-            Flag(fiatCoin.item, 14.dp, modifier = Modifier.align(Alignment.Center).requiredSize(ColumnWidths.Icon))
-        }
-        Spacer(modifier = Modifier.width(AppSizes.current.Space))
+        CoinIcon(fiatCoin.icon().imageOrNull(), true, 1f)
+        Spacer(modifier = Modifier.width(ColumnWidths.IconCoinGap))
         HoldingsText(fiatCoin.item, textAlign = TextAlign.Left, width = ColumnWidths.Coin.default2If(hasMultipleFiats).scaled())
         Spacer(modifier = Modifier.background(Color.Black).width(ColumnWidths.Balance.scaled()))
         HoldingsText(holdings.totalCost(fiatCoin).gf2, width = ColumnWidths.Cost.scaled())
@@ -156,23 +161,25 @@ private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, hold
 @Composable
 private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFiats: Boolean) {
     var scale by remember { mutableStateOf(1f) }
-    LaunchedEffect(index, holdings.timeDate) {
-        val scalePeak = 1.25f
+    var isColored by remember(holdings.asset, holdings.timeDate) { mutableStateOf(true) }
+    LaunchedEffect(index, holdings.asset, holdings.timeDate) {
+        val scalePeak = 1.1f
         Animatable(1f).animateTo(scalePeak, animationSpec = tween(300)) { scale = this.value }
         Animatable(scalePeak).animateTo(1f, animationSpec = tween(500)) { scale = this.value }
     }
+
+    LaunchedEffect(index, holdings.asset, isColored) {
+        delay(StatsUiState.IconToGrayscaleDelay)
+        isColored = false
+    }
+
     Row(
         modifier = Modifier
             .background(AppColors.current.RowBackground.get(isEven = index % 2 == 0))
             .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space)
     ) {
-        val icon = holdings.asset.iconCrypto()
-        if (icon.exists()) {
-            Image(icon.image(), contentDescription = "", modifier = Modifier.size(ColumnWidths.Icon).scale(scale))
-        } else {
-            Spacer(modifier = Modifier.width(ColumnWidths.Icon))
-        }
-        Spacer(modifier = Modifier.width(AppSizes.current.Space))
+        CoinIcon(holdings.asset.iconCrypto().imageOrNull(), isColored, scale)
+        Spacer(modifier = Modifier.width(ColumnWidths.IconCoinGap))
         HoldingsText(holdings.asset.cryptoLabelOnlyIf(!hasMultipleFiats), textAlign = TextAlign.Left, width = ColumnWidths.Coin.default2If(hasMultipleFiats).scaled())
         HoldingsText(holdings.actualCryptoBalance.gf4, width = ColumnWidths.Balance.scaled())
         HoldingsText(holdings.cost.gf2, width = ColumnWidths.Cost.scaled())
@@ -194,6 +201,28 @@ private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFia
                 color = AppColors.current.PrimaryVariant,
                 modifier = Modifier.align(alignment = Alignment.CenterVertically)
             )
+        }
+    }
+}
+
+@Composable
+private fun CoinIcon(image: ImageBitmap?, isColored: Boolean, scale: Float) {
+    Box(
+        modifier = Modifier
+            .size(ColumnWidths.Icon)
+            .border(AppSizes.current.ThinLine, AppColors.current.PrimaryVariant, AppTheme.Shapes.RoundedCornersSize2)
+            .clip(AppTheme.Shapes.RoundedCornersSize2)
+            .background(AppColors.current.BackgroundAssetIcon)
+            .padding(AppSizes.current.Space)
+    ) {
+        if (image != null) {
+            val grayscaleColorFilter = remember { ColorFilter.colorMatrix(ColorMatrixGreyScale) }
+            Image(
+                image, contentDescription = "", filterQuality = FilterQuality.High, colorFilter = grayscaleColorFilter.takeIf { !isColored },
+                modifier = Modifier.scale(scale).align(Alignment.Center)
+            )
+        } else {
+            Spacer(modifier = Modifier.width(ColumnWidths.Icon))
         }
     }
 }
@@ -225,9 +254,9 @@ private fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Mo
     Row(
         modifier = Modifier
             .padding(AppSizes.current.Space)
-            .border(1.dp, AppColors.current.PrimaryVariant, RoundedCornerShape(16.dp))
-            .background(AppColors.current.RowBackground.get(), RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
+            .border(AppSizes.current.ThinLine, AppColors.current.PrimaryVariant, AppTheme.Shapes.RoundedCornersSize4)
+            .background(AppColors.current.RowBackground.get(), AppTheme.Shapes.RoundedCornersSize4)
+            .clip(AppTheme.Shapes.RoundedCornersSize4)
             .then(modifier)
     ) {
         Column(

@@ -12,7 +12,7 @@ class Ledger(
     val coins by lazy { items.map { it.assets }.toSet().flatten().distinct().sorted() }
     val fiatCoins by lazy { coins.filter { FiatCurrencies.contains(it) }.toSet() }
     val cryptoCoins by lazy { coins - fiatCoins }
-    val assets by lazy { cryptoCoins.map { c -> fiatCoins.map { f -> Asset(c, f) } }.flatten() }
+    val assets by lazy { items.map { it.asset }.filter { it.isCryptoTradingAsset }.toSet().sorted() }
 
     fun getGroupedData(by: GroupStrategy = grouping): Map<Long, List<Transaction>> {
         return cacheByGroupStrategy.getOrPut(by) {
