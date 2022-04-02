@@ -11,8 +11,15 @@ import kotlinx.serialization.json.jsonPrimitive
 object CryptoCompareResultSerializer : JsonContentPolymorphicSerializer<CryptoCompareWssResponse>(CryptoCompareWssResponse::class) {
     //https://min-api.cryptocompare.com/documentation/websockets
     override fun selectDeserializer(element: JsonElement) = when (element.jsonObject["TYPE"]?.jsonPrimitive?.contentOrNull?.toInt() ?: 0) {
+        999 -> CryptoCompareWssResponse.HeartBeat.serializer()
         2 -> CryptoCompareWssResponse.MarketTicker.serializer()
-        in (400..599) -> CryptoCompareWssResponse.Error.serializer()
+        16 -> CryptoCompareWssResponse.SubscriptionAssetDone.serializer()
+        in (400..599) -> {
+            when (element.jsonObject["MESSAGE"]?.jsonPrimitive?.contentOrNull) {
+                "INVALID_SUB" -> CryptoCompareWssResponse.SubscriptionError.serializer()
+                else -> CryptoCompareWssResponse.Error.serializer()
+            }
+        }
         else -> CryptoCompareWssResponse.UnspecificMessage.serializer()
     }
 }

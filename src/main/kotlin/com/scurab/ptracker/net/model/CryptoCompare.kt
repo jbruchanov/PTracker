@@ -91,7 +91,36 @@ sealed class CryptoCompareWssResponse {
     ) : CryptoCompareWssResponse()
 
     @Serializable
+    data class HeartBeat(
+        @SerialName("MESSAGE") val message: String
+    ) : CryptoCompareWssResponse()
+
+    @Serializable
+    data class SubscriptionComplete(
+        @SerialName("MESSAGE") val message: String,
+        @SerialName("TIMEMS") val timestamp: Long
+    ) : CryptoCompareWssResponse()
+
+    @Serializable
+    data class SubscriptionAssetDone(
+        @SerialName("MESSAGE") val message: String,
+        @SerialName("SUB") val subToken: String
+    ) : CryptoCompareWssResponse() {
+        private val subs = subToken.split("~")
+        val exchangeWallet = subs.getOrNull(1)
+        val cryptoCoin = subs.getOrNull(2)
+        val fiatCoin = subs.getOrNull(3)
+        val asset by lazy { Asset.fromUnknownPairOrNull(cryptoCoin, fiatCoin) }
+    }
+
+    @Serializable
     data class Error(
+        @SerialName("MESSAGE") val message: String,
+        @SerialName("PARAMETER") val params: String
+    ) : CryptoCompareWssResponse()
+
+    @Serializable
+    data class SubscriptionError(
         @SerialName("MESSAGE") val message: String,
         @SerialName("PARAMETER") val params: String
     ) : CryptoCompareWssResponse()

@@ -61,15 +61,15 @@ class CryptoCompareClient(
         return result
     }
 
-    fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>): Channel<CryptoCompareWssResponse.MarketTicker> {
+    fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>): Channel<CryptoCompareWssResponse> {
         val apiKey = settings.cryptoCompareApiKey
         requireNotNull(apiKey) { "cryptoCompareApiKey is null" }
         return subscribeTicker(args, apiKey)
     }
 
-    private fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>, apiKey: String): Channel<CryptoCompareWssResponse.MarketTicker> {
+    private fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>, apiKey: String): Channel<CryptoCompareWssResponse> {
         var wss: Job? = null
-        val channel = Channel<CryptoCompareWssResponse.MarketTicker>().apply {
+        val channel = Channel<CryptoCompareWssResponse>().apply {
             invokeOnClose {
                 requireNotNull(wss).cancel()
             }
@@ -87,12 +87,9 @@ class CryptoCompareClient(
                             val message = frame.data.decodeToString()
                             val obj = runCatching { jsonBridge.deserialize<CryptoCompareWssResponse>(message) }.getOrNull()
                             when (obj) {
-                                is CryptoCompareWssResponse.MarketTicker -> channel.trySend(obj)
                                 is CryptoCompareWssResponse.Error -> throw IllegalStateException(message)
-                                is CryptoCompareWssResponse.UnspecificMessage -> {
-                                    //nothing
-                                }
-                                else -> System.err.println(message)
+                                null -> throw IllegalStateException("Parsing error? json:${message}")
+                                else -> channel.trySend(obj)
                             }
                         }
                     }
