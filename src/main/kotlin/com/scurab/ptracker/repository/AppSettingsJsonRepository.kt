@@ -3,6 +3,7 @@ package com.scurab.ptracker.repository
 import com.scurab.ptracker.component.ProcessScope
 import com.scurab.ptracker.component.delegate.OnKeyChangeListener
 import com.scurab.ptracker.component.delegate.WithNotifyingMutableProperties
+import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.Locations
 import com.scurab.ptracker.serialisation.JsonBridge
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +31,7 @@ class AppSettingsJsonRepository(
     private val onChangeListener: OnKeyChangeListener = { flow.tryEmit(it) }
 
     init {
-        setNotifyingCallback { onChangeListener }
+        setNotifyingCallback(onChangeListener)
         if (autoSave) {
             ProcessScope.launch(Dispatchers.IO) {
                 flow.debounce(1000L).collect { save() }
@@ -44,6 +45,9 @@ class AppSettingsJsonRepository(
 
     override var cryptoCompareApiKey: String? by data::cryptoCompareApiKey.notifying()
     override var fontScale: Float by data::fontScale.notifying()
+    override var lastSelectedAsset: Asset? by data::lastSelectedAsset.notifying()
+    override var latestLedger: String? by data::latestLedger.notifying()
+    override var ledgers: List<String>? by data::ledgers.notifying()
 
     companion object {
 

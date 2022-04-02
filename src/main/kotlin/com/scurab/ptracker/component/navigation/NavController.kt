@@ -7,6 +7,7 @@ interface NavController {
     fun push(token: NavToken<EmptyNavArgs>) = push(token, EmptyNavArgs)
     fun <T : NavArgs> push(token: NavToken<T>, args: T)
 
+    fun replace(token: NavToken<EmptyNavArgs>) = replace(token, EmptyNavArgs)
     fun <T : NavArgs> replace(token: NavToken<T>, args: T)
     fun <T : NavArgs> replaceAll(token: NavToken<T>, args: T)
 

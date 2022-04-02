@@ -16,7 +16,7 @@ internal class CryptoCompareWssResponseTest {
         )
 
         json.forEach {
-            val item = JsonBridge.deserialize<CryptoCompareWssResponse>(it)
+            val item = JsonBridge.deserialize<CryptoCompareWsResponse>(it)
             println(item)
         }
     }

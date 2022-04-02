@@ -1,26 +1,50 @@
 package com.scurab.ptracker.usecase
 
-import com.scurab.ptracker.model.Asset
-import com.scurab.ptracker.model.Locations
-import com.scurab.ptracker.model.PriceItem
-import com.scurab.ptracker.model.randomPriceData
-import com.scurab.ptracker.net.model.CryptoComparePriceItem
-import com.scurab.ptracker.serialisation.JsonBridge
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import com.scurab.ptracker.model.AppData
+import com.scurab.ptracker.model.Filter
+import com.scurab.ptracker.repository.AppSettings
+import com.scurab.ptracker.repository.AppStateRepository
+import com.scurab.ptracker.repository.PricesRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import java.io.File
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.days
 
-class LoadDataUseCase {
-    fun loadData(asset: Asset): List<PriceItem> {
-        val f = File("${Locations.Daily}/${asset.label}.json")
-        val items = if (f.exists()) {
-            JsonBridge.deserialize<List<CryptoComparePriceItem>>(f.readText()).mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, asset, cryptoComparePriceItem) }
-        } else {
-            randomPriceData(Random, 100, Clock.System.now().minus(1000L.days).toLocalDateTime(TimeZone.UTC), 1L.days)
+class LoadDataUseCase(
+    private val loadLedgerUseCase: LoadLedgerUseCase,
+    private val loadPriceHistoryUseCase: LoadPriceHistoryUseCase,
+    private val loadIconsUseCase: LoadIconsUseCase,
+    private val statsCalculatorUseCase: StatsCalculatorUseCase,
+    private val appSettings: AppSettings,
+    private val appStateRepository: AppStateRepository,
+    private val pricesRepository: PricesRepository
+) {
+
+    suspend fun loadAllData(ledgerUri: String) = coroutineScope {
+        //TODO: global uri
+        val ledgerFile = File(ledgerUri)
+        val ledger = loadLedgerUseCase.load(ledgerFile)
+        val historyDef = async(Dispatchers.IO) { loadPriceHistoryUseCase.loadAll(ledger.assets) }
+        val iconsDef = async(Dispatchers.IO) { loadIconsUseCase.loadIcons(ledger.assets) }
+        val statsDef = async(Dispatchers.IO) { statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions) }
+
+        val history = historyDef.await().mapValues { it.value.getOrNull() }.mapValues { it.value ?: emptyList() }
+        val stats = statsDef.await()
+        iconsDef.await()
+
+        return@coroutineScope AppData(
+            ledger, history, stats
+        )
+    }
+
+    suspend fun loadAndSetAllData(ledgerUri: String) {
+        val data = loadAllData(ledgerUri)
+        appSettings.latestLedger = ledgerUri
+        appStateRepository.setAppData(data)
+        if (appSettings.cryptoCompareApiKey != null) {
+            pricesRepository.subscribeWsRandomPrices(
+                data.ledgerStats.assetsByExchange
+            )
         }
-        return items
     }
 }

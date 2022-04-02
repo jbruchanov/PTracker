@@ -83,6 +83,7 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density,
     }
 
     fun initViewport(size: Size = this.canvasSize, priceItemIndex: Int = priceItems.size, alignCenter: Boolean = false): Rect {
+        if (priceItems.isEmpty()) return Rect.Zero
         val focusItem = priceItems.getOrNull(priceItemIndex.coerceIn(0, priceItems.size - 1)) ?: return Rect(0f, 0f, size.width, size.height)
         var offsetX = ((priceItemIndex) * DashboardSizes.PriceItemWidth)
         //take last n visible items on the screen

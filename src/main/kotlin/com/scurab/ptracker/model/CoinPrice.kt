@@ -2,8 +2,8 @@ package com.scurab.ptracker.model
 
 import com.scurab.ptracker.serialisation.BigDecimalAsStringSerializer
 import kotlinx.serialization.SerialName
-import java.math.BigDecimal
 import kotlinx.serialization.Serializable
+import java.math.BigDecimal
 
 @Serializable
 data class CoinPrice(

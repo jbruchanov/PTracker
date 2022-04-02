@@ -1,8 +1,8 @@
 package com.scurab.ptracker.model
 
-import java.io.File
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import java.io.File
 
 @Serializable
 data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {

@@ -1,5 +1,6 @@
 package com.scurab.ptracker.usecase
 
+import com.scurab.ptracker.ext.existsAndHasSize
 import com.scurab.ptracker.ext.parallelMapIndexed
 import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.FiatCurrencies
@@ -19,13 +20,13 @@ class LoadIconsUseCase(
 
     private val location = File(Locations.Icons)
 
-    suspend fun loadIcons(cryptoAssets: List<Asset>): List<Pair<String, File?>> {
-        val allCoins = (cryptoAssets.map { it.fiat } + cryptoAssets.map { it.crypto }).toSet()
+    suspend fun loadIcons(assets: List<Asset>): List<Pair<String, File?>> {
+        val allCoins = (assets.map { it.fiat } + assets.map { it.crypto }).toSet()
         location.mkdirs()
 
         val result = allCoins
             .map { c -> c to File(location, "${c.lowercase()}.png") }
-            .filterNot { (_, f) -> f.exists() && f.length() > 0L }
+            .filterNot { (_, f) -> f.existsAndHasSize() }
             .parallelMapIndexed { _, (c, f) ->
                 val fullImageUrl = if (FiatCurrencies.contains(c)) {
                     "${Locations.IconsUrl}${c.take(2).lowercase()}.png"
@@ -36,6 +37,6 @@ class LoadIconsUseCase(
                 Triple(c, f, fullImageUrl)
             }
         val downloadsMap = result.associateBy(keySelector = { it.first }, valueTransform = { it.second })
-        return allCoins.map { it to downloadsMap[it]?.takeIf { f -> f.exists() && f.length() > 0 } }
+        return allCoins.map { it to downloadsMap[it]?.takeIf { f -> f.existsAndHasSize() } }
     }
 }

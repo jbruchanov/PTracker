@@ -3,10 +3,12 @@
 package com.scurab.ptracker.net.model
 
 import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.model.ExchangeWallet
 import com.scurab.ptracker.model.IPriceItem
 import com.scurab.ptracker.model.MapCache
 import com.scurab.ptracker.model.MarketPrice
 import com.scurab.ptracker.model.WithCache
+import com.scurab.ptracker.model.WsExchangeResponse
 import com.scurab.ptracker.serialisation.BigDecimalAsDoubleSerializer
 import com.scurab.ptracker.serialisation.BigDecimalAsStringSerializer
 import com.scurab.ptracker.serialisation.CryptoCompareResultSerializer
@@ -83,47 +85,50 @@ data class CryptoCompareWssSubscriptionArg(
 )
 
 @Serializable(with = CryptoCompareResultSerializer::class)
-sealed class CryptoCompareWssResponse {
+sealed class CryptoCompareWsResponse : WsExchangeResponse {
+
+    @kotlinx.serialization.Transient
+    override val client: String = "CryptoCompare"
 
     @Serializable
     data class UnspecificMessage(
         @SerialName("MESSAGE") val message: String
-    ) : CryptoCompareWssResponse()
+    ) : CryptoCompareWsResponse()
 
     @Serializable
     data class HeartBeat(
         @SerialName("MESSAGE") val message: String
-    ) : CryptoCompareWssResponse()
+    ) : CryptoCompareWsResponse(), WsExchangeResponse.HeartBeat
 
     @Serializable
     data class SubscriptionComplete(
         @SerialName("MESSAGE") val message: String,
         @SerialName("TIMEMS") val timestamp: Long
-    ) : CryptoCompareWssResponse()
+    ) : CryptoCompareWsResponse(), WsExchangeResponse.SubscriptionComplete
 
     @Serializable
     data class SubscriptionAssetDone(
         @SerialName("MESSAGE") val message: String,
         @SerialName("SUB") val subToken: String
-    ) : CryptoCompareWssResponse() {
+    ) : CryptoCompareWsResponse(), WsExchangeResponse.Subscription {
         private val subs = subToken.split("~")
-        val exchangeWallet = subs.getOrNull(1)
+        override val exchangeWallet by lazy { subs.getOrNull(1)?.let { ExchangeWallet(it) } ?: ExchangeWallet("_unknown_") }
         val cryptoCoin = subs.getOrNull(2)
         val fiatCoin = subs.getOrNull(3)
-        val asset by lazy { Asset.fromUnknownPairOrNull(cryptoCoin, fiatCoin) }
+        override val asset by lazy { Asset.fromUnknownPair(cryptoCoin, fiatCoin) }
     }
 
     @Serializable
     data class Error(
-        @SerialName("MESSAGE") val message: String,
+        @SerialName("MESSAGE") override val message: String,
         @SerialName("PARAMETER") val params: String
-    ) : CryptoCompareWssResponse()
+    ) : CryptoCompareWsResponse(), WsExchangeResponse.Error
 
     @Serializable
     data class SubscriptionError(
-        @SerialName("MESSAGE") val message: String,
+        @SerialName("MESSAGE") override val message: String,
         @SerialName("PARAMETER") val params: String
-    ) : CryptoCompareWssResponse()
+    ) : CryptoCompareWsResponse(), WsExchangeResponse.SubscriptionError
 
     @Serializable
     data class MarketTicker(
@@ -135,7 +140,7 @@ sealed class CryptoCompareWssResponse {
         @SerialName("HIGHDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val high: BigDecimal? = null,
         @SerialName("LOWDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val low: BigDecimal? = null,
         @SerialName("OPENDAY") @Serializable(with = BigDecimalAsDoubleSerializer::class) val open: BigDecimal? = null
-    ) : CryptoCompareWssResponse(), MarketPrice {
+    ) : CryptoCompareWsResponse(), MarketPrice, WsExchangeResponse.MarketPrice {
         @kotlinx.serialization.Transient
         override val asset = Asset(cryptoCoin, fiatCoin)
     }

@@ -141,47 +141,45 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
 fun PriceBoard(vm: PriceBoardViewModel) {
     vm.uiState.priceBoardState.init()
     val priceBoardState = vm.uiState.priceBoardState
-    when {
-        priceBoardState.priceItems.isEmpty() -> Text("Select Asset")
-        priceBoardState.priceItems.isNotEmpty() -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(AppColors.current.BackgroundContent)
-            ) {
-                Column {
-                    Box(modifier = Modifier.zIndex(1f)) {
-                        val scrollState = rememberScrollState()
-                        Row(
-                            modifier = Modifier
-                                .width(IntrinsicSize.Max)
-                                .height(IntrinsicSize.Min)
-                                .horizontalScroll(scrollState)
-                        ) {
-                            FlatButton(Icons.Default.BorderOuter, onClick = { vm.onResetClicked() })
-                            VerticalDivider()
-                            ToggleButton(Icons.Default.FilterAlt, isSelected = vm.uiState.hasTradeOnlyFilter, onClick = { vm.onFilterClicked(Filter.ImportantTransactions) })
-                            VerticalDivider()
-                            val assets = vm.uiState.assets
-                            assets.forEach { assetIcon ->
-                                val isSelected = assetIcon.asset == vm.uiState.priceBoardState.selectedAsset
-                                ToggleButton(text = assetIcon.asset.label, onClick = { vm.onAssetSelected(assetIcon.asset) }, isSelected = isSelected)
-                                VerticalDivider()
-                            }
-                        }
-                        HorizontalScrollbar(adapter = rememberScrollbarAdapter(scrollState), modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .offset(0.dp, LocalScrollbarStyle.current.thickness / 2f)
-                        )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.current.BackgroundContent)
+    ) {
+        Column {
+            Box(modifier = Modifier.zIndex(1f)) {
+                val scrollState = rememberScrollState()
+                Row(
+                    modifier = Modifier
+                        .width(IntrinsicSize.Max)
+                        .height(IntrinsicSize.Min)
+                        .horizontalScroll(scrollState)
+                ) {
+                    FlatButton(Icons.Default.BorderOuter, onClick = { vm.onResetClicked() })
+                    VerticalDivider()
+                    ToggleButton(Icons.Default.FilterAlt, isSelected = vm.uiState.hasTradeOnlyFilter, onClick = { vm.onFilterClicked(Filter.ImportantTransactions) })
+                    VerticalDivider()
+                    val assets = vm.uiState.assets
+                    assets.forEach { assetIcon ->
+                        val isSelected = assetIcon.asset == vm.uiState.priceBoardState.selectedAsset
+                        ToggleButton(text = assetIcon.asset.label, onClick = { vm.onAssetSelected(assetIcon.asset) }, isSelected = isSelected)
+                        VerticalDivider()
                     }
-                    Row(modifier = Modifier.zIndex(0f)) {
-                        Box(modifier = Modifier.weight(1f)) {
-                            PriceBoard(priceBoardState, vm)
-                        }
-                        val scale = LocalDensity.current.maxValue()
-                        Column(modifier = Modifier.width(width = 220.dp * scale)) {
-                            PriceBoardTransactions(priceBoardState, vm)
-                        }
+                }
+                HorizontalScrollbar(
+                    adapter = rememberScrollbarAdapter(scrollState), modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset(0.dp, LocalScrollbarStyle.current.thickness / 2f)
+                )
+            }
+            if (priceBoardState.priceItems.isNotEmpty()) {
+                Row(modifier = Modifier.zIndex(0f)) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        PriceBoard(priceBoardState, vm)
+                    }
+                    val scale = LocalDensity.current.maxValue()
+                    Column(modifier = Modifier.width(width = 220.dp * scale)) {
+                        PriceBoardTransactions(priceBoardState, vm)
                     }
                 }
             }

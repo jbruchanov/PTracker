@@ -5,7 +5,7 @@ import com.scurab.ptracker.model.CoinPrice
 import com.scurab.ptracker.net.model.CryptoCompareCoinDetail
 import com.scurab.ptracker.net.model.CryptoCompareHistoryData
 import com.scurab.ptracker.net.model.CryptoCompareResult
-import com.scurab.ptracker.net.model.CryptoCompareWssResponse
+import com.scurab.ptracker.net.model.CryptoCompareWsResponse
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscription
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.repository.AppSettings
@@ -51,7 +51,7 @@ class CryptoCompareClient(
     suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {
         if (assets.isEmpty()) return emptyList()
         val cryptoSyms = assets.map { it.crypto }.distinct().joinToString(separator = ",")
-        val fiatSyms = assets.map { it.fiat }.distinct().joinToString(separator = ",")
+        val fiatSyms = assets.map { it.ensureFiatOrNull() }.distinct().joinToString(separator = ",")
         val rawData = httpClient.get<Map<String, Map<String, Double>>>(pricesUrl(cryptoSyms, fiatSyms))
         val result = rawData.map { (c1, v) -> v.map { (c2, price) -> Asset.fromUnknownPairOrNull(c1, c2) to price.toBigDecimal() } }
             .flatten()
@@ -61,15 +61,15 @@ class CryptoCompareClient(
         return result
     }
 
-    fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>): Channel<CryptoCompareWssResponse> {
+    fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>): Channel<CryptoCompareWsResponse> {
         val apiKey = settings.cryptoCompareApiKey
         requireNotNull(apiKey) { "cryptoCompareApiKey is null" }
         return subscribeTicker(args, apiKey)
     }
 
-    private fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>, apiKey: String): Channel<CryptoCompareWssResponse> {
+    private fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>, apiKey: String): Channel<CryptoCompareWsResponse> {
         var wss: Job? = null
-        val channel = Channel<CryptoCompareWssResponse>().apply {
+        val channel = Channel<CryptoCompareWsResponse>().apply {
             invokeOnClose {
                 requireNotNull(wss).cancel()
             }
@@ -85,9 +85,9 @@ class CryptoCompareClient(
                     when (val frame = incoming.receive()) {
                         is Frame.Text -> {
                             val message = frame.data.decodeToString()
-                            val obj = runCatching { jsonBridge.deserialize<CryptoCompareWssResponse>(message) }.getOrNull()
+                            val obj = runCatching { jsonBridge.deserialize<CryptoCompareWsResponse>(message) }.getOrNull()
                             when (obj) {
-                                is CryptoCompareWssResponse.Error -> throw IllegalStateException(message)
+                                is CryptoCompareWsResponse.Error -> throw IllegalStateException(message)
                                 null -> throw IllegalStateException("Parsing error? json:${message}")
                                 else -> channel.trySend(obj)
                             }

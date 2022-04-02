@@ -11,7 +11,7 @@ interface WithNotifyingMutableProperties {
 
     class Delegate : WithNotifyingMutableProperties {
         private var onChange: OnKeyChangeListener? = null
-        private val onChangeRef: () -> OnKeyChangeListener = { { requireNotNull(onChange) { "callback not set, have you called setNotifyingCallback?!" } } }
+        private val onChangeRef: () -> OnKeyChangeListener = { requireNotNull(onChange) { "callback not set, have you called setNotifyingCallback?!" } }
 
         override fun <V> KMutableProperty0<V>.notifying(): ReadWriteProperty<Any, V> = NotifyingReadWriteProperty(this, onChangeRef)
 

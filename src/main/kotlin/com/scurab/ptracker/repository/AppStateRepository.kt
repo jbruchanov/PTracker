@@ -2,6 +2,7 @@ package com.scurab.ptracker.repository
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.unit.Density
+import com.scurab.ptracker.model.AppData
 import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.Ledger
 import kotlinx.coroutines.channels.BufferOverflow
@@ -10,9 +11,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class AppStateRepository(appSettings: AppSettings) {
+class AppStateRepository(private val appSettings: AppSettings) {
 
-    private val _selectedAsset = MutableStateFlow(Asset("BTC", "GBP"))
+    private var appData: AppData? = null
+
+    private val _selectedAsset = MutableStateFlow(Asset.Empty)
     val selectedAsset = _selectedAsset.asStateFlow()
 
     private val _latestKeyPress = MutableSharedFlow<Key>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -26,6 +29,7 @@ class AppStateRepository(appSettings: AppSettings) {
 
     fun setSelectedAsset(value: Asset) {
         _selectedAsset.tryEmit(value)
+        appSettings.lastSelectedAsset = value
     }
 
     fun onKey(key: Key) {
@@ -34,5 +38,10 @@ class AppStateRepository(appSettings: AppSettings) {
 
     fun setLedger(ledger: Ledger) {
         _ledger.tryEmit(ledger)
+    }
+
+    fun setAppData(appData: AppData) {
+        this.appData = appData
+        _ledger.tryEmit(appData.ledger)
     }
 }

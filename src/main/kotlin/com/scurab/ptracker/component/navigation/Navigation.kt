@@ -6,6 +6,7 @@ object EmptyNavArgs : NavArgs
 class AppNavArgs(val items: Array<String>) : NavArgs
 
 interface NavToken<T : NavArgs>
-object StartNavToken : NavToken<AppNavArgs>
+interface StartNavToken : NavToken<AppNavArgs>
+object DefaultStartNavToken : StartNavToken
 data class StringNavToken(val key: String) : NavToken<EmptyNavArgs>
 

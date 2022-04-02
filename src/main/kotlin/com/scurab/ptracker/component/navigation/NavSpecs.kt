@@ -18,7 +18,7 @@ interface NavSpecs {
 }
 
 class DefaultNavSpecs(
-    items: List<NavRecord<*, *>>, private val componentFactory: ComponentFactory, appNavArgs: AppNavArgs
+    items: List<NavRecord<*, *>>, private val componentFactory: ComponentFactory, private val appNavArgs: AppNavArgs
 ) : NavSpecs, NavController {
     private val navItems = items.toList()
     private val stack: Stack<ActiveNavRecord<*>> = Stack()
@@ -28,15 +28,29 @@ class DefaultNavSpecs(
     override val activeRecords: Int get() = stack.size
     override val activeScreenNavToken: NavToken<*> get() = stack.peek().navigationRecord.navToken
 
+    private var needInitRecord = true
+
     init {
-        requireNotNull(navItems.firstOrNull { it.navToken == StartNavToken }) {
-            "NavItems must include at least 1 record using StartNavigationToken"
+        //push at this point can't be done as it's potentially creating infinite loop
+        //Start -> build navs -> push Start -> Start depends on this NavController -> DI -> build navs again
+    }
+
+    private fun init() {
+        if (stack.isEmpty()) {
+            val record = navItems.firstOrNull { it.navToken is StartNavToken }
+            requireNotNull(record) {
+                "NavItems must include at least 1 record using StartNavToken"
+            }
+            push(record.navToken as StartNavToken, appNavArgs)
         }
-        push(StartNavToken, appNavArgs)
     }
 
     @Composable
     override fun render() {
+        if (needInitRecord) {
+            needInitRecord = false
+            init()
+        }
         val token by activeScreen.collectAsState()
         println("Current nav token:$token")
         stack.peek()?.render()

@@ -16,8 +16,8 @@ import com.scurab.ptracker.model.PriceItem
 import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.ui.model.AssetIcon
-import com.scurab.ptracker.usecase.LoadDataUseCase
 import com.scurab.ptracker.usecase.LoadLedgerUseCase
+import com.scurab.ptracker.usecase.LoadPriceHistoryUseCase
 import com.scurab.ptracker.usecase.PriceBoardDataProcessingUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +45,7 @@ interface PriceBoardEventDelegate {
 
 class PriceBoardViewModel(
     private val appStateRepository: AppStateRepository,
-    private val loadDataUseCase: LoadDataUseCase,
+    private val loadPriceHistoryUseCase: LoadPriceHistoryUseCase,
     private val loadLedgerUseCase: LoadLedgerUseCase,
     private val dataUseCase: PriceBoardDataProcessingUseCase
 ) : ViewModel(), PriceBoardEventDelegate {
@@ -62,7 +62,9 @@ class PriceBoardViewModel(
 
     init {
         launch {
-            appStateRepository.selectedAsset.collect(::loadAsset)
+            appStateRepository.selectedAsset
+                .filter { it != Asset.Empty }
+                .collect(::loadAsset)
         }
         launch {
             appStateRepository.keyEvents
@@ -100,7 +102,7 @@ class PriceBoardViewModel(
 
     private fun loadAsset(asset: Asset) {
         launch(Dispatchers.IO) {
-            prices.value = asset to loadDataUseCase.loadData(asset)
+            prices.value = asset to loadPriceHistoryUseCase.load(asset)
         }
     }
 
