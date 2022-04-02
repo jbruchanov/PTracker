@@ -14,10 +14,14 @@ class LoadPriceHistoryUseCase(
     private val jsonBridge: JsonBridge
 ) {
 
+    private val location = File(Locations.Daily)
+
     suspend fun loadAll(assets: List<Asset>): Map<Asset, Result<List<PriceItem>>> = assets.associateWith { kotlin.runCatching { load(it) } }
 
     suspend fun load(asset: Asset): List<PriceItem> {
-        val f = File("${Locations.Daily}/${asset.label}.json")
+        location.mkdirs()
+        val f = File(location, "${asset.label}.json")
+
         var result: List<PriceItem>? = null
         if (f.existsAndHasSize()) {
             result =

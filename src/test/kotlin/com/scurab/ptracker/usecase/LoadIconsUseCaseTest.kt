@@ -15,7 +15,7 @@ internal class LoadIconsUseCaseTest {
 
     @Test
     fun loadIcons() {
-        val ledger = kotlin.runCatching { LoadLedgerUseCase().load(File("data/output2.xlsx")) }.getOrNull()
+        val ledger = kotlin.runCatching { LoadLedgerUseCase().load(File("data/output.xlsx")) }.getOrNull()
         val httpClient = defaultHttpClient()
         val assets = ledger?.assets ?: TestCoins
         val loadIconsUseCase = LoadIconsUseCase(httpClient, CryptoCompareClient(httpClient, mockk(), JsonBridge))
