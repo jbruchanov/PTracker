@@ -10,6 +10,7 @@ import com.scurab.ptracker.model.Ledger
 import com.scurab.ptracker.model.Locations
 import com.scurab.ptracker.model.MarketPrice
 import com.scurab.ptracker.model.WsExchangeResponse
+import com.scurab.ptracker.model.WsMessageToken
 import com.scurab.ptracker.net.CryptoCompareClient
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.serialisation.JsonBridge
@@ -32,11 +33,6 @@ import kotlin.random.Random
 class PricesRepository(
     private val client: CryptoCompareClient
 ) {
-    data class MessageToken(
-        val timestamp: Long,
-        val client: String
-    )
-
     data class Subscription(
         val exchangeWallet: ExchangeWallet,
         val asset: Asset
@@ -45,7 +41,7 @@ class PricesRepository(
     private val _wsMarketPrice = MutableSharedFlow<MarketPrice>(16, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val wsMarketPrice = _wsMarketPrice.asSharedFlow()
 
-    private val _wsTickToken = MutableSharedFlow<MessageToken>(1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val _wsTickToken = MutableSharedFlow<WsMessageToken>(1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val wsTickToken = _wsTickToken.asSharedFlow()
 
     private val _subscriptions = mutableSetOf<Subscription>()
@@ -82,7 +78,7 @@ class PricesRepository(
                             is WsExchangeResponse.MarketPrice -> _wsMarketPrice.tryEmit(it)
                             is WsExchangeResponse.Subscription -> _subscriptions.add(Subscription(it.exchangeWallet, it.asset))
                         }
-                        _wsTickToken.tryEmit(MessageToken(System.currentTimeMillis(), it.client))
+                        _wsTickToken.tryEmit(WsMessageToken(System.currentTimeMillis(), it.client))
                     }
                 } catch (e: CancellationException) {
                     throw e
@@ -103,9 +99,9 @@ class PricesRepository(
                     val offset = 1 + (Random.nextInt(1, 5) / 100f * Random.nextBoolean().sign())
                     val marketPrice = coinPrice.copy(price = coinPrice.price * offset.toBigDecimal())
                     _wsMarketPrice.tryEmit(marketPrice)
-                    _wsTickToken.tryEmit(MessageToken(System.currentTimeMillis(), "Demo"))
+                    _wsTickToken.tryEmit(WsMessageToken(System.currentTimeMillis(), "Demo"))
                     prices[index] = marketPrice
-                    delay(Random.nextLong(1000, 2000))
+                    delay(Random.nextLong(4000, 6000))
                 }
             }
         }

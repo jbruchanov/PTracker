@@ -63,7 +63,7 @@ fun createKoinModule(appArgs: Array<String>) = module {
     fun Scope.getMainNavController() = get<NavController>(NavigationScope.Main)
 
     single { args -> AppViewModel(args.get(), get(), get(), get(), getAppNavController()) }
-    factory { MainViewModel(get(), getMainNavController()) }
+    factory { MainViewModel(get(), get(), getMainNavController()) }
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), getMainNavController(), get()) }
     factory { StatsViewModel(get(), get(), get()) }

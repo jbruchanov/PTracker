@@ -52,7 +52,8 @@ class DefaultNavSpecs(
             init()
         }
         val token by activeScreen.collectAsState()
-        println("Current nav token:$token")
+        //reading of token necessary to make it working, otherwise recomposition not triggered
+        println(token)
         stack.peek()?.render()
     }
 
