@@ -11,9 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
@@ -68,7 +66,7 @@ fun TransactionRow(
         Column {
             Row {
                 Text(text = formatter.fullDateTime(item.dateTime), style = AppTheme.TextStyles.TransactionSecondary)
-                Spacer(modifier = Modifier.weight(1f))
+                FSpacer()
                 val iconColor = item.iconColor()
                 val size = AppSizes.current.IconTransactionType.scaled()
                 Icon(
@@ -102,7 +100,7 @@ fun TransactionRow(
                     AnnotatedText(text = "Price")
                 }
             }
-            Spacer(modifier = Modifier.height(AppSizes.current.Space))
+            HSpacer()
             Text(text = item.exchange, style = AppTheme.TextStyles.TransactionDetail)
         }
     }

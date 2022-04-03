@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,6 +47,7 @@ import com.scurab.ptracker.component.navigation.NavToken
 import com.scurab.ptracker.model.WsMessageToken
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
+import com.scurab.ptracker.ui.common.FSpacer
 import com.scurab.ptracker.ui.common.VerticalDivider
 import com.scurab.ptracker.ui.common.VerticalTabButton
 import kotlinx.coroutines.delay
@@ -111,7 +111,7 @@ private fun ColumnScope.Menu(navToken: NavToken<*>, tick: WsMessageToken?, ledge
         VerticalTabButton(icon, isSelected = navToken == token, onClick = handler)
         Divider(color = AppTheme.Colors.PrimaryVariant)
     }
-    Spacer(modifier = Modifier.weight(1f))
+    FSpacer()
     val ledgerIcons = remember { listOf(Icons.Default.LooksOne, Icons.Default.LooksTwo, Icons.Default.Looks3) }
     ledgers.forEachIndexed { index, s ->
         VerticalTabButton(ledgerIcons[index], isSelected = false, onClick = { eventHandler.onLedgerClicked(s) })

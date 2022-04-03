@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
@@ -41,9 +39,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.LocalTexts
+import com.scurab.ptracker.ui.common.FSpacer
+import com.scurab.ptracker.ui.common.HSpacer
+import com.scurab.ptracker.ui.common.HSpacer05
+import com.scurab.ptracker.ui.common.HSpacer2
+import com.scurab.ptracker.ui.common.WSpacer
+import com.scurab.ptracker.ui.common.WSpacer2
+import com.scurab.ptracker.ui.common.WSpacer4
 import com.scurab.ptracker.ui.model.IconColor
 import com.scurab.ptracker.ui.model.Validity
 import kotlin.math.roundToInt
@@ -84,18 +90,18 @@ private fun Settings(state: SettingsUiState, handler: SettingsEventHandler) {
             ) {
                 Row(modifier = Modifier.wrapContentWidth()) {
                     Text(text = texts.Settings, style = AppTheme.TextStyles.Header, modifier = Modifier.align(Alignment.CenterVertically))
-                    Spacer(modifier = Modifier.weight(1f))
+                    FSpacer()
                     Button(onClick = handler::onSaveClicked, modifier = Modifier.align(Alignment.Top)) {
-                        Text(LocalTexts.current.Save, maxLines = 1)
+                        Text(LocalTexts.current.Save, maxLines = 1, color = AppColors.current.Secondary)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(appSizes.Space2))
+                HSpacer2()
                 Row {
                     Column(modifier = Modifier.verticalScroll(vScrollState).weight(1f)) {
                         SettingsContent(state, handler)
                     }
-                    Spacer(modifier = Modifier.width(appSizes.Space))
+                    WSpacer()
                     VerticalScrollbar(adapter = rememberScrollbarAdapter(vScrollState))
                 }
             }
@@ -116,7 +122,7 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
             valueRange = 0.75f.rangeTo(3f),
             modifier = Modifier.requiredWidthIn(120.dp, 320.dp).align(Alignment.CenterVertically)
         )
-        Spacer(modifier = Modifier.width(AppSizes.current.Space2))
+        WSpacer2()
         Text(LocalTexts.current.RestartNeeded, fontSize = 14.sp * state.fontScale, modifier = Modifier.align(Alignment.CenterVertically))
     }
 
@@ -128,7 +134,7 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
             textStyle = AppTheme.TextStyles.Monospace,
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.fillMaxWidth())
+        FSpacer()
         if (false) {
             Button(
                 onClick = handler::onTestCryptoCompareKeyClicked,
@@ -142,7 +148,7 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
                 } else if (icon != null) {
                     Image(icon.imageVector.get(), contentDescription = "", colorFilter = ColorFilter.tint(icon.color.get()))
                 }
-                Spacer(modifier = Modifier.width(if (smallSpace) appSizes.Space2 else appSizes.Space8))
+                WSpacer(if (smallSpace) appSizes.Space2 else appSizes.Space8)
                 Text(texts.Test, maxLines = 1, modifier = Modifier.align(Alignment.CenterVertically))
             }
         }
@@ -157,7 +163,7 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
             onDelete = handler::onDeleteLedger
         )
         if (!isLast) {
-            Spacer(modifier = Modifier.height(AppSizes.current.Space))
+            HSpacer()
         }
     }
 }
@@ -179,7 +185,7 @@ private fun ColumnScope.LedgerRow(
             modifier = Modifier.weight(1f)
         )
         if (showDeleteButton) {
-            Spacer(modifier = Modifier.width(AppSizes.current.Space4))
+            WSpacer4()
             Button(
                 onClick = { onDelete(index, path) },
                 modifier = Modifier.align(Alignment.CenterVertically)
@@ -192,7 +198,7 @@ private fun ColumnScope.LedgerRow(
 
 @Composable
 private fun ColumnScope.Label(text: String) {
-    Spacer(modifier = Modifier.height(AppSizes.current.Space2))
+    HSpacer2()
     Text(text = text)
-    Spacer(modifier = Modifier.height(AppSizes.current.Space05))
+    HSpacer05()
 }

@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -65,6 +63,11 @@ import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.LocalTexts
 import com.scurab.ptracker.ui.common.ColorMatrixGreyScale
 import com.scurab.ptracker.ui.common.Divider
+import com.scurab.ptracker.ui.common.FSpacer
+import com.scurab.ptracker.ui.common.HSpacer
+import com.scurab.ptracker.ui.common.HSpacer2
+import com.scurab.ptracker.ui.common.WSpacer
+import com.scurab.ptracker.ui.common.WSpacer4
 import kotlinx.coroutines.delay
 
 class StatsUiState {
@@ -108,7 +111,7 @@ private fun Stats(state: StatsUiState, event: StatsEventHandler) {
         val vScrollState = rememberScrollState()
         Row(modifier = Modifier.verticalScroll(vScrollState)) {
             Holdings(state, event)
-            Spacer(modifier = Modifier.weight(1f))
+            FSpacer()
         }
         VerticalScrollbar(rememberScrollbarAdapter(vScrollState), modifier = Modifier.align(Alignment.CenterEnd))
     }
@@ -128,9 +131,9 @@ private fun HoldingRowHeader(hasMultipleFiatCoins: Boolean) {
         HoldingsText(texts.Cost, isMonoSpace = false, width = ColumnWidths.Cost.scaled())
         HoldingsText(texts.Price, isMonoSpace = false, width = ColumnWidths.Cost.scaled())
         HoldingsText(texts.MarketValue, isMonoSpace = false, width = ColumnWidths.MarketValue.scaled())
-        Spacer(modifier = Modifier.width(AppSizes.current.Space4))
+        WSpacer4()
         HoldingsText(texts.ROI, isMonoSpace = false, textAlign = TextAlign.Center, width = ColumnWidths.ROI.scaled())
-        Spacer(modifier = Modifier.width(AppSizes.current.Space4))
+        WSpacer4()
     }
 }
 
@@ -141,20 +144,20 @@ private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, hold
             .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
     ) {
         CoinIcon(fiatCoin.icon().imageOrNull(), true, 1f)
-        Spacer(modifier = Modifier.width(ColumnWidths.IconCoinGap))
+        WSpacer(ColumnWidths.IconCoinGap)
         HoldingsText(fiatCoin.item, textAlign = TextAlign.Left, width = ColumnWidths.Coin.default2If(hasMultipleFiats).scaled())
-        Spacer(modifier = Modifier.background(Color.Black).width(ColumnWidths.Balance.scaled()))
+        WSpacer(ColumnWidths.Balance.scaled())
         HoldingsText(holdings.totalCost(fiatCoin).gf2, width = ColumnWidths.Cost.scaled())
-        Spacer(modifier = Modifier.width(ColumnWidths.Cost.scaled()))
+        WSpacer(ColumnWidths.Cost.scaled())
         HoldingsText(holdings.totalMarketValue(fiatCoin).gf2, width = ColumnWidths.MarketValue.scaled())
-        Spacer(modifier = Modifier.width(AppSizes.current.Space4))
+        WSpacer4()
         val totalRoi = holdings.totalRoi(fiatCoin)
         HoldingsText(
             (totalRoi.f2 + " %").colored(AppTheme.DashboardColors.Candle.get(isEven = totalRoi.isPositive)),
             textAlign = TextAlign.Right,
             width = ColumnWidths.ROI.scaled()
         )
-        Spacer(modifier = Modifier.width(AppSizes.current.Space4))
+        WSpacer4()
     }
 }
 
@@ -179,19 +182,19 @@ private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFia
             .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space)
     ) {
         CoinIcon(holdings.asset.iconCrypto().imageOrNull(), isColored, scale)
-        Spacer(modifier = Modifier.width(ColumnWidths.IconCoinGap))
+        WSpacer(ColumnWidths.IconCoinGap)
         HoldingsText(holdings.asset.cryptoLabelOnlyIf(!hasMultipleFiats), textAlign = TextAlign.Left, width = ColumnWidths.Coin.default2If(hasMultipleFiats).scaled())
         HoldingsText(holdings.actualCryptoBalance.gf4, width = ColumnWidths.Balance.scaled())
         HoldingsText(holdings.cost.gf2, width = ColumnWidths.Cost.scaled())
         HoldingsText(holdings.marketValueUnitPrice.gf2, width = ColumnWidths.Cost.scaled(), color = AppColors.current.Secondary)
         HoldingsText(holdings.marketValue.gf2, width = ColumnWidths.MarketValue.scaled())
-        Spacer(modifier = Modifier.width(AppSizes.current.Space4))
+        WSpacer4()
         HoldingsText(
             (holdings.roi.f2 + " %").colored(AppTheme.DashboardColors.Candle.get(isEven = holdings.roi.isPositive)),
             textAlign = TextAlign.Right,
             width = ColumnWidths.ROI.scaled()
         )
-        Spacer(modifier = Modifier.width(AppSizes.current.Space4))
+        WSpacer4()
         if (false) {
             Text(
                 DateTimeFormats.fullTime(holdings.timeDate),
@@ -222,7 +225,7 @@ private fun CoinIcon(image: ImageBitmap?, isColored: Boolean, scale: Float) {
                 modifier = Modifier.scale(scale).align(Alignment.Center)
             )
         } else {
-            Spacer(modifier = Modifier.width(ColumnWidths.Icon))
+            WSpacer(ColumnWidths.Icon)
         }
     }
 }
@@ -273,11 +276,11 @@ private fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Mo
                 }
             }
             Divider(thickness = AppSizes.current.ThickLine, color = AppColors.current.Primary, modifier = Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(AppSizes.current.Space))
+            HSpacer()
             fiatCoins.forEach {
                 HoldingRowFooter(it, hasFiatCoins, state.holdings)
             }
-            Spacer(modifier = Modifier.height(AppSizes.current.Space2))
+            HSpacer2()
         }
     }
 }

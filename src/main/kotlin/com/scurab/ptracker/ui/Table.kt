@@ -16,7 +16,6 @@ import androidx.compose.foundation.interaction.HoverInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.model.Transaction
+import com.scurab.ptracker.ui.common.WSpacer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
@@ -152,7 +152,7 @@ fun TableRow(item: Transaction, widths: SnapshotStateList<Float>) {
 }
 
 @Composable
-private fun VDivider() = Spacer(modifier = Modifier.width(4.dp))
+private fun VDivider() = WSpacer()
 
 @Composable
 private fun Cell(text: String, width: Float) {
