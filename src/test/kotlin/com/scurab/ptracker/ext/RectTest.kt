@@ -3,9 +3,6 @@ package com.scurab.ptracker.app.ext
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import org.junit.jupiter.api.Test
-import kotlin.math.exp
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.test.assertEquals
 
 class RectTest {
