@@ -45,6 +45,7 @@ object App : KoinComponent {
             state = rememberWindowState(size = DpSize((resolution.width * 0.5).dp, (resolution.height * 0.75).dp))
         ) {
             val density by appStateRepo.density.collectAsState()
+
             CompositionLocalProvider(
                 LocalDensity provides density,
                 LocalTexts provides English
@@ -57,7 +58,7 @@ object App : KoinComponent {
                             .padding(start = contentPadding, bottom = contentPadding, end = contentPadding)
                             .background(AppColors.current.BackgroundContent)
                     ) {
-                        navigation.render()
+                        navigation()
                     }
                 }
             }

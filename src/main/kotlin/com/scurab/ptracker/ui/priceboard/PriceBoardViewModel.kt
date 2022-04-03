@@ -19,7 +19,6 @@ import com.scurab.ptracker.model.Transaction
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.repository.PricesRepository
 import com.scurab.ptracker.ui.model.AssetIcon
-import com.scurab.ptracker.usecase.LoadLedgerUseCase
 import com.scurab.ptracker.usecase.LoadPriceHistoryUseCase
 import com.scurab.ptracker.usecase.PriceBoardDataProcessingUseCase
 import kotlinx.coroutines.Dispatchers

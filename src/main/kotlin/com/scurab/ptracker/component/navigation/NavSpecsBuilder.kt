@@ -1,7 +1,6 @@
 package com.scurab.ptracker.component.navigation
 
 import androidx.compose.runtime.Composable
-import com.scurab.ptracker.component.ViewModel
 import kotlin.reflect.KClass
 
 fun navigation(

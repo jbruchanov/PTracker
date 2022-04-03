@@ -1,7 +1,6 @@
 package com.scurab.ptracker.component.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.scurab.ptracker.ext.peekOrNull
@@ -16,6 +15,9 @@ interface NavSpecs {
 
     @Composable
     fun render()
+
+    @Composable
+    operator fun invoke() = render()
 }
 
 class DefaultNavSpecs(

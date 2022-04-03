@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.scurab.ptracker.ext.f4
 import com.scurab.ptracker.ext.gf4
 import com.scurab.ptracker.model.Asset
 import com.scurab.ptracker.model.MarketPrice
@@ -29,7 +28,6 @@ import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.model.AssetIcon
-import org.apache.xmlbeans.xml.stream.Space
 
 @Composable
 fun ToggleButton(
