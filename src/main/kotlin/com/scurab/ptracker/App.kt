@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.component.navigation.NavSpecs
-import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme

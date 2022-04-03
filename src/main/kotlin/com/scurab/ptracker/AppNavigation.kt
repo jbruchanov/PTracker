@@ -8,15 +8,15 @@ import com.scurab.ptracker.component.navigation.NavArgs
 import com.scurab.ptracker.component.navigation.NavToken
 import com.scurab.ptracker.component.navigation.StartNavToken
 import com.scurab.ptracker.component.navigation.navigation
-import com.scurab.ptracker.ui.main.Main
+import com.scurab.ptracker.ui.app.AppScreen
+import com.scurab.ptracker.ui.app.AppViewModel
+import com.scurab.ptracker.ui.main.MainScreen
 import com.scurab.ptracker.ui.main.MainViewModel
-import com.scurab.ptracker.ui.priceboard.PriceBoard
+import com.scurab.ptracker.ui.priceboard.PriceBoardScreen
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
-import com.scurab.ptracker.ui.settings.Settings
+import com.scurab.ptracker.ui.settings.SettingsScreen
 import com.scurab.ptracker.ui.settings.SettingsViewModel
-import com.scurab.ptracker.ui.start.App
-import com.scurab.ptracker.ui.start.AppViewModel
-import com.scurab.ptracker.ui.stats.Stats
+import com.scurab.ptracker.ui.stats.StatsScreen
 import com.scurab.ptracker.ui.stats.StatsViewModel
 import org.koin.core.qualifier.Qualifier
 import org.koin.core.qualifier.QualifierValue
@@ -37,12 +37,12 @@ sealed class NavigationScope : Qualifier {
 
 fun appNavSpecs(appArgs: Array<String>, componentFactory: ComponentFactory) = navigation(componentFactory) {
     appArgs(appArgs)
-    screen(DefaultStartNavToken) { vm: AppViewModel -> App(vm) }
-    screen(AppNavTokens.Main) { vm: MainViewModel -> Main(vm) }
+    screen(DefaultStartNavToken) { vm: AppViewModel -> AppScreen(vm) }
+    screen(AppNavTokens.Main) { vm: MainViewModel -> MainScreen(vm) }
 }
 
 fun defaultNavSpecs(componentFactory: ComponentFactory) = navigation(componentFactory) {
-    screen(AppNavTokens.PriceDashboard) { vm: PriceBoardViewModel -> PriceBoard(vm) }
-    screen(AppNavTokens.Stats) { vm: StatsViewModel -> Stats(vm) }
-    screen(AppNavTokens.Settings) { vm: SettingsViewModel -> Settings(vm) }
+    screen(AppNavTokens.PriceDashboard) { vm: PriceBoardViewModel -> PriceBoardScreen(vm) }
+    screen(AppNavTokens.Stats) { vm: StatsViewModel -> StatsScreen(vm) }
+    screen(AppNavTokens.Settings) { vm: SettingsViewModel -> SettingsScreen(vm) }
 }

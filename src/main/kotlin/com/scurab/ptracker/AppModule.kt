@@ -1,5 +1,17 @@
 package com.scurab.ptracker
 
+import com.scurab.ptracker.app.repository.AppSettings
+import com.scurab.ptracker.app.repository.AppSettingsJsonRepository
+import com.scurab.ptracker.app.repository.AppStateRepository
+import com.scurab.ptracker.app.repository.PricesRepository
+import com.scurab.ptracker.app.serialisation.JsonBridge
+import com.scurab.ptracker.app.usecase.LoadDataUseCase
+import com.scurab.ptracker.app.usecase.LoadIconsUseCase
+import com.scurab.ptracker.app.usecase.LoadLedgerUseCase
+import com.scurab.ptracker.app.usecase.LoadPriceHistoryUseCase
+import com.scurab.ptracker.app.usecase.PriceBoardDataProcessingUseCase
+import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
+import com.scurab.ptracker.app.usecase.TestCryptoCompareKeyUseCase
 import com.scurab.ptracker.component.KoinViewModelFactory
 import com.scurab.ptracker.component.navigation.ComponentFactory
 import com.scurab.ptracker.component.navigation.DefaultNavSpecs
@@ -7,24 +19,12 @@ import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.net.CryptoCompareClient
 import com.scurab.ptracker.net.defaultHttpClient
-import com.scurab.ptracker.repository.AppSettings
-import com.scurab.ptracker.repository.AppSettingsJsonRepository
-import com.scurab.ptracker.repository.AppStateRepository
-import com.scurab.ptracker.repository.PricesRepository
-import com.scurab.ptracker.serialisation.JsonBridge
 import com.scurab.ptracker.ui.DateTimeFormats
+import com.scurab.ptracker.ui.app.AppViewModel
 import com.scurab.ptracker.ui.main.MainViewModel
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
-import com.scurab.ptracker.ui.start.AppViewModel
 import com.scurab.ptracker.ui.stats.StatsViewModel
-import com.scurab.ptracker.usecase.LoadDataUseCase
-import com.scurab.ptracker.usecase.LoadIconsUseCase
-import com.scurab.ptracker.usecase.LoadLedgerUseCase
-import com.scurab.ptracker.usecase.LoadPriceHistoryUseCase
-import com.scurab.ptracker.usecase.PriceBoardDataProcessingUseCase
-import com.scurab.ptracker.usecase.StatsCalculatorUseCase
-import com.scurab.ptracker.usecase.TestCryptoCompareKeyUseCase
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
 

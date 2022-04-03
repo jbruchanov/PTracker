@@ -13,8 +13,8 @@ import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.toSize
-import com.scurab.ptracker.ext.firstIndexOf
-import com.scurab.ptracker.ext.translate
+import com.scurab.ptracker.app.ext.firstIndexOf
+import com.scurab.ptracker.app.ext.translate
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import org.jetbrains.skia.Point

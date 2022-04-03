@@ -2,7 +2,9 @@ package com.scurab.ptracker.usecase
 
 import com.scurab.ptracker.net.CryptoCompareClient
 import com.scurab.ptracker.net.defaultHttpClient
-import com.scurab.ptracker.serialisation.JsonBridge
+import com.scurab.ptracker.app.serialisation.JsonBridge
+import com.scurab.ptracker.app.usecase.LoadIconsUseCase
+import com.scurab.ptracker.app.usecase.LoadLedgerUseCase
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Disabled

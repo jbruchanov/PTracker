@@ -1,7 +1,7 @@
 package test
 
-import com.scurab.ptracker.ext.now
-import com.scurab.ptracker.model.Transaction
+import com.scurab.ptracker.app.ext.now
+import com.scurab.ptracker.app.model.Transaction
 import kotlinx.datetime.LocalDateTime
 import java.math.BigDecimal
 

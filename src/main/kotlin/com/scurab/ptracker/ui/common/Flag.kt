@@ -12,9 +12,9 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import com.scurab.ptracker.ext.One
-import com.scurab.ptracker.ext.nativeCanvas
-import com.scurab.ptracker.ext.toFlagEmoji
+import com.scurab.ptracker.app.ext.One
+import com.scurab.ptracker.app.ext.nativeCanvas
+import com.scurab.ptracker.app.ext.toFlagEmoji
 import com.scurab.ptracker.ui.AppTheme
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.TextLine

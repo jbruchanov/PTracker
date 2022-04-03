@@ -2,12 +2,12 @@ package com.scurab.ptracker.ui.main
 
 import androidx.compose.ui.input.key.Key
 import com.scurab.ptracker.AppNavTokens
+import com.scurab.ptracker.app.repository.AppSettings
+import com.scurab.ptracker.app.repository.AppStateRepository
+import com.scurab.ptracker.app.repository.PricesRepository
+import com.scurab.ptracker.app.usecase.LoadDataUseCase
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.component.navigation.NavController
-import com.scurab.ptracker.repository.AppSettings
-import com.scurab.ptracker.repository.AppStateRepository
-import com.scurab.ptracker.repository.PricesRepository
-import com.scurab.ptracker.usecase.LoadDataUseCase
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch

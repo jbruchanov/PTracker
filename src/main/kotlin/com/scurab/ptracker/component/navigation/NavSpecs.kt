@@ -3,7 +3,7 @@ package com.scurab.ptracker.component.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.scurab.ptracker.ext.peekOrNull
+import com.scurab.ptracker.app.ext.peekOrNull
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

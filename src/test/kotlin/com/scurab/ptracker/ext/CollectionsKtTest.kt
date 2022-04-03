@@ -1,4 +1,4 @@
-package com.scurab.ptracker.ext
+package com.scurab.ptracker.app.ext
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

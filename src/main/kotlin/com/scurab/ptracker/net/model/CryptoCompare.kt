@@ -2,17 +2,17 @@
 
 package com.scurab.ptracker.net.model
 
-import com.scurab.ptracker.model.Asset
-import com.scurab.ptracker.model.ExchangeWallet
-import com.scurab.ptracker.model.IPriceItem
-import com.scurab.ptracker.model.MapCache
-import com.scurab.ptracker.model.MarketPrice
-import com.scurab.ptracker.model.WithCache
-import com.scurab.ptracker.model.WsExchangeResponse
-import com.scurab.ptracker.serialisation.BigDecimalAsDoubleSerializer
-import com.scurab.ptracker.serialisation.BigDecimalAsStringSerializer
-import com.scurab.ptracker.serialisation.CryptoCompareResultSerializer
-import com.scurab.ptracker.serialisation.SecondsLongAsDateTimeSerializer
+import com.scurab.ptracker.app.serialisation.BigDecimalAsDoubleSerializer
+import com.scurab.ptracker.app.serialisation.BigDecimalAsStringSerializer
+import com.scurab.ptracker.app.serialisation.CryptoCompareResultSerializer
+import com.scurab.ptracker.app.serialisation.SecondsLongAsDateTimeSerializer
+import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.ExchangeWallet
+import com.scurab.ptracker.app.model.IPriceItem
+import com.scurab.ptracker.app.model.MapCache
+import com.scurab.ptracker.app.model.MarketPrice
+import com.scurab.ptracker.app.model.WithCache
+import com.scurab.ptracker.app.model.WsExchangeResponse
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone

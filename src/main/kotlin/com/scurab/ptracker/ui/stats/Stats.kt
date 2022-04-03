@@ -42,20 +42,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.component.compose.StateContainer
-import com.scurab.ptracker.ext.colored
-import com.scurab.ptracker.ext.f2
-import com.scurab.ptracker.ext.fiatCoins
-import com.scurab.ptracker.ext.firstIf
-import com.scurab.ptracker.ext.gf2
-import com.scurab.ptracker.ext.gf4
-import com.scurab.ptracker.ext.imageOrNull
-import com.scurab.ptracker.ext.isPositive
-import com.scurab.ptracker.ext.scaled
-import com.scurab.ptracker.ext.totalCost
-import com.scurab.ptracker.ext.totalMarketValue
-import com.scurab.ptracker.ext.totalRoi
-import com.scurab.ptracker.model.FiatCoin
-import com.scurab.ptracker.model.OnlineHoldingStats
+import com.scurab.ptracker.app.ext.colored
+import com.scurab.ptracker.app.ext.f2
+import com.scurab.ptracker.app.ext.fiatCoins
+import com.scurab.ptracker.app.ext.firstIf
+import com.scurab.ptracker.app.ext.gf2
+import com.scurab.ptracker.app.ext.gf4
+import com.scurab.ptracker.app.ext.imageOrNull
+import com.scurab.ptracker.app.ext.isPositive
+import com.scurab.ptracker.app.ext.scaled
+import com.scurab.ptracker.app.ext.totalCost
+import com.scurab.ptracker.app.ext.totalMarketValue
+import com.scurab.ptracker.app.ext.totalRoi
+import com.scurab.ptracker.app.model.FiatCoin
+import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
@@ -95,18 +95,18 @@ interface StatsEventHandler {
 
 
 @Composable
-fun Stats(vm: StatsViewModel) {
+fun StatsScreen(vm: StatsViewModel) {
     Row(modifier = Modifier) {
         Box(
             modifier = Modifier.padding(AppSizes.current.Space).weight(1f)
         ) {
-            Stats(vm.uiState, vm)
+            StatsScreen(vm.uiState, vm)
         }
     }
 }
 
 @Composable
-private fun Stats(state: StatsUiState, event: StatsEventHandler) {
+private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
     Box {
         val vScrollState = rememberScrollState()
         Row(modifier = Modifier.verticalScroll(vScrollState)) {

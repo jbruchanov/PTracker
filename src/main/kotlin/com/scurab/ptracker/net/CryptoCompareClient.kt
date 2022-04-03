@@ -1,15 +1,15 @@
 package com.scurab.ptracker.net
 
-import com.scurab.ptracker.model.Asset
-import com.scurab.ptracker.model.CoinPrice
+import com.scurab.ptracker.app.repository.AppSettings
+import com.scurab.ptracker.app.serialisation.JsonBridge
+import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.net.model.CryptoCompareCoinDetail
 import com.scurab.ptracker.net.model.CryptoCompareHistoryData
 import com.scurab.ptracker.net.model.CryptoCompareResult
 import com.scurab.ptracker.net.model.CryptoCompareWsResponse
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscription
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
-import com.scurab.ptracker.repository.AppSettings
-import com.scurab.ptracker.serialisation.JsonBridge
 import com.scurab.ptracker.ui.model.Validity
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.wss

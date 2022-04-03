@@ -1,13 +1,13 @@
 package com.scurab.ptracker.ui.stats
 
+import com.scurab.ptracker.app.repository.AppStateRepository
+import com.scurab.ptracker.app.repository.PricesRepository
+import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
 import com.scurab.ptracker.component.ViewModel
-import com.scurab.ptracker.model.Filter
-import com.scurab.ptracker.model.Ledger
-import com.scurab.ptracker.model.LedgerStats
-import com.scurab.ptracker.model.MarketPrice
-import com.scurab.ptracker.repository.AppStateRepository
-import com.scurab.ptracker.repository.PricesRepository
-import com.scurab.ptracker.usecase.StatsCalculatorUseCase
+import com.scurab.ptracker.app.model.Filter
+import com.scurab.ptracker.app.model.Ledger
+import com.scurab.ptracker.app.model.LedgerStats
+import com.scurab.ptracker.app.model.MarketPrice
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch

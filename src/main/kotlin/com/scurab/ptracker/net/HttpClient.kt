@@ -1,6 +1,6 @@
 package com.scurab.ptracker.net
 
-import com.scurab.ptracker.serialisation.JsonBridge
+import com.scurab.ptracker.app.serialisation.JsonBridge
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.ProxyBuilder

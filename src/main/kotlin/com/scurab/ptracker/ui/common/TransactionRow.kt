@@ -22,10 +22,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import com.scurab.ptracker.ext.formattedPrices
-import com.scurab.ptracker.ext.iconColor
-import com.scurab.ptracker.ext.scaled
-import com.scurab.ptracker.model.Transaction
+import com.scurab.ptracker.app.ext.formattedPrices
+import com.scurab.ptracker.app.ext.iconColor
+import com.scurab.ptracker.app.ext.scaled
+import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme

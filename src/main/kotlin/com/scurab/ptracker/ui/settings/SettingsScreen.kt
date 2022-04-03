@@ -72,12 +72,12 @@ class SettingsUiState {
 }
 
 @Composable
-fun Settings(vm: SettingsViewModel) {
-    Settings(vm.uiState, vm)
+fun SettingsScreen(vm: SettingsViewModel) {
+    SettingsScreen(vm.uiState, vm)
 }
 
 @Composable
-private fun Settings(state: SettingsUiState, handler: SettingsEventHandler) {
+private fun SettingsScreen(state: SettingsUiState, handler: SettingsEventHandler) {
     val texts = LocalTexts.current
     val appSizes = AppSizes.current
     BoxWithConstraints {

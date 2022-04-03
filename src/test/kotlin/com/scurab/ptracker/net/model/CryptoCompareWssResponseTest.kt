@@ -1,6 +1,6 @@
 package com.scurab.ptracker.net.model
 
-import com.scurab.ptracker.serialisation.JsonBridge
+import com.scurab.ptracker.app.serialisation.JsonBridge
 import org.junit.jupiter.api.Test
 
 internal class CryptoCompareWssResponseTest {

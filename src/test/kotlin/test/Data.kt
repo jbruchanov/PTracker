@@ -1,6 +1,6 @@
 package test
 
-import com.scurab.ptracker.model.Asset
+import com.scurab.ptracker.app.model.Asset
 
 val SampleFiatCoins = listOf("USD", "GBP")
 val SampleCryptoCoins = listOf("BTC", "ETH", "LTC", "ADA", "DOT", "AVAX", "AAVE", "DOGE")

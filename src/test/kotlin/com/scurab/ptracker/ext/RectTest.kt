@@ -1,4 +1,4 @@
-package com.scurab.ptracker.ext
+package com.scurab.ptracker.app.ext
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect

@@ -42,7 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.scurab.ptracker.model.Transaction
+import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.ui.common.WSpacer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
