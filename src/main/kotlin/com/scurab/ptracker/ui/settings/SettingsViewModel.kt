@@ -1,16 +1,12 @@
 package com.scurab.ptracker.ui.settings
 
 import com.scurab.ptracker.AppNavTokens
-import com.scurab.ptracker.component.ProcessScope
 import com.scurab.ptracker.component.ViewModel
-import com.scurab.ptracker.component.navigation.EmptyAppNavArgs
 import com.scurab.ptracker.component.navigation.NavController
-import com.scurab.ptracker.component.navigation.NavToken
 import com.scurab.ptracker.repository.AppSettings
 import com.scurab.ptracker.repository.AppStateRepository
 import com.scurab.ptracker.ui.model.Validity
 import com.scurab.ptracker.usecase.TestCryptoCompareKeyUseCase
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 interface SettingsEventHandler {

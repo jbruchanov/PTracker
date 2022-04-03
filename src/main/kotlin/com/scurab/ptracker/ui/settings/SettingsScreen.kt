@@ -2,16 +2,20 @@ package com.scurab.ptracker.ui.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
@@ -70,74 +74,91 @@ fun Settings(vm: SettingsViewModel) {
 private fun Settings(state: SettingsUiState, handler: SettingsEventHandler) {
     val texts = LocalTexts.current
     val appSizes = AppSizes.current
-    Row(modifier = Modifier.requiredWidthIn(min = 480.dp)) {
+    BoxWithConstraints {
         val vScrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
-                .verticalScroll(vScrollState)
-                .weight(1f)
-                .padding(AppTheme.Sizes.Space2)
-        ) {
-            Text(text = texts.Settings, style = AppTheme.TextStyles.Header)
-
-            Spacer(modifier = Modifier.height(appSizes.Space2))
-
-            Label(text = "${texts.FontScaling}: ${(state.fontScale * 100).roundToInt()}%")
-            Row {
-                Slider(
-                    state.fontScale, onValueChange = { handler.onFontScaleChanged(it) }, valueRange = 0.75f.rangeTo(3f),
-                    modifier = Modifier.requiredWidthIn(120.dp, 320.dp)
-                )
-                Spacer(modifier = Modifier.width(AppSizes.current.Space2))
-                Text(LocalTexts.current.RestartNeeded, fontSize = 14.sp * state.fontScale)
-            }
-            Label(text = texts.CryptoCompareApiKey)
-            Row {
-                TextField(
-                    value = state.cryptoCompareKey,
-                    onValueChange = { handler.onCryptoCompareKeyChanged(it) },
-                    textStyle = AppTheme.TextStyles.Monospace,
-                    modifier = Modifier.weight(1f, fill = false)
-                )
-                Spacer(modifier = Modifier.width(appSizes.Space4))
-                if (false) {
-                    Button(
-                        onClick = handler::onTestCryptoCompareKeyClicked,
-                        enabled = !state.isTestingCryptoCompareKey,
-                        modifier = Modifier.height(IntrinsicSize.Max)
-                    ) {
-                        val icon = state.cryptoCompareIcon()
-                        val smallSpace = state.isTestingCryptoCompareKey || icon != null
-                        if (state.isTestingCryptoCompareKey) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        } else if (icon != null) {
-                            Image(icon.imageVector.get(), contentDescription = "", colorFilter = ColorFilter.tint(icon.color.get()))
-                        }
-                        Spacer(modifier = Modifier.width(if (smallSpace) appSizes.Space2 else appSizes.Space8))
-                        Text(texts.Test, maxLines = 1, modifier = Modifier.align(Alignment.CenterVertically))
+        Row(modifier = Modifier) {
+            Column(
+                modifier = Modifier
+                    .defaultMinSize(minHeight = this@BoxWithConstraints.maxHeight)
+                    .padding(AppTheme.Sizes.Space2)
+            ) {
+                Row(modifier = Modifier.wrapContentWidth()) {
+                    Text(text = texts.Settings, style = AppTheme.TextStyles.Header, modifier = Modifier.align(Alignment.CenterVertically))
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(onClick = handler::onSaveClicked, modifier = Modifier.align(Alignment.Top)) {
+                        Text(LocalTexts.current.Save, maxLines = 1)
                     }
                 }
-            }
-            Label(text = texts.Ledgers)
-            state.predefinedLedgers.forEachIndexed { index, s ->
-                val isLast = index == state.predefinedLedgers.size - 1
-                LedgerRow(
-                    index, s,
-                    showDeleteButton = true,
-                    onChange = handler::onLedgerChanged,
-                    onDelete = handler::onDeleteLedger
-                )
-                if (!isLast) {
-                    Spacer(modifier = Modifier.height(AppSizes.current.Space))
+
+                Spacer(modifier = Modifier.height(appSizes.Space2))
+                Row {
+                    Column(modifier = Modifier.verticalScroll(vScrollState).weight(1f)) {
+                        SettingsContent(state, handler)
+                    }
+                    Spacer(modifier = Modifier.width(appSizes.Space))
+                    VerticalScrollbar(adapter = rememberScrollbarAdapter(vScrollState))
                 }
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(appSizes.Space))
-            Button(onClick = handler::onSaveClicked, modifier = Modifier.align(Alignment.Start)) {
-                Text(LocalTexts.current.Save)
+@Composable
+fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHandler) {
+    val texts = LocalTexts.current
+    val appSizes = AppSizes.current
+
+    Label(text = "${texts.FontScaling}: ${(state.fontScale * 100).roundToInt()}%")
+    Row(modifier = Modifier) {
+        Slider(
+            state.fontScale,
+            onValueChange = { handler.onFontScaleChanged(it) },
+            valueRange = 0.75f.rangeTo(3f),
+            modifier = Modifier.requiredWidthIn(120.dp, 320.dp).align(Alignment.CenterVertically)
+        )
+        Spacer(modifier = Modifier.width(AppSizes.current.Space2))
+        Text(LocalTexts.current.RestartNeeded, fontSize = 14.sp * state.fontScale, modifier = Modifier.align(Alignment.CenterVertically))
+    }
+
+    Label(text = texts.CryptoCompareApiKey)
+    Row {
+        TextField(
+            value = state.cryptoCompareKey,
+            onValueChange = { handler.onCryptoCompareKeyChanged(it) },
+            textStyle = AppTheme.TextStyles.Monospace,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.fillMaxWidth())
+        if (false) {
+            Button(
+                onClick = handler::onTestCryptoCompareKeyClicked,
+                enabled = !state.isTestingCryptoCompareKey,
+                modifier = Modifier.height(IntrinsicSize.Max)
+            ) {
+                val icon = state.cryptoCompareIcon()
+                val smallSpace = state.isTestingCryptoCompareKey || icon != null
+                if (state.isTestingCryptoCompareKey) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                } else if (icon != null) {
+                    Image(icon.imageVector.get(), contentDescription = "", colorFilter = ColorFilter.tint(icon.color.get()))
+                }
+                Spacer(modifier = Modifier.width(if (smallSpace) appSizes.Space2 else appSizes.Space8))
+                Text(texts.Test, maxLines = 1, modifier = Modifier.align(Alignment.CenterVertically))
             }
         }
-        VerticalScrollbar(adapter = rememberScrollbarAdapter(vScrollState))
+    }
+    Label(text = texts.Ledgers)
+    state.predefinedLedgers.forEachIndexed { index, s ->
+        val isLast = index == state.predefinedLedgers.size - 1
+        LedgerRow(
+            index, s,
+            showDeleteButton = true,
+            onChange = handler::onLedgerChanged,
+            onDelete = handler::onDeleteLedger
+        )
+        if (!isLast) {
+            Spacer(modifier = Modifier.height(AppSizes.current.Space))
+        }
     }
 }
 
@@ -149,13 +170,13 @@ private fun ColumnScope.LedgerRow(
     onChange: (Int, String) -> Unit,
     onDelete: (Int, String) -> Unit
 ) {
-    Row(modifier = Modifier) {
+    Row(modifier = Modifier.fillMaxWidth()) {
         TextField(
             value = path,
             onValueChange = { onChange(index, it) },
             textStyle = AppTheme.TextStyles.Monospace,
             placeholder = { Text("/path/yourledger.xlsx") },
-            modifier = Modifier
+            modifier = Modifier.weight(1f)
         )
         if (showDeleteButton) {
             Spacer(modifier = Modifier.width(AppSizes.current.Space4))
@@ -170,7 +191,7 @@ private fun ColumnScope.LedgerRow(
 }
 
 @Composable
-private fun Label(text: String) {
+private fun ColumnScope.Label(text: String) {
     Spacer(modifier = Modifier.height(AppSizes.current.Space2))
     Text(text = text)
     Spacer(modifier = Modifier.height(AppSizes.current.Space05))
