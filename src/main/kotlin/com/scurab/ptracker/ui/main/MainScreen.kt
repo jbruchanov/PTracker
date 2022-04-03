@@ -2,6 +2,7 @@ package com.scurab.ptracker.ui.main
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,8 @@ import com.scurab.ptracker.NavigationScope
 import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.component.navigation.NavToken
 import com.scurab.ptracker.app.model.WsMessageToken
+import com.scurab.ptracker.component.util.mock
+import com.scurab.ptracker.previewStartKoin
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.common.FSpacer
@@ -150,5 +153,19 @@ private fun PriceTickShape(tick: WsMessageToken?) {
                 .size(AppSizes.current.Space4)
 
         )
+    }
+}
+
+
+@Preview
+@Composable
+fun PreviewMain() {
+    AppTheme {
+        previewStartKoin()
+        val mainUiState = MainUiState().apply {
+            ledgers = listOf("A", "B", "C")
+            activeLedger = "a"
+        }
+        MainScreen(mainUiState, MainEventHandler::class.mock())
     }
 }

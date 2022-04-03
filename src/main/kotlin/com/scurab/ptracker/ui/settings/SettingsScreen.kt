@@ -56,19 +56,6 @@ import com.scurab.ptracker.ui.model.IconColor
 import com.scurab.ptracker.ui.model.Validity
 import kotlin.math.roundToInt
 
-@Preview
-@Composable
-private fun PreviewSettingsScreen() {
-    AppTheme {
-        val state = SettingsUiState().apply {
-            fontScale = 1.5f
-            predefinedLedgers.addAll(listOf("Ledger1", "Ledger2", ""))
-            cryptoCompareKey = "Abc"
-        }
-        SettingsScreen(state, SettingsEventHandler::class.mock())
-    }
-}
-
 class SettingsUiState {
     var fontScale by mutableStateOf(1f)
     var cryptoCompareKey by mutableStateOf("")
@@ -216,4 +203,17 @@ private fun ColumnScope.Label(text: String) {
     HSpacer2()
     Text(text = text)
     HSpacer05()
+}
+
+@Preview
+@Composable
+private fun PreviewSettingsScreen() {
+    AppTheme {
+        val state = SettingsUiState().apply {
+            fontScale = 1.5f
+            predefinedLedgers.addAll(listOf("Ledger1", "Ledger2", ""))
+            cryptoCompareKey = "Abc"
+        }
+        SettingsScreen(state, SettingsEventHandler::class.mock())
+    }
 }

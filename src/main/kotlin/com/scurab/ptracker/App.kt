@@ -20,6 +20,14 @@ import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import java.awt.Toolkit
 
+fun previewStartKoin() {
+    runCatching {
+        startKoin {
+            loadKoinModules(createKoinModule(emptyArray()))
+        }
+    }
+}
+
 fun main(args: Array<String>) {
     startKoin {
         loadKoinModules(createKoinModule(args))

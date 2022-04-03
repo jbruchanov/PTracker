@@ -93,7 +93,6 @@ interface StatsEventHandler {
 
 }
 
-
 @Composable
 fun StatsScreen(vm: StatsViewModel) {
     Row(modifier = Modifier) {
