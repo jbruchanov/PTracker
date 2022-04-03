@@ -80,7 +80,7 @@ object AssetAsStringSerializer : KSerializer<Asset> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("com.scurab.ptracker.app.model.Asset", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Asset {
-        return Asset.fromString(decoder.decodeString())
+        return Asset.fromStringOrEmpty(decoder.decodeString())
     }
 
     override fun serialize(encoder: Encoder, value: Asset) {

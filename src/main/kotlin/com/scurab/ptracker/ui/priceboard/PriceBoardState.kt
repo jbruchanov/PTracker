@@ -73,6 +73,15 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density,
     fun normalizedPointer() = pointer.normalize(canvasSize)
     fun maxDensity() = localDensity.maxValue()
 
+    fun resetData() {
+        selectedAsset = null
+        priceItems = emptyList()
+        clickedTransaction = null
+        pointedPriceItem = null
+        visibleTransactions = emptyList()
+        visibleTransactionsPerPriceItem = emptyMap()
+    }
+
     suspend fun reset(animate: Boolean = true) = coroutineScope {
         if (animate) {
             animateToOffsetScale(offset = Offset.Zero, scale = ONE)

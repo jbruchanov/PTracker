@@ -44,6 +44,7 @@ class MainViewModel(
                     uiState.ledgers = appSettings.ledgers ?: emptyList()
                 }
         }
+        uiState.activeLedger = appSettings.latestLedger
     }
 
     override fun onOpenSettingsClick() {
@@ -68,6 +69,7 @@ class MainViewModel(
     override fun onLedgerClicked(path: String) {
         launch {
             loadAllDataUseCase.loadAndSetAllData(path)
+            uiState.activeLedger = path
         }
     }
 

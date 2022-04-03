@@ -1,5 +1,7 @@
 package com.scurab.ptracker.app.model
 
+import com.scurab.ptracker.app.ext.firstIf
+import com.scurab.ptracker.app.ext.other
 import com.scurab.ptracker.app.serialisation.AssetAsStringSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -11,19 +13,24 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
     fun has(value1: String, value2: String) = (value1 == crypto && value2 == fiat) || (value2 == crypto && value1 == fiat)
 
     @Transient
-    val label = buildString {
-        append(crypto)
-        if (isNotEmpty() && fiat.isNotEmpty()) {
-            append("-")
+    val label by lazy {
+        buildString {
+            append(crypto)
+            if (isNotEmpty() && fiat.isNotEmpty()) {
+                append("-")
+            }
+            append(fiat)
         }
-        append(fiat)
     }
 
+    //getters seem to be necessary for deserialized objects
     @Transient
-    val isEmpty = this == Empty
+    val isEmpty
+        get() = this == Empty
 
     @Transient
-    val isCryptoTradingAsset = crypto.isNotEmpty() && fiat.isNotEmpty()/* && !FiatCurrencies.contains(crypto) && FiatCurrencies.contains(fiat)*/
+    val isCryptoTradingAsset
+        get() = crypto.isNotEmpty() && fiat.isNotEmpty()/* && !FiatCurrencies.contains(crypto) && FiatCurrencies.contains(fiat)*/
 
     fun cryptoLabelOnlyIf(value: Boolean) = if (value) crypto else label
 
@@ -41,11 +48,14 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
             requireNotNull(coin2) { "Coin2 is null" }
             require(coin1 != coin2) { "Invalid pair:$coin1, $coin2" }
             val isCoin1Fiat = FiatCurrencies.contains(coin1)
-            val isCoin2Fiat = FiatCurrencies.contains(coin2)
-            require((isCoin1Fiat xor isCoin2Fiat)) { "Invalid pair:$coin1, $coin2" }
+            //currently ignored, for some Fiat/Fiat exchange data, so the Asset crypto/Fiat won't work in some edgecase
+            //val isCoin2Fiat = FiatCurrencies.contains(coin2)
+            //require((isCoin1Fiat xor isCoin2Fiat)) { "Invalid pair:$coin1, $coin2" }
+            val pair = Pair(coin1, coin2)
+            val crypto = pair.firstIf(!isCoin1Fiat)
             return Asset(
-                crypto = coin1.takeIf { !isCoin1Fiat } ?: coin2,
-                fiat = coin1.takeIf { isCoin1Fiat } ?: coin2
+                crypto = pair.firstIf(!isCoin1Fiat),
+                fiat = pair.other(crypto)
             )
         }
 
@@ -57,6 +67,8 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
             require(items.size == 2) { "Invalid input:${value}, must be 'COIN1-COIN2'" }
             return fromUnknownPair(items[0], items[1])
         }
+
+        fun fromStringOrEmpty(value: String): Asset = kotlin.runCatching { fromString(value) }.getOrElse { Empty }
     }
 
     override fun compareTo(other: Asset): Int = label.compareTo(other.label)

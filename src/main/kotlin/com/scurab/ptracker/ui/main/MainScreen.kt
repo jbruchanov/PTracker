@@ -59,6 +59,7 @@ private data class LeftMenuButton(
 class MainUiState {
     var latestPriceTick by mutableStateOf<WsMessageToken?>(null)
     var ledgers by mutableStateOf<List<String>>(emptyList())
+    var activeLedger by mutableStateOf<String?>(null)
 }
 
 @Composable
@@ -86,7 +87,7 @@ private fun MainScreen(uiState: MainUiState, eventHandler: MainEventHandler) {
             Column(
                 modifier = Modifier.width(IntrinsicSize.Max).zIndex(1000f)
             ) {
-                Menu(navToken, uiState.latestPriceTick, uiState.ledgers, eventHandler)
+                Menu(navToken, uiState, eventHandler)
             }
             VerticalDivider()
             Box(
@@ -99,7 +100,9 @@ private fun MainScreen(uiState: MainUiState, eventHandler: MainEventHandler) {
 }
 
 @Composable
-private fun ColumnScope.Menu(navToken: NavToken<*>, tick: WsMessageToken?, ledgers: List<String>, eventHandler: MainEventHandler) {
+private fun ColumnScope.Menu(navToken: NavToken<*>, uiState: MainUiState, eventHandler: MainEventHandler) {
+    val tick = uiState.latestPriceTick
+    val ledgers = uiState.ledgers
     val buttons = remember {
         listOf(
             LeftMenuButton(Icons.Default.WaterfallChart, AppNavTokens.PriceDashboard, eventHandler::onOpenPriceDashboardClick),
@@ -114,7 +117,7 @@ private fun ColumnScope.Menu(navToken: NavToken<*>, tick: WsMessageToken?, ledge
     FSpacer()
     val ledgerIcons = remember { listOf(Icons.Default.LooksOne, Icons.Default.LooksTwo, Icons.Default.Looks3) }
     ledgers.forEachIndexed { index, s ->
-        VerticalTabButton(ledgerIcons[index], isSelected = false, onClick = { eventHandler.onLedgerClicked(s) })
+        VerticalTabButton(ledgerIcons[index], isSelected = uiState.activeLedger == s, onClick = { eventHandler.onLedgerClicked(s) })
     }
     VerticalTabButton(Icons.Default.FolderOpen, isSelected = false, onClick = { eventHandler.onOpenFileClicked() })
     PriceTickShape(tick)

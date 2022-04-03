@@ -69,7 +69,6 @@ class PriceBoardViewModel(
     init {
         launch {
             appStateRepository.selectedAsset
-                .filter { it != Asset.Empty }
                 .collect(::loadAsset)
         }
         launch {
@@ -82,7 +81,7 @@ class PriceBoardViewModel(
             ledger.combine(prices) { i1, i2 -> Pair(i1, i2) }.collect { (ledger, pricePair) ->
                 val (asset, prices) = pricePair
                 data = PriceBoardDataProcessingUseCase.RawData(ledger, asset, prices)
-                updateData(data, filters.firstIf(uiState.hasTradeOnlyFilter), true)
+                updateData(data, filters.firstIf(uiState.hasTradeOnlyFilter), resetViewport = uiState.priceBoardState.selectedAsset != asset)
             }
         }
         launch(Dispatchers.Main) {
@@ -101,19 +100,32 @@ class PriceBoardViewModel(
     ) {
         val result = withContext(Dispatchers.IO) { dataUseCase.prepareData(data, filter, grouping) }
         withContext(Dispatchers.Main) {
+            val isSelectedAssetMissing = !result.assets.contains(data.asset)
             with(uiState) {
-                assets = result.assets
+                assets = result.assetsIcons
                 hasTradeOnlyFilter = filter == Filter.ImportantTransactions
+                if (isSelectedAssetMissing) {
+                    appStateRepository.setSelectedAsset(Asset.Empty)
+
+                }
             }
             with(uiState.priceBoardState) {
-                visibleTransactions = result.transactions
-                visibleTransactionsPerPriceItem = result.transactionsPerPriceItem
-                setItems(data.asset, data.prices, resetViewport)
+                if (isSelectedAssetMissing) {
+                    resetData()
+                } else {
+                    visibleTransactions = result.transactions
+                    visibleTransactionsPerPriceItem = result.transactionsPerPriceItem
+                    setItems(data.asset, data.prices, resetViewport)
+                }
             }
         }
     }
 
     private fun loadAsset(asset: Asset) {
+        if (asset.isEmpty) {
+            prices.value = Pair(asset, emptyList())
+            return
+        }
         launch(Dispatchers.IO) {
             prices.value = asset to loadPriceHistoryUseCase.load(asset)
         }
