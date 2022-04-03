@@ -1,14 +1,9 @@
 package com.scurab.ptracker
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -17,8 +12,6 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.component.navigation.NavSpecs
-import com.scurab.ptracker.ui.AppColors
-import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.English
 import com.scurab.ptracker.ui.LocalTexts
@@ -51,15 +44,7 @@ object App : KoinComponent {
                 LocalTexts provides English
             ) {
                 AppTheme {
-                    val contentPadding = AppSizes.current.Space05
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                            .background(AppColors.current.WindowEdge)
-                            .padding(start = contentPadding, bottom = contentPadding, end = contentPadding)
-                            .background(AppColors.current.BackgroundContent)
-                    ) {
-                        navigation()
-                    }
+                    navigation()
                 }
             }
         }

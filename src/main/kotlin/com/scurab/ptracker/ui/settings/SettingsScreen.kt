@@ -1,5 +1,6 @@
 package com.scurab.ptracker.ui.settings
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scurab.ptracker.component.util.mock
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
@@ -53,6 +55,19 @@ import com.scurab.ptracker.ui.common.WSpacer4
 import com.scurab.ptracker.ui.model.IconColor
 import com.scurab.ptracker.ui.model.Validity
 import kotlin.math.roundToInt
+
+@Preview
+@Composable
+private fun PreviewSettingsScreen() {
+    AppTheme {
+        val state = SettingsUiState().apply {
+            fontScale = 1.5f
+            predefinedLedgers.addAll(listOf("Ledger1", "Ledger2", ""))
+            cryptoCompareKey = "Abc"
+        }
+        SettingsScreen(state, SettingsEventHandler::class.mock())
+    }
+}
 
 class SettingsUiState {
     var fontScale by mutableStateOf(1f)

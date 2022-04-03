@@ -18,7 +18,7 @@ import java.lang.Float.min
 
 @Composable
 @Preview
-private fun TestPieChart() {
+private fun PreviewPieChart() {
     val sampleData = listOf(
         PieChartSegment(0f, 120f, Color.Green),
         PieChartSegment(120f, 140f, Color.Red, strokeWidth = 30.dp),

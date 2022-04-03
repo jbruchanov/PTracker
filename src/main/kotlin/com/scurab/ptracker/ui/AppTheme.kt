@@ -1,10 +1,15 @@
 package com.scurab.ptracker.ui
 
 import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.background
 import androidx.compose.foundation.defaultScrollbarStyle
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.darkColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -17,6 +22,7 @@ import androidx.compose.material.icons.outlined.WbCloudy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
@@ -62,7 +68,15 @@ fun AppTheme(block: @Composable () -> Unit) {
                 unhoverColor = AppTheme.Colors.SecondaryVariant,
             )
         ) {
-            block()
+            val contentPadding = AppSizes.current.Space05
+            Surface(
+                modifier = Modifier.fillMaxSize()
+                    .background(AppColors.current.WindowEdge)
+                    .padding(start = contentPadding, bottom = contentPadding, end = contentPadding)
+                    .background(AppColors.current.BackgroundContent)
+            ) {
+                block()
+            }
         }
     }
 }

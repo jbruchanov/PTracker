@@ -29,7 +29,7 @@ import kotlin.random.Random
 
 @Composable
 @Preview
-private fun TestLineChart() {
+private fun PreviewLineChart() {
     val steps = 40
     val random = Random(10)
     val sampleData = (0..steps).map {
