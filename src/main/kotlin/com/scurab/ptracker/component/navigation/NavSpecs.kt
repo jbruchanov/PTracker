@@ -62,14 +62,14 @@ class DefaultNavSpecs(
     override fun <T : NavArgs> push(token: NavToken<T>, args: T) {
         stopPeek(required = false)
         addRecord(token, args)
-        startPeek()
+        startPeek(required = true)
         notifyPeekStackChanged()
     }
 
     override fun pop(steps: Int): Int {
         if (steps <= 0) return 0
         val popped = popAndDestroy(steps)
-        startPeek()
+        startPeek(required = false)
         notifyPeekStackChanged()
         return popped
     }
@@ -90,7 +90,7 @@ class DefaultNavSpecs(
     private fun <T : NavArgs> replace(removeRecords: Int, token: NavToken<T>, args: T) {
         popAndDestroy(steps = removeRecords)
         addRecord(token, args)
-        startPeek()
+        startPeek(required = true)
         notifyPeekStackChanged()
     }
 
@@ -111,8 +111,8 @@ class DefaultNavSpecs(
         return counter
     }
 
-    private fun startPeek() {
-        val peek = stack.peekOrNull()
+    private fun startPeek(required: Boolean) {
+        val peek = if (required) stack.peek() else stack.peekOrNull()
         peek?.lifecycleComponent?.start()
     }
 
@@ -121,6 +121,7 @@ class DefaultNavSpecs(
         record?.lifecycleComponent?.stop()
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <T : NavArgs> addRecord(token: NavToken<T>, args: T) {
         val navItem = requireNotNull(navItems.firstOrNull { it.navToken == token }) {
             "Unable to find navItem matching token:$token"

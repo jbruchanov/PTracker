@@ -5,34 +5,34 @@ import com.scurab.ptracker.component.ViewModel
 import kotlin.reflect.KClass
 
 fun navigation(
-    viewModelFactory: ComponentFactory,
+    componentFactory: ComponentFactory,
     builder: NavSpecsBuilder.() -> Unit
-): DefaultNavSpecs = NavSpecsBuilder(viewModelFactory).apply(builder).build()
+): DefaultNavSpecs = NavSpecsBuilder(componentFactory).apply(builder).build()
 
-open class NavSpecsBuilder(private val viewModelFactory: ComponentFactory) {
+open class NavSpecsBuilder(private val componentFactory: ComponentFactory) {
     private val navElements = mutableListOf<NavRecord<*, *>>()
     private var appNavArgs = AppNavArgs(emptyArray())
 
-    open fun build() = DefaultNavSpecs(navElements, viewModelFactory, appNavArgs)
+    open fun build() = DefaultNavSpecs(navElements, componentFactory, appNavArgs)
 
     open fun appArgs(args: Array<String>) {
         appNavArgs = AppNavArgs(args)
     }
 
-    open fun <VM : ViewModel, T : NavArgs> register(navigationRecord: NavRecord<T, VM>) {
+    open fun <LC : LifecycleComponent, T : NavArgs> register(navigationRecord: NavRecord<T, LC>) {
         navElements.add(navigationRecord)
     }
 
-    open fun <VM : ViewModel, T : NavArgs> screen(navToken: NavToken<T>, viewModelKClass: KClass<VM>, content: @Composable (VM) -> Unit) {
+    open fun <LC : LifecycleComponent, T : NavArgs> screen(navToken: NavToken<T>, viewModelKClass: KClass<LC>, content: @Composable (LC) -> Unit) {
         register(NavRecord(navToken, viewModelKClass, content))
     }
 
-    inline fun <reified VM : ViewModel, T : NavArgs> screen(navToken: NavToken<T>, noinline content: @Composable (VM) -> Unit) {
-        register(NavRecord(navToken, VM::class, content))
+    inline fun <reified LC : LifecycleComponent, T : NavArgs> screen(navToken: NavToken<T>, noinline content: @Composable (LC) -> Unit) {
+        register(NavRecord(navToken, LC::class, content))
     }
 
-    inline fun <reified VM : ViewModel> screen(key: String, noinline content: @Composable (VM) -> Unit) {
-        register(NavRecord(StringNavToken(key), VM::class, content))
+    inline fun <reified LC : LifecycleComponent> screen(key: String, noinline content: @Composable (LC) -> Unit) {
+        register(NavRecord(StringNavToken(key), LC::class, content))
     }
 }
 
