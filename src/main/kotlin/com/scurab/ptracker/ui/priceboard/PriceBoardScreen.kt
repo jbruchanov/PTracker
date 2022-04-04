@@ -248,8 +248,10 @@ private fun PriceBoardScreen(state: PriceBoardState, eventDelegate: PriceBoardEv
 
         PriceSelectedDayDetail(state)
         PriceSelectedDayTransactionTypes(state)
-        LaunchedEffect(state.animateInitViewPort) {
-            state.setViewport(state.initViewport(), animate = true)
+        if (state.animateInitViewPort != -1L) {
+            LaunchedEffect(state.animateInitViewPort) {
+                state.setViewport(state.initViewport(), animate = true)
+            }
         }
     }
 }

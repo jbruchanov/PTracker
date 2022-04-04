@@ -177,4 +177,9 @@ class PriceBoardViewModel(
             }
         }
     }
+
+    override fun stop() {
+        super.stop()
+        uiState.priceBoardState.animateInitViewPort = -1L
+    }
 }
