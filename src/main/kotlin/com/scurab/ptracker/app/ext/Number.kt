@@ -45,6 +45,7 @@ val Int.bd get() = toBigDecimal()
 val Double.bd get() = toBigDecimal()
 
 fun BigDecimal.isZero() = compareTo(BigDecimal.ZERO) == 0
+fun BigDecimal.isNotZero() = !isZero()
 fun BigDecimal.base() = ceil(log10(toDouble())).toInt()
 
 fun BigDecimal.round(asset: String?, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal =

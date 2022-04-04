@@ -10,7 +10,7 @@ fun BigDecimal.valueIf(value: Boolean, falseValue: BigDecimal = ZERO) = if (valu
 val BigDecimal.f8: String get() = f(8)
 val BigDecimal.f6 get() = f(6)
 val BigDecimal.f4: String get() = f(4)
-val BigDecimal.gf4: String get() = f(4)
+val BigDecimal.gf4: String get() = gf(4)
 val BigDecimal.f2 get() = f(2)
 val BigDecimal.gf2 get() = gf(2)
 fun BigDecimal.f(digits: Int): String = BigDecimalFormats.formats[digits].value.format(this)

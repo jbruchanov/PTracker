@@ -1,5 +1,8 @@
 package com.scurab.ptracker.ui.stats
 
+import com.scurab.ptracker.app.ext.bd
+import com.scurab.ptracker.app.ext.now
+import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
@@ -8,6 +11,7 @@ import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.LedgerStats
 import com.scurab.ptracker.app.model.MarketPrice
+import com.scurab.ptracker.app.model.OnlineHoldingStats
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -26,12 +30,15 @@ class StatsViewModel(
         launch {
             appStateRepository.ledger
                 .filter { it != Ledger.Empty }
-                .collect {
+                .collect { ledger ->
                     uiState.holdings.clear()
-                    latestLedger = it
-                    ledgerStats = statsCalculatorUseCase.calculateStats(it, Filter.AllTransactions)
-                    val prices = pricesRepository.getPrices(it.assets)
-                    prices.forEach(::onMarketPrice)
+                    latestLedger = ledger
+                    ledgerStats = statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions)
+                    val prices = pricesRepository.getPrices(ledger.assets).associateBy { it.asset }
+                    val onlineHoldingStats = ledgerStats.holdinds
+                        .map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, prices[asset] ?: CoinPrice(asset, 0.bd)) }
+                        .sortedBy { it.asset }
+                    uiState.holdings.addAll(onlineHoldingStats)
                 }
         }
 
