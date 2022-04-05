@@ -98,7 +98,7 @@ class PriceBoardState(items: List<PriceItem>, private val localDensity: Density,
         //take last n visible items on the screen
         val sample = priceItems.takeAround(
             priceItemIndex.coerceIn(0, priceItems.size - 1),
-            (size.width / DashboardSizes.PriceItemWidth).toInt().coerceAtLeast(10)
+            PriceDashboardConfig.DefaultMinColumns.coerceAtLeast(10)
         )
         val priceRange = sample.minOf { it.low }.toFloat().rangeTo(sample.maxOf { it.high }.toFloat())
         val y = focusItem.centerY

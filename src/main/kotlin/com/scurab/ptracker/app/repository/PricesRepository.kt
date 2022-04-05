@@ -1,7 +1,6 @@
 package com.scurab.ptracker.app.repository
 
 import com.scurab.ptracker.app.ext.now
-import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.ext.sign
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice

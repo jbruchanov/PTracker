@@ -109,7 +109,7 @@ object PriceDashboardConfig {
     const val Debug = true
     const val SnappingMouseCrossHorizontally = true
     const val AxisYContentCoef = 0.5f
-    const val DefaultMinColumns = 100
+    const val DefaultMinColumns = 200
     const val AxisXStep = 5
     const val ViewportAnimationDuration = 300
     const val FocusInitRadius = 100f
