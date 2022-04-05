@@ -2,10 +2,12 @@ package com.scurab.ptracker.ui.stats
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -15,12 +17,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,10 +39,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.colored
@@ -52,11 +58,13 @@ import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.isPositive
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.ext.totalCost
+import com.scurab.ptracker.app.ext.totalGains
 import com.scurab.ptracker.app.ext.totalMarketValue
 import com.scurab.ptracker.app.ext.totalRoi
 import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.compose.StateContainer
+import com.scurab.ptracker.component.util.mock
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
@@ -69,6 +77,7 @@ import com.scurab.ptracker.ui.common.HSpacer2
 import com.scurab.ptracker.ui.common.WSpacer
 import com.scurab.ptracker.ui.common.WSpacer4
 import kotlinx.coroutines.delay
+import stub.StubData
 
 private object ColumnWidths {
     val Icon = AppTheme.Sizes.StatsIconSize
@@ -122,11 +131,24 @@ private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, hold
         HoldingsText(holdings.totalMarketValue(fiatCoin).gf2, width = ColumnWidths.MarketValue.scaled())
         WSpacer4()
         val totalRoi = holdings.totalRoi(fiatCoin)
-        HoldingsText(
-            (totalRoi.f2 + " %").colored(AppTheme.DashboardColors.Candle.get(isEven = totalRoi.isPositive)),
-            textAlign = TextAlign.Right,
-            width = ColumnWidths.ROI.scaled()
-        )
+        Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
+            val color = AppTheme.DashboardColors.Candle.get(isEven = totalRoi.isPositive)
+            HoldingsText(
+                (totalRoi.f2 + "%"),
+                color = color,
+                textAlign = TextAlign.Right,
+                width = ColumnWidths.ROI.scaled()
+            )
+            HSpacer()
+            HoldingsText(
+                holdings.totalGains(fiatCoin).takeIf { it.isNotZero() }?.gf2 ?: "",
+                color = color,
+                textAlign = TextAlign.Right,
+                width = ColumnWidths.ROI.scaled(),
+                style = AppTheme.TextStyles.TinyMonospace
+            )
+        }
+
         WSpacer4()
     }
 }
@@ -158,17 +180,28 @@ private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFia
         HoldingsText(holdings.actualCryptoBalance.gf4, width = ColumnWidths.Balance.scaled())
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(ColumnWidths.Cost.scaled())) {
             HoldingsText(holdings.cost.gf2)
-            Text(holdings.costUnit.gf2, color = AppColors.current.Primary, style = AppTheme.TextStyles.Tiny, modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End))
+            HSpacer()
+            Text(holdings.costUnit.gf2, color = AppColors.current.SecondaryVariant, style = AppTheme.TextStyles.TinyMonospace)
         }
         HoldingsText(holdings.marketValueUnitPrice.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.Cost.scaled(), color = AppColors.current.Secondary)
         HoldingsText(holdings.marketValue.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.MarketValue.scaled())
         WSpacer4()
-        HoldingsText(
-            (holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.f2?.let { "$it %" }
-                ?: "").colored(AppTheme.DashboardColors.Candle.get(isEven = holdings.roi.isPositive)),
-            textAlign = TextAlign.Right,
-            width = ColumnWidths.ROI.scaled()
-        )
+        Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
+            val color = AppTheme.DashboardColors.Candle.get(isEven = holdings.roi.isPositive)
+            HoldingsText(
+                holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.f2?.let { "$it%" } ?: "",
+                color = color,
+                textAlign = TextAlign.Right
+            )
+            HSpacer()
+            HoldingsText(
+                holdings.gain.takeIf { it.isNotZero() }?.gf2 ?: "",
+                color = color,
+                textAlign = TextAlign.Right,
+                width = ColumnWidths.ROI.scaled(),
+                style = AppTheme.TextStyles.TinyMonospace
+            )
+        }
         WSpacer4()
         if (false) {
             Text(
@@ -206,7 +239,7 @@ private fun CoinIcon(image: ImageBitmap?, isColored: Boolean, scale: Float) {
                 colorFilter = grayscaleColorFilter.takeIf { !isColored },
                 modifier = Modifier.scale(scale).align(Alignment.Center)
             )
-            //WSpacer(ColumnWidths.Icon)
+            WSpacer(ColumnWidths.Icon)
         }
     }
 }
@@ -229,9 +262,10 @@ private fun HoldingsText(
         style = style ?: textStyles.firstIf(isMonoSpace),
         textAlign = textAlign,
         color = color,
-        modifier = Modifier.width(width = width).fillMaxSize().wrapContentSize(if (textAlign == TextAlign.Left) Alignment.CenterStart else Alignment.CenterEnd).then(modifier)
+        modifier = Modifier.width(width = width).then(modifier)
     )
 }
+
 
 @Composable
 fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier = Modifier) {
@@ -264,6 +298,25 @@ fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier =
                 HoldingRowFooter(it, hasFiatCoins, state.holdings)
             }
             HSpacer2()
+        }
+    }
+}
+
+
+@Preview
+@Composable
+private fun PreviewHoldings() {
+    AppTheme {
+        val uiState = StatsUiState().apply {
+            this.holdings.addAll(StubData.onlineStubHoldings())
+            this.pieChartData.addAll(StubData.pieChartData())
+        }
+        CompositionLocalProvider(
+            LocalDensity provides Density(1.25f, 1f)
+        ) {
+            Box {
+                Holdings(uiState, StatsEventHandler::class.mock())
+            }
         }
     }
 }
