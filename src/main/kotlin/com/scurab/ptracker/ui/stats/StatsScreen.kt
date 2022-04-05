@@ -66,7 +66,7 @@ interface StatsEventHandler {
 @Composable
 fun StatsScreen(vm: StatsViewModel) {
     Box(
-        modifier = Modifier.padding(AppSizes.current.Space)
+        modifier = Modifier.padding(AppSizes.current.Space2)
     ) {
         StatsScreen(vm.uiState, vm)
     }
@@ -75,7 +75,7 @@ fun StatsScreen(vm: StatsViewModel) {
 @Composable
 private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
     Column {
-        Text(text = LocalTexts.current.Settings, style = AppTheme.TextStyles.Header, modifier = Modifier)
+        Text(text = LocalTexts.current.Stats, style = AppTheme.TextStyles.Header, modifier = Modifier)
         HSpacer2()
         val vScrollState = rememberScrollState()
         Row(modifier = Modifier) {

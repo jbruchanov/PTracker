@@ -3,6 +3,7 @@ package com.scurab.ptracker.ui.settings
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -54,6 +55,7 @@ import com.scurab.ptracker.ui.common.WSpacer2
 import com.scurab.ptracker.ui.common.WSpacer4
 import com.scurab.ptracker.ui.model.IconColor
 import com.scurab.ptracker.ui.model.Validity
+import com.scurab.ptracker.ui.stats.StatsScreen
 import kotlin.math.roundToInt
 
 class SettingsUiState {
@@ -75,23 +77,24 @@ class SettingsUiState {
 
 @Composable
 fun SettingsScreen(vm: SettingsViewModel) {
-    SettingsScreen(vm.uiState, vm)
+    Box(
+        modifier = Modifier.padding(AppSizes.current.Space2)
+    ) {
+        SettingsScreen(vm.uiState, vm)
+    }
 }
 
 @Composable
 private fun SettingsScreen(state: SettingsUiState, handler: SettingsEventHandler) {
     val texts = LocalTexts.current
-    val appSizes = AppSizes.current
     BoxWithConstraints {
         val vScrollState = rememberScrollState()
         Row(modifier = Modifier) {
             Column(
-                modifier = Modifier
-                    .defaultMinSize(minHeight = this@BoxWithConstraints.maxHeight)
-                    .padding(AppTheme.Sizes.Space2)
+                modifier = Modifier.defaultMinSize(minHeight = this@BoxWithConstraints.maxHeight)
             ) {
                 Row(modifier = Modifier.wrapContentWidth()) {
-                    Text(text = texts.Settings, style = AppTheme.TextStyles.Header, modifier = Modifier.align(Alignment.CenterVertically))
+                    Text(text = texts.Settings, style = AppTheme.TextStyles.Header, modifier = Modifier)
                     FSpacer()
                     Button(onClick = handler::onSaveClicked, modifier = Modifier.align(Alignment.Top)) {
                         Text(LocalTexts.current.Save, maxLines = 1, color = AppColors.current.Secondary)

@@ -8,7 +8,6 @@ import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.LoadDataUseCase
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.component.navigation.NavController
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
