@@ -21,7 +21,7 @@ class LoadIconsUseCase(
     private val location = File(Locations.Icons)
 
     suspend fun loadIcons(assets: List<Asset>): List<Pair<String, File?>> {
-        val allCoins = (assets.map { it.fiat } + assets.map { it.crypto }).toSet()
+        val allCoins = (assets.map { it.coin2 } + assets.map { it.coin1 }).toSet()
         location.mkdirs()
 
         val result = allCoins

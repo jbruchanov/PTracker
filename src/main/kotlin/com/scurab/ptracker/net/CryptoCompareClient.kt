@@ -1,9 +1,10 @@
 package com.scurab.ptracker.net
 
-import com.scurab.ptracker.app.repository.AppSettings
-import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
+import com.scurab.ptracker.app.model.FiatCoin
+import com.scurab.ptracker.app.repository.AppSettings
+import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.net.model.CryptoCompareCoinDetail
 import com.scurab.ptracker.net.model.CryptoCompareHistoryData
 import com.scurab.ptracker.net.model.CryptoCompareResult
@@ -48,11 +49,12 @@ class CryptoCompareClient(
         return httpClient.get(coinUrl(cryptoSymbol))
     }
 
-    suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {
+    suspend fun getPrices(assets: List<Asset>, primaryFiatCoin: FiatCoin? = FiatCoin("GBP")): List<CoinPrice> {
         if (assets.isEmpty()) return emptyList()
-        val cryptoSyms = assets.map { it.crypto }.distinct().joinToString(separator = ",")
-        val fiatSyms = assets.map { it.ensureFiatOrNull() }.distinct().joinToString(separator = ",")
-        val rawData = httpClient.get<Map<String, Map<String, Double>>>(pricesUrl(cryptoSyms, fiatSyms))
+        val fromSyms = assets.mapNotNull { it.fiatCoinOrNull()?.item }.distinct().joinToString(separator = ",")
+        val toCoins = (assets.mapNotNull { it.cryptoCoinOrNull()?.item } + primaryFiatCoin?.item).filterNotNull().distinct()
+        val toSyms = toCoins.joinToString(separator = ",")
+        val rawData = httpClient.get<Map<String, Map<String, Double>>>(pricesUrl(toSyms, fromSyms))
         val result = rawData.map { (c1, v) -> v.map { (c2, price) -> Asset.fromUnknownPairOrNull(c1, c2) to price.toBigDecimal() } }
             .flatten()
             .filter { it.first != null }

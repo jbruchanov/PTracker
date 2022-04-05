@@ -1,5 +1,7 @@
 package com.scurab.ptracker.app.model
 
+import com.scurab.ptracker.app.ext.ZERO
+import com.scurab.ptracker.app.ext.align
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.safeDiv
 import java.math.BigDecimal
@@ -14,10 +16,10 @@ data class Holdings(
     val actualPricePerUnit = cost.safeDiv(actualCryptoBalance)
 
     //staking, gifts or anything what wasn't paid for
-    val freeIncome = (actualCryptoBalance - totalCryptoBalance).max(BigDecimal.ZERO)
+    val freeIncome = (actualCryptoBalance.align - totalCryptoBalance).max(ZERO)
 
     //gifts, losses
-    val nonProfitableOutcome = (actualCryptoBalance - totalCryptoBalance).min(BigDecimal.ZERO).abs()
+    val nonProfitableOutcome = (actualCryptoBalance.align - totalCryptoBalance).min(ZERO).abs()
 
     fun realtimeStats(marketPrice: MarketPrice): OnlineHoldingStats {
         require(asset == marketPrice.asset) { "Invalid marketPrice:${marketPrice.asset}, expected:${asset}" }

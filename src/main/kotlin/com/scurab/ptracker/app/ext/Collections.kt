@@ -72,3 +72,12 @@ suspend fun <I, O> Collection<I>.parallelMapIndexed(parallelism: Int = 4, map: s
 }
 
 
+inline fun <I, O> Iterable<I>.setOf(selector: (I) -> O): Set<O> {
+    val result = mutableSetOf<O>()
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+        val v = selector(iterator.next())
+        result.add(v)
+    }
+    return result
+}

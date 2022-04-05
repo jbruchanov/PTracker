@@ -21,6 +21,7 @@ interface Texts {
     val Save: String
     val Ledgers: String
     val RestartNeeded: String
+    val Unit: String
 }
 
 object English : Texts {
@@ -39,4 +40,5 @@ object English : Texts {
     override val Save: String = "Save"
     override val Ledgers: String = "Ledgers"
     override val RestartNeeded: String = "Restart needed"
+    override val Unit: String = "Unit"
 }

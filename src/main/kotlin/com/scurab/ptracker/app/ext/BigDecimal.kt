@@ -1,10 +1,30 @@
 package com.scurab.ptracker.app.ext
 
+import com.scurab.ptracker.app.model.FiatCurrencies
 import java.math.BigDecimal
+import java.math.MathContext
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import kotlin.math.ceil
+import kotlin.math.log10
 
-private val ZERO = "0".bd
+val DefaultMathContext = MathContext(8, RoundingMode.HALF_UP)
+val ZERO = "0".bd
+
+fun BigDecimal.isZero() = compareTo(ZERO) == 0
+fun BigDecimal.isNotZero() = !isZero()
+fun BigDecimal.base() = ceil(log10(toDouble())).toInt()
+fun BigDecimal.round(asset: String?, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal =
+    round(asset != null && FiatCurrencies.contains(asset), scaleFiat, scaleCrypto)
+
+fun BigDecimal.round(isFiat: Boolean, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal {
+    return if (isFiat && scale() > scaleFiat) {
+        setScale(scaleFiat, RoundingMode.HALF_UP)
+    } else if (scale() > scaleCrypto) {
+        setScale(scaleCrypto, RoundingMode.HALF_UP)
+    } else this
+}
+
 fun BigDecimal.valueIf(value: Boolean, falseValue: BigDecimal = ZERO) = if (value) this else falseValue
 
 val BigDecimal.f8: String get() = f(8)
@@ -21,10 +41,10 @@ fun BigDecimal.align(scale: Int) = setScale(scale, RoundingMode.HALF_UP)
 
 val BigDecimal.isPositive get() = this > ZERO
 val BigDecimal.isNegative get() = this < ZERO
-fun BigDecimal.safeDiv(divisor: BigDecimal): BigDecimal = if (divisor.isZero()) BigDecimal.ZERO else this / divisor
+fun BigDecimal.safeDiv(divisor: BigDecimal): BigDecimal = if (divisor.isZero()) ZERO else this.align / divisor
 fun BigDecimal.roi() = takeIf { !it.isZero() }
     ?.let { v -> (if (v > 1.bd) v - 1.bd else -(1.bd - v)) * 100.bd }
-    ?: BigDecimal.ZERO
+    ?: ZERO
 
 object BigDecimalFormats {
     val formats = (0..8).map {
@@ -33,6 +53,7 @@ object BigDecimalFormats {
                 maximumFractionDigits = it
                 minimumFractionDigits = it
                 isGroupingUsed = false
+                roundingMode = RoundingMode.HALF_UP
             }
         }
     }
@@ -41,6 +62,7 @@ object BigDecimalFormats {
             DecimalFormat().apply {
                 maximumFractionDigits = it
                 minimumFractionDigits = it
+                roundingMode = RoundingMode.HALF_UP
                 isGroupingUsed = true
             }
         }

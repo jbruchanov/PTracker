@@ -1,10 +1,10 @@
 package com.scurab.ptracker.app.usecase
 
-import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.app.ext.existsAndHasSize
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.net.CryptoCompareClient
 import com.scurab.ptracker.net.model.CryptoComparePriceItem
 import java.io.File
@@ -28,7 +28,7 @@ class LoadPriceHistoryUseCase(
                 jsonBridge.deserialize<List<CryptoComparePriceItem>>(f.readText()).mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, asset, cryptoComparePriceItem) }
         }
         if (result == null) {
-            result = cryptoCompareClient.getHistoryData(asset.crypto, asset.fiat).data.items
+            result = cryptoCompareClient.getHistoryData(asset.coin1, asset.coin2).data.items
                 .also { f.writeText(jsonBridge.serialize(it)) }
                 .mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, asset, cryptoComparePriceItem) }
         }

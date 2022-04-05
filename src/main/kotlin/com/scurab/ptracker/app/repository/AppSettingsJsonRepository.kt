@@ -1,11 +1,11 @@
 package com.scurab.ptracker.app.repository
 
+import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.component.ProcessScope
 import com.scurab.ptracker.component.delegate.OnKeyChangeListener
 import com.scurab.ptracker.component.delegate.WithNotifyingMutableProperties
-import com.scurab.ptracker.app.model.Asset
-import com.scurab.ptracker.app.model.Locations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow

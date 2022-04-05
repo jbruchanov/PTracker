@@ -34,12 +34,12 @@ data class PieChartSegment(
     val startAngle: Float,
     val sweepAngle: Float,
     val color: Color,
-    val strokeWidth: Dp = 5.dp,
+    val strokeWidth: Dp = 15.dp,
     val radiusOffset: Dp = 0.dp
 )
 
 @Composable
-private fun PieChart(data: List<PieChartSegment>) {
+fun PieChart(data: List<PieChartSegment>) {
     val debug = false
 
     Canvas(modifier = Modifier.fillMaxSize()) {

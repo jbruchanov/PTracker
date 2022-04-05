@@ -8,18 +8,18 @@ import kotlinx.serialization.Transient
 import java.io.File
 
 @Serializable(with = AssetAsStringSerializer::class)
-data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
-    fun has(value: String) = crypto == value || fiat == value
-    fun has(value1: String, value2: String) = (value1 == crypto && value2 == fiat) || (value2 == crypto && value1 == fiat)
+data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
+    fun has(value: String) = coin1 == value || coin2 == value
+    fun has(value1: String, value2: String) = (value1 == coin1 && value2 == coin2) || (value2 == coin1 && value1 == coin2)
 
     @Transient
     val label by lazy {
         buildString {
-            append(crypto)
-            if (isNotEmpty() && fiat.isNotEmpty()) {
+            append(coin1)
+            if (isNotEmpty() && coin2.isNotEmpty()) {
                 append("-")
             }
-            append(fiat)
+            append(coin2)
         }
     }
 
@@ -29,16 +29,34 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
         get() = this == Empty
 
     @Transient
-    val isCryptoTradingAsset
-        get() = crypto.isNotEmpty() && fiat.isNotEmpty()/* && !FiatCurrencies.contains(crypto) && FiatCurrencies.contains(fiat)*/
+    val isNotEmpty
+        get() = this != Empty
 
-    fun cryptoLabelOnlyIf(value: Boolean) = if (value) crypto else label
+    @Transient
+    val isTradingAsset by lazy { coin1.isNotEmpty() && coin2.isNotEmpty() }
 
-    fun iconCrypto() = File(Locations.Icons, crypto.lowercase() + ".png")
+    @Transient
+    val isCryptoTradingAsset by lazy { isTradingAsset && !(FiatCurrencies.contains(coin1) && FiatCurrencies.contains(coin2)) }
 
-    fun ensureFiatOrNull() = fiat.takeIf { FiatCurrencies.contains(fiat) } ?: crypto.takeIf { FiatCurrencies.contains(crypto) }
+    @Transient
+    val isFiatTradingAsset by lazy { isTradingAsset && FiatCurrencies.contains(coin1) && FiatCurrencies.contains(coin2) }
 
-    override fun toString(): String = "$crypto-$fiat"
+    fun cryptoLabelOnlyIf(value: Boolean) = if (value) coin1 else label
+
+    fun iconCoin1() = File(Locations.Icons, coin1.lowercase() + ".png")
+
+    fun fiatCoin(): FiatCoin = (coin2.takeIf { FiatCurrencies.contains(coin2) } ?: coin1.takeIf { FiatCurrencies.contains(coin1) })
+        ?.let { FiatCoin(it) }
+        ?: throw IllegalStateException("No fiat coin in $this")
+
+    fun cryptoCoin(): CryptoCoin = (coin2.takeIf { !FiatCurrencies.contains(coin2) } ?: coin1.takeIf { !FiatCurrencies.contains(coin1) })
+        ?.let { CryptoCoin(it) }
+        ?: throw IllegalStateException("No crypto coin in $this")
+
+    fun fiatCoinOrNull() = kotlin.runCatching { fiatCoin() }.getOrNull()
+    fun cryptoCoinOrNull() = kotlin.runCatching { cryptoCoin() }.getOrNull()
+
+    override fun toString(): String = "$coin1-$coin2"
 
     companion object {
         val Empty = Asset("", "")
@@ -54,8 +72,8 @@ data class Asset(val crypto: String, val fiat: String) : Comparable<Asset> {
             val pair = Pair(coin1, coin2)
             val crypto = pair.firstIf(!isCoin1Fiat)
             return Asset(
-                crypto = pair.firstIf(!isCoin1Fiat),
-                fiat = pair.other(crypto)
+                coin1 = pair.firstIf(!isCoin1Fiat),
+                coin2 = pair.other(crypto)
             )
         }
 

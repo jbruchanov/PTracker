@@ -67,6 +67,7 @@ class MainViewModel(
     }
 
     override fun onLedgerClicked(path: String) {
+        if (uiState.activeLedger == path) return
         launch {
             loadAllDataUseCase.loadAndSetAllData(path)
             uiState.activeLedger = path

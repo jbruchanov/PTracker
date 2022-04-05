@@ -2,10 +2,6 @@
 
 package com.scurab.ptracker.net.model
 
-import com.scurab.ptracker.app.serialisation.BigDecimalAsDoubleSerializer
-import com.scurab.ptracker.app.serialisation.BigDecimalAsStringSerializer
-import com.scurab.ptracker.app.serialisation.CryptoCompareResultSerializer
-import com.scurab.ptracker.app.serialisation.SecondsLongAsDateTimeSerializer
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.ExchangeWallet
 import com.scurab.ptracker.app.model.IPriceItem
@@ -13,6 +9,10 @@ import com.scurab.ptracker.app.model.MapCache
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.WithCache
 import com.scurab.ptracker.app.model.WsExchangeResponse
+import com.scurab.ptracker.app.serialisation.BigDecimalAsDoubleSerializer
+import com.scurab.ptracker.app.serialisation.BigDecimalAsStringSerializer
+import com.scurab.ptracker.app.serialisation.CryptoCompareResultSerializer
+import com.scurab.ptracker.app.serialisation.SecondsLongAsDateTimeSerializer
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -75,7 +75,7 @@ data class CryptoCompareWssSubscription(
     @SerialName("subs") val subs: List<String>,
 ) {
     constructor(args: List<CryptoCompareWssSubscriptionArg>) : this(
-        "SubAdd", args.map { (exchange, asset) -> "2~${exchange}~${asset.crypto}~${asset.fiat}" }
+        "SubAdd", args.map { (exchange, asset) -> "2~${exchange}~${asset.coin1}~${asset.coin2}" }
     )
 }
 

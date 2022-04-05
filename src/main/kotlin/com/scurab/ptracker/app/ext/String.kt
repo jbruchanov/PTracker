@@ -5,7 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import java.math.BigDecimal
 
-val String.bd: BigDecimal get() = BigDecimal(this).align
+val String.bd: BigDecimal get() = BigDecimal(this, DefaultMathContext)
 
 fun String.toFlagEmoji(): String {
     require(this.length >= 2) { "Invalid code:${this}, needs at least 2 chars" }

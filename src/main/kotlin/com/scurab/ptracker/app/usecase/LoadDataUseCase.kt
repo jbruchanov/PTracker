@@ -1,10 +1,10 @@
 package com.scurab.ptracker.app.usecase
 
+import com.scurab.ptracker.app.model.AppData
+import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
-import com.scurab.ptracker.app.model.AppData
-import com.scurab.ptracker.app.model.Filter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

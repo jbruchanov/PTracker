@@ -43,9 +43,9 @@ import androidx.compose.ui.zIndex
 import com.scurab.ptracker.App.getKoin
 import com.scurab.ptracker.AppNavTokens
 import com.scurab.ptracker.NavigationScope
+import com.scurab.ptracker.app.model.WsMessageToken
 import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.component.navigation.NavToken
-import com.scurab.ptracker.app.model.WsMessageToken
 import com.scurab.ptracker.component.util.mock
 import com.scurab.ptracker.previewStartKoin
 import com.scurab.ptracker.ui.AppSizes

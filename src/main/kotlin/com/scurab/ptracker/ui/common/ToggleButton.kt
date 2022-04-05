@@ -71,9 +71,9 @@ fun FlatToggleButton(
         Row {
             //unfinished
             Box(modifier = Modifier.background(Color.Black).padding(4.dp)) {
-                Flag(code = item.asset.fiat, size = 12.dp, modifier = Modifier)
+                Flag(code = item.asset.coin2, size = 12.dp, modifier = Modifier)
                 if (item.icon != null) {
-                    Image(item.icon, contentDescription = item.asset.crypto, modifier = Modifier.size(24.dp))
+                    Image(item.icon, contentDescription = item.asset.coin1, modifier = Modifier.size(24.dp))
                 }
             }
             Column(
@@ -81,8 +81,8 @@ fun FlatToggleButton(
                     .align(Alignment.CenterVertically)
                     .wrapContentHeight(align = Alignment.CenterVertically)
             ) {
-                Text(text = item.asset.crypto, fontSize = AppTheme.TextRendering.small, color = color, modifier = Modifier)
-                Text(text = item.asset.fiat, fontSize = AppTheme.TextRendering.small, color = color, modifier = Modifier)
+                Text(text = item.asset.coin1, fontSize = AppTheme.TextRendering.small, color = color, modifier = Modifier)
+                Text(text = item.asset.coin2, fontSize = AppTheme.TextRendering.small, color = color, modifier = Modifier)
             }
         }
     }

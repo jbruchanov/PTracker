@@ -1,7 +1,7 @@
+import com.scurab.ptracker.app.ext.ZERO
 import com.scurab.ptracker.app.model.Transaction
 import kotlinx.datetime.toKotlinLocalDateTime
 import org.apache.poi.ss.usermodel.Row
-import java.math.BigDecimal
 
 interface BittyTaxParser {
     fun Row.shouldSkip() = getCell(TYPE) == null || getCell(TIMESTAMP) == null
@@ -13,7 +13,7 @@ interface BittyTaxParser {
     val Row.sellQuantity get() = getCell(SELL_QUANTITY)?.toString()?.toBigDecimal()
     val Row.sellAsset get() = getCell(SELL_ASSET).stringCellValue
     val Row.sellValueInFiat get() = getCell(SELL_QUANTITY_FIAT)?.numericCellValue?.toBigDecimal()
-    val Row.feeQuantity get() = getCell(FEE_QUANTITY)?.numericCellValue?.toBigDecimal() ?: BigDecimal.ZERO
+    val Row.feeQuantity get() = getCell(FEE_QUANTITY)?.numericCellValue?.toBigDecimal() ?: ZERO
     val Row.feeAsset get() = getCell(FEE_ASSET).stringCellValue
     val Row.feeValueInFiat get() = getCell(FEE_QUANTITY_FIAT)?.numericCellValue?.toBigDecimal()
     val Row.wallet get() = getCell(WALLET).stringCellValue

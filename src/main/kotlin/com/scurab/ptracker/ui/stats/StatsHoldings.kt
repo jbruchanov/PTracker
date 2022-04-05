@@ -9,14 +9,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +36,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -45,7 +50,6 @@ import com.scurab.ptracker.app.ext.gf4
 import com.scurab.ptracker.app.ext.imageOrNull
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.isPositive
-import com.scurab.ptracker.app.ext.isZero
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.ext.totalCost
 import com.scurab.ptracker.app.ext.totalMarketValue
@@ -77,9 +81,15 @@ private object ColumnWidths {
 }
 
 @Composable
+fun OnlineHoldingStats.costUnitFormatted() = buildAnnotatedString {
+    append(AnnotatedString(costUnit.gf2, AppTheme.SpanStyles.tiny(AppColors.current.Primary)))
+}
+
+@Composable
 private fun HoldingRowHeader(hasMultipleFiatCoins: Boolean) {
     val texts = LocalTexts.current
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
             .defaultMinSize(minHeight = 40.dp)
@@ -99,6 +109,7 @@ private fun HoldingRowHeader(hasMultipleFiatCoins: Boolean) {
 @Composable
 private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, holdings: SnapshotStateList<OnlineHoldingStats>) {
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
     ) {
@@ -136,20 +147,25 @@ private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFia
     }
 
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .background(AppColors.current.RowBackground.get(isEven = index % 2 == 0))
             .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space)
     ) {
-        CoinIcon(holdings.asset.iconCrypto().imageOrNull(), isColored, scale)
+        CoinIcon(holdings.asset.iconCoin1().imageOrNull(), isColored, scale)
         WSpacer(ColumnWidths.IconCoinGap)
         HoldingsText(holdings.asset.cryptoLabelOnlyIf(!hasMultipleFiats), textAlign = TextAlign.Left, width = ColumnWidths.Coin.default2If(hasMultipleFiats).scaled())
         HoldingsText(holdings.actualCryptoBalance.gf4, width = ColumnWidths.Balance.scaled())
-        HoldingsText(holdings.cost.gf2, width = ColumnWidths.Cost.scaled())
+        Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(ColumnWidths.Cost.scaled())) {
+            HoldingsText(holdings.cost.gf2)
+            Text(holdings.costUnit.gf2, color = AppColors.current.Primary, style = AppTheme.TextStyles.Tiny, modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End))
+        }
         HoldingsText(holdings.marketValueUnitPrice.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.Cost.scaled(), color = AppColors.current.Secondary)
         HoldingsText(holdings.marketValue.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.MarketValue.scaled())
         WSpacer4()
         HoldingsText(
-            (holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.f2?.let { "$it %" } ?: "").colored(AppTheme.DashboardColors.Candle.get(isEven = holdings.roi.isPositive)),
+            (holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.f2?.let { "$it %" }
+                ?: "").colored(AppTheme.DashboardColors.Candle.get(isEven = holdings.roi.isPositive)),
             textAlign = TextAlign.Right,
             width = ColumnWidths.ROI.scaled()
         )
@@ -177,35 +193,43 @@ private fun CoinIcon(image: ImageBitmap?, isColored: Boolean, scale: Float) {
             .background(AppColors.current.BackgroundAssetIcon)
             .padding(AppSizes.current.Space)
     ) {
+        val grayscaleColorFilter = remember { ColorFilter.colorMatrix(ColorMatrixGreyScale) }
         if (image != null) {
-            val grayscaleColorFilter = remember { ColorFilter.colorMatrix(ColorMatrixGreyScale) }
             Image(
                 image, contentDescription = "", filterQuality = FilterQuality.High, colorFilter = grayscaleColorFilter.takeIf { !isColored },
                 modifier = Modifier.scale(scale).align(Alignment.Center)
             )
         } else {
-            WSpacer(ColumnWidths.Icon)
+            Image(
+                imageVector = Icons.Default.Api,
+                contentDescription = "",
+                colorFilter = grayscaleColorFilter.takeIf { !isColored },
+                modifier = Modifier.scale(scale).align(Alignment.Center)
+            )
+            //WSpacer(ColumnWidths.Icon)
         }
     }
 }
 
 @Composable
-private fun RowScope.HoldingsText(
+private fun HoldingsText(
     text: CharSequence,
     isMonoSpace: Boolean = true,
     textAlign: TextAlign = TextAlign.Right,
     width: Dp = Dp.Unspecified,
-    color: Color = Color.Unspecified
+    color: Color = Color.Unspecified,
+    style: TextStyle? = null,
+    modifier: Modifier = Modifier
 ) {
     val textStyles = remember { Pair(AppTheme.TextStyles.NormalMonospace, AppTheme.TextStyles.Normal) }
     val value = if (text is AnnotatedString) text else AnnotatedString(text.toString())
     Text(
         value,
         maxLines = 1,
-        style = textStyles.firstIf(isMonoSpace),
+        style = style ?: textStyles.firstIf(isMonoSpace),
         textAlign = textAlign,
         color = color,
-        modifier = Modifier.width(width = width).align(alignment = Alignment.CenterVertically)
+        modifier = Modifier.width(width = width).fillMaxSize().wrapContentSize(if (textAlign == TextAlign.Left) Alignment.CenterStart else Alignment.CenterEnd).then(modifier)
     )
 }
 

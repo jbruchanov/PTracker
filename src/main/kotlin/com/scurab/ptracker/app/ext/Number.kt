@@ -1,10 +1,5 @@
 package com.scurab.ptracker.app.ext
 
-import com.scurab.ptracker.app.model.FiatCurrencies
-import java.math.BigDecimal
-import java.math.RoundingMode
-import kotlin.math.ceil
-import kotlin.math.log10
 import kotlin.math.roundToInt
 
 val Float.f0 get() = this.roundToInt().toString()
@@ -40,21 +35,5 @@ fun FloatRange.getLabelPriceDecimals(): Int {
 
 private fun Float.round(base: Float, decimals: Int = 2) = ((this / base).roundToInt() * base).roundToInt().toFloat().f(decimals)
 
-
-val Int.bd get() = toBigDecimal()
-val Double.bd get() = toBigDecimal()
-
-fun BigDecimal.isZero() = compareTo(BigDecimal.ZERO) == 0
-fun BigDecimal.isNotZero() = !isZero()
-fun BigDecimal.base() = ceil(log10(toDouble())).toInt()
-
-fun BigDecimal.round(asset: String?, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal =
-    round(asset != null && FiatCurrencies.contains(asset), scaleFiat, scaleCrypto)
-
-fun BigDecimal.round(isFiat: Boolean, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal {
-    return if (isFiat && scale() > scaleFiat) {
-        setScale(scaleFiat, RoundingMode.HALF_UP)
-    } else if (scale() > scaleCrypto) {
-        setScale(scaleCrypto, RoundingMode.HALF_UP)
-    } else this
-}
+val Int.bd get() = toBigDecimal(DefaultMathContext)
+val Double.bd get() = toBigDecimal(DefaultMathContext)

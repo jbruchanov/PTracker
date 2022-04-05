@@ -6,11 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.unit.Density
-import com.scurab.ptracker.app.repository.AppStateRepository
-import com.scurab.ptracker.app.repository.PricesRepository
-import com.scurab.ptracker.app.usecase.LoadPriceHistoryUseCase
-import com.scurab.ptracker.app.usecase.PriceBoardDataProcessingUseCase
-import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.app.ext.firstIf
 import com.scurab.ptracker.app.ext.firstIndexOf
 import com.scurab.ptracker.app.model.Asset
@@ -20,6 +15,11 @@ import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.repository.AppStateRepository
+import com.scurab.ptracker.app.repository.PricesRepository
+import com.scurab.ptracker.app.usecase.LoadPriceHistoryUseCase
+import com.scurab.ptracker.app.usecase.PriceBoardDataProcessingUseCase
+import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.ui.model.AssetIcon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

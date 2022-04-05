@@ -3,7 +3,6 @@ package com.scurab.ptracker.ui
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.defaultScrollbarStyle
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,13 +28,13 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.App
-import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.app.ext.FloatRange
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.ext.toLabelPrice
@@ -43,6 +42,7 @@ import com.scurab.ptracker.app.ext.toPx
 import com.scurab.ptracker.app.icons.TriangleDown
 import com.scurab.ptracker.app.icons.TriangleUp
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.ui.model.IconColor
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.Font
@@ -260,5 +260,10 @@ object AppTheme {
         val TransactionSecondary = TextStyle(color = Colors.Secondary, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = FontFamily.Monospace)
         val TransactionDetail = TextStyle(color = Colors.Primary, fontSize = 12.sp, fontWeight = FontWeight.Light)
         val TransactionMoneyAnnotation = TextStyle(color = Colors.OnBackgroundVariant, fontSize = 11.sp, fontWeight = FontWeight.Normal)
+    }
+
+    object SpanStyles {
+        fun small(color: Color = Colors.OnBackground) = SpanStyle(color = color, fontSize = 12.sp, fontWeight = FontWeight.Normal)
+        fun tiny(color: Color = Colors.OnBackground) = SpanStyle(color = color, fontSize = 10.sp, fontWeight = FontWeight.Normal)
     }
 }
