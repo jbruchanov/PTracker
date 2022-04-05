@@ -1,9 +1,11 @@
 package com.scurab.ptracker.app.repository
 
 import com.scurab.ptracker.app.ext.now
+import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.ext.sign
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
+import com.scurab.ptracker.app.model.CoinPrice.Companion.asCoinPrice
 import com.scurab.ptracker.app.model.ExchangeWallet
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.Locations
@@ -52,17 +54,21 @@ class PricesRepository(
 
     suspend fun getPrices(ledger: Ledger) = client.getPrices(ledger.assets)
 
+    private val folder = File(Locations.Prices)
     suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {
-        val file = File(Locations.Data, "prices-${now().toJavaLocalDateTime().format(DateTimeFormats.debugFullDate)}.json")
-        return if (file.exists()) {
-            JsonBridge.deserialize(file.readText())
-        } else {
-            client.getPrices(assets).also {
-                file.writeText(JsonBridge.serialize(it, beautify = true))
-            }
-        }.also { prices ->
-            _latestPrices.putAll(prices.associateBy(keySelector = { it.asset }, valueTransform = { it }))
+        if (_latestPrices.keys.containsAll(assets)) {
+            return _latestPrices.values.map { it.asCoinPrice() }
         }
+        folder.mkdirs()
+        val file = File(folder, "prices-${now().toJavaLocalDateTime().format(DateTimeFormats.debugFullDate)}.json")
+        val localData = (if (file.exists()) JsonBridge.deserialize<List<CoinPrice>>(file.readText()).toSet() else emptySet()).associateBy { it.asset }
+        val onlineData = (if (!localData.keys.containsAll(assets)) client.getPrices(assets).toSet() else emptySet()).associateBy { it.asset }
+        val result = (localData.keys + onlineData.keys).mapNotNull { onlineData[it] ?: localData[it] }
+        if (onlineData.isNotEmpty()) {
+            file.writeText(JsonBridge.serialize(result, beautify = true))
+        }
+        _latestPrices.putAll(result.associateBy(keySelector = { it.asset }, valueTransform = { it }))
+        return result.toList()
     }
 
     private fun flowPrices(data: Map<ExchangeWallet, List<Asset>>): Channel<out WsExchangeResponse> {
