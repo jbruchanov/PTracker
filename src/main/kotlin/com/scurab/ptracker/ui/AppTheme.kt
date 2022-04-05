@@ -267,3 +267,13 @@ object AppTheme {
         fun tiny(color: Color = Colors.OnBackground) = SpanStyle(color = color, fontSize = 10.sp, fontWeight = FontWeight.Normal)
     }
 }
+
+val RandomColors = listOf(Color.Red, Color.Green, Color.Yellow, Color.LightGray, Color.Cyan)
+val CoinColors = mapOf(
+    "BTC" to Color(0xFFF7931A),
+    "ETH" to Color(0xFF62688F),
+    "LTC" to Color(0xFF345D9D),
+    "DOT" to Color(0xFFE6007A),
+    "ADA" to Color(0xFFFFD952),
+    "SOL" to Color(0xFFB14AED),
+)

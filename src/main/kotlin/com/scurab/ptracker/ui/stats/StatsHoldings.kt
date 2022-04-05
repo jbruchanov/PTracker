@@ -176,7 +176,7 @@ private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFia
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(ColumnWidths.Cost.scaled())) {
             HoldingsText(holdings.cost.gf2)
             HSpacer()
-            Text(holdings.costUnit.gf2, color = AppColors.current.SecondaryVariant, style = AppTheme.TextStyles.TinyMonospace)
+            HoldingsText(holdings.costUnit.gf2, color = AppColors.current.SecondaryVariant, style = AppTheme.TextStyles.TinyMonospace)
         }
         HoldingsText(holdings.marketValueUnitPrice.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.Cost.scaled(), color = AppColors.current.Secondary)
         HoldingsText(holdings.marketValue.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.MarketValue.scaled())
@@ -304,7 +304,7 @@ private fun PreviewHoldings() {
     AppTheme {
         val uiState = StatsUiState().apply {
             this.holdings.addAll(StubData.onlineStubHoldings())
-            this.pieChartData.addAll(StubData.pieChartData())
+            this.pieChartData = StubData.pieChartData()
         }
         CompositionLocalProvider(
             LocalDensity provides Density(1.25f, 1f)

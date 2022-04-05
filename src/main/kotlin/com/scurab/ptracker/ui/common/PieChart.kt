@@ -34,12 +34,13 @@ data class PieChartSegment(
     val startAngle: Float,
     val sweepAngle: Float,
     val color: Color,
-    val strokeWidth: Dp = 15.dp,
+    val strokeWidth: Dp = 30.dp,
     val radiusOffset: Dp = 0.dp
 )
 
 @Composable
 fun PieChart(data: List<PieChartSegment>) {
+    if (data.isEmpty()) return
     val debug = false
 
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -47,7 +48,7 @@ fun PieChart(data: List<PieChartSegment>) {
             drawCircle(Color.Green, 50f, center = Offset.Zero)
         }
 
-        val pieChartSize = min(size.width, size.height) / 2f
+        val pieChartSize = min(size.width, size.height) - data.maxOf { it.radiusOffset.toPx() + it.strokeWidth.toPx() }
         translate(left = size.width / 2, top = size.height / 2) {
             data.forEach { (startAngle, sweepAngle, color, strokeWidth, radiusOffset) ->
                 val radiusOffsetPx = radiusOffset.toPx()

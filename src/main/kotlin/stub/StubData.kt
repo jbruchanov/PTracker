@@ -2,10 +2,10 @@ package stub
 
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.marketPercentage
+import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.Holdings
-import com.scurab.ptracker.app.model.pieChartData
 import com.scurab.ptracker.ui.common.PieChartSegment
 
 object StubData {
