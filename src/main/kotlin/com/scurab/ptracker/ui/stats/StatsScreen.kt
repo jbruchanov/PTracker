@@ -9,12 +9,16 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
@@ -27,12 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
 import com.scurab.ptracker.app.ext.gf2
 import com.scurab.ptracker.app.ext.pieChartData
+import com.scurab.ptracker.app.ext.reduceOf
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.MarketPercentage
@@ -42,15 +48,17 @@ import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.LocalTexts
+import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.HSpacer
 import com.scurab.ptracker.ui.common.HSpacer2
 import com.scurab.ptracker.ui.common.PieChart
 import com.scurab.ptracker.ui.common.PieChartSegment
 import com.scurab.ptracker.ui.common.WSpacer2
 import com.scurab.ptracker.ui.common.WSpacer4
+import com.scurab.ptracker.ui.stats.StatsUiState.Companion.MarketPercentageGroupingThreshold
 import stub.StubData
 
-class StatsUiState {
+class StatsUiState() {
     var isLoading by mutableStateOf(false)
     var holdings = mutableStateListOf<OnlineHoldingStats>()
     var marketPercentage by mutableStateOf<List<MarketPercentage>>(emptyList())
@@ -61,6 +69,7 @@ class StatsUiState {
 
     companion object {
         val IconToGrayscaleDelay = 60_000L
+        val MarketPercentageGroupingThreshold = 0.1f
     }
 }
 
@@ -86,9 +95,11 @@ private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
         val vScrollState = rememberScrollState()
         val hScrollState = rememberScrollState()
         Row(modifier = Modifier.weight(1f)) {
-            Row(modifier = Modifier.weight(1f)
-                .verticalScroll(vScrollState)
-                .horizontalScroll(hScrollState)) {
+            Row(
+                modifier = Modifier.weight(1f)
+                    .verticalScroll(vScrollState)
+                    .horizontalScroll(hScrollState)
+            ) {
                 Holdings(state, event)
                 WSpacer4()
                 StatsPieChart(state)
@@ -101,8 +112,16 @@ private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
 
 @Composable
 private fun RowScope.StatsPieChart(state: StatsUiState) {
-    Box(modifier = Modifier.width(300.dp).padding(AppSizes.current.Space8)) {
+    Box(modifier = Modifier.size(300.dp).padding(AppSizes.current.Space8)) {
         PieChart(state.pieChartData)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.align(Alignment.Center).width(intrinsicSize = IntrinsicSize.Max)
+        ) {
+            Text("x%", color = AppColors.current.PrimaryVariant)
+            Divider(color = AppColors.current.Primary, thickness = AppSizes.current.ThickLine)
+            Text("x10%", color = AppColors.current.PrimaryVariant)
+        }
     }
     WSpacer4()
     Column(
@@ -113,7 +132,13 @@ private fun RowScope.StatsPieChart(state: StatsUiState) {
             .padding(AppSizes.current.Space4)
             .width(200.dp)
     ) {
-        state.marketPercentage.forEachIndexed { index, (asset, perc, color) ->
+        var dividerShown = false
+        state.marketPercentage.scan(0f) { acc: Float, (asset, perc, color) ->
+            if (!dividerShown && acc >= 1f - MarketPercentageGroupingThreshold) {
+                Divider(color = AppColors.current.Primary, thickness = AppSizes.current.ThickLine)
+                HSpacer()
+                dividerShown = true
+            }
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -127,6 +152,7 @@ private fun RowScope.StatsPieChart(state: StatsUiState) {
                 Text((perc.toBigDecimal() * 100.bd).gf2 + "%", textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.width(75.dp))
             }
             HSpacer()
+            acc + perc
         }
     }
 }

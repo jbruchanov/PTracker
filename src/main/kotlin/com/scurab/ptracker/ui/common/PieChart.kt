@@ -35,7 +35,7 @@ data class PieChartSegment(
     val sweepAngle: Float,
     val color: Color,
     val strokeWidth: Dp = 30.dp,
-    val radiusOffset: Dp = 0.dp
+    val radiusOffset: Dp = 0.dp,
 )
 
 @Composable

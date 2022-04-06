@@ -13,7 +13,7 @@ fun Collection<OnlineHoldingStats>.marketPercentage(): List<MarketPercentage> {
     return map { MarketPercentage(it.asset, it.marketValue.safeDiv(totalMarketValue).toFloat()) }.sortedByDescending { it.percentage }
 }
 
-fun Collection<OnlineHoldingStats>.coloredMarketPercentage(groupingThreshold: Float = 0.015f): List<MarketPercentage> {
+fun Collection<OnlineHoldingStats>.coloredMarketPercentage(groupingThreshold: Float = 0f): List<MarketPercentage> {
     val items = marketPercentage().sortedByDescending { it.percentage }
     val colors = items.map { it.asset }.colors()
     val result = mutableListOf<MarketPercentage>()

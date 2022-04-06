@@ -82,4 +82,15 @@ inline fun <I, O> Iterable<I>.setOf(selector: (I) -> O): Set<O> {
     return result
 }
 
-fun List<*>.isNotLastIndex(index: Int) = index < size - 1
+fun List<*>.isLastIndex(index: Int) = index == size - 1
+fun List<*>.isNotLastIndex(index: Int) = !isLastIndex(index)
+
+inline fun <T, S : Any> Collection<T>.reduceOf(value: (T) -> S, operation: (S, T) -> S): S {
+    val iterator = this.iterator()
+    if (!iterator.hasNext()) throw UnsupportedOperationException("Empty collection can't be reduced.")
+    var accumulator: S = value(iterator.next())
+    while (iterator.hasNext()) {
+        accumulator = operation(accumulator, iterator.next())
+    }
+    return accumulator
+}

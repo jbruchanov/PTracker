@@ -4,6 +4,7 @@ import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.pieChartData
+import com.scurab.ptracker.app.ext.pieChartData2
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.Filter
@@ -15,6 +16,7 @@ import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
 import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.ui.stats.StatsUiState.Companion.MarketPercentageGroupingThreshold
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -68,9 +70,8 @@ class StatsViewModel(
             .map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, prices[asset] ?: CoinPrice(asset, 0.bd)) }
             .sortedBy { it.asset }
 
-        val colorGroupingThreshold = 0.015f
-        val marketPercentage = onlineHoldingStats.coloredMarketPercentage(colorGroupingThreshold)
-        val pieChartData = marketPercentage.pieChartData(colorGroupingThreshold)
+        val marketPercentage = onlineHoldingStats.coloredMarketPercentage()
+        val pieChartData = marketPercentage.pieChartData2(MarketPercentageGroupingThreshold)
         //synchronization against the market ticker, sometimes it added a value
         withContext(Dispatchers.Main) {
             if (tick != null) {
