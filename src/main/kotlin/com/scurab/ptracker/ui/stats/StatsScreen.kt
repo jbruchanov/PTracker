@@ -1,9 +1,11 @@
 package com.scurab.ptracker.ui.stats
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
@@ -78,20 +81,24 @@ private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
         Text(text = LocalTexts.current.Stats, style = AppTheme.TextStyles.Header, modifier = Modifier)
         HSpacer2()
         val vScrollState = rememberScrollState()
-        Row(modifier = Modifier) {
-            Row(modifier = Modifier.weight(1f).verticalScroll(vScrollState)) {
+        val hScrollState = rememberScrollState()
+        Row(modifier = Modifier.weight(1f)) {
+            Row(modifier = Modifier.weight(1f)
+                .verticalScroll(vScrollState)
+                .horizontalScroll(hScrollState)) {
                 Holdings(state, event)
                 WSpacer4()
                 StatsPieChart(state)
             }
             VerticalScrollbar(rememberScrollbarAdapter(vScrollState), modifier = Modifier)
         }
+        HorizontalScrollbar(rememberScrollbarAdapter(hScrollState), modifier = Modifier)
     }
 }
 
 @Composable
 private fun RowScope.StatsPieChart(state: StatsUiState) {
-    Box(modifier = Modifier.requiredSize(300.dp).padding(AppSizes.current.Space8)) {
+    Box(modifier = Modifier.width(300.dp).padding(AppSizes.current.Space8)) {
         PieChart(state.pieChartData)
     }
     WSpacer4()

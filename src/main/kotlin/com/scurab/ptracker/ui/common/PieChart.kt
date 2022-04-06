@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import java.lang.Float.max
 import java.lang.Float.min
 
 @Composable
@@ -48,8 +49,9 @@ fun PieChart(data: List<PieChartSegment>) {
             drawCircle(Color.Green, 50f, center = Offset.Zero)
         }
 
-        val pieChartSize = min(size.width, size.height) - data.maxOf { it.radiusOffset.toPx() + it.strokeWidth.toPx() }
-        translate(left = size.width / 2, top = size.height / 2) {
+        val pieChartSize = max(size.width, size.height) - data.maxOf { it.radiusOffset.toPx() + it.strokeWidth.toPx() }
+        if (pieChartSize <= 0) return@Canvas
+        translate(left = max(size.width, pieChartSize) / 2, top = max(pieChartSize, size.height) / 2) {
             data.forEach { (startAngle, sweepAngle, color, strokeWidth, radiusOffset) ->
                 val radiusOffsetPx = radiusOffset.toPx()
                 drawArc(
