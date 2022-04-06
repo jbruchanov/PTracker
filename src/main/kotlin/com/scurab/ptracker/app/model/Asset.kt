@@ -11,6 +11,7 @@ import java.io.File
 data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
     fun has(value: String) = coin1 == value || coin2 == value
     fun has(value1: String, value2: String) = (value1 == coin1 && value2 == coin2) || (value2 == coin1 && value1 == coin2)
+    fun contains(value1: String, value2: String) = has(value1) || has(value2)
 
     @Transient
     val label by lazy {
@@ -55,6 +56,8 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
 
     fun fiatCoinOrNull() = kotlin.runCatching { fiatCoin() }.getOrNull()
     fun cryptoCoinOrNull() = kotlin.runCatching { cryptoCoin() }.getOrNull()
+
+    fun flipCoins(): Asset = Asset(coin2, coin1)
 
     override fun toString(): String = "$coin1-$coin2"
 

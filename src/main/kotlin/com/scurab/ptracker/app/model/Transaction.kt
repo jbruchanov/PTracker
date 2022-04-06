@@ -32,7 +32,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
 
     var priceItem: PriceItem? by cache
 
-    class Income(
+    data class Income(
         override val exchange: String,
         override val type: String,
         override val dateTime: LocalDateTime,

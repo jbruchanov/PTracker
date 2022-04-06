@@ -8,7 +8,6 @@ import java.text.DecimalFormat
 import kotlin.math.ceil
 import kotlin.math.log10
 
-val DefaultMathContext = MathContext(8, RoundingMode.HALF_UP)
 val ZERO = "0".bd
 
 fun BigDecimal.isZero() = compareTo(ZERO) == 0

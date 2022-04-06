@@ -35,5 +35,5 @@ fun FloatRange.getLabelPriceDecimals(): Int {
 
 private fun Float.round(base: Float, decimals: Int = 2) = ((this / base).roundToInt() * base).roundToInt().toFloat().f(decimals)
 
-val Int.bd get() = toBigDecimal(DefaultMathContext)
-val Double.bd get() = toBigDecimal(DefaultMathContext)
+val Int.bd get() = toBigDecimal().align
+val Double.bd get() = toBigDecimal().align

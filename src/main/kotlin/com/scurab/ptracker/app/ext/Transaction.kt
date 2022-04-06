@@ -4,8 +4,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
+import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.HasIncome
 import com.scurab.ptracker.app.model.HasOutcome
+import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.model.TransactionTextPrices
@@ -31,8 +34,7 @@ private fun String.annotatedPrice(prefix: String? = null, suffix: String? = null
         append(" ")
         append(
             AnnotatedString(
-                text = suffix,
-                spanStyle = SpanStyle(color = AppTheme.Colors.PrimaryVariant, fontSize = 10.sp)
+                text = suffix, spanStyle = SpanStyle(color = AppTheme.Colors.PrimaryVariant, fontSize = 10.sp)
             )
         )
     }
@@ -66,10 +68,39 @@ fun Transaction.formattedPrices(): TransactionTextPrices {
         val price = up?.toPlainString()?.let { " ".repeat(max(0, maxn - un)) + " " + it }
 
         TransactionTextPrices(
-            buy = buy?.annotatedPrice(ba),
-            sell = sell?.annotatedPrice(sa),
-            fee = fee?.annotatedPrice(feeAsset),
-            unitPrice = price?.annotatedPrice(ua)
+            buy = buy?.annotatedPrice(ba), sell = sell?.annotatedPrice(sa), fee = fee?.annotatedPrice(feeAsset), unitPrice = price?.annotatedPrice(ua)
         )
+    }
+}
+
+fun Transaction.convertTradePrice(price: MarketPrice): Transaction {
+    return when (this) {
+        is Transaction.Income -> this
+        is Transaction.Outcome -> this
+        is Transaction.Trade -> {
+            when {
+                (this.sellAsset == price.asset.coin2) -> {
+                    val init = CoinPrice(Asset(buyAsset, sellAsset), sellQuantity)
+                    val tx = init.convertCurrency(price)
+                    val (feeAsset, feeQuantity) = if (this.feeAsset == price.asset.coin2) {
+                        price.asset.coin1 to init.copy(price = feeQuantity).convertCurrency(price).price
+                    } else feeAsset to feeQuantity
+                    this.copy(
+                        sellAsset = price.asset.coin1, sellQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
+                    )
+                }
+                (this.buyAsset == price.asset.coin2) -> {
+                    val init = CoinPrice(Asset(sellAsset, buyAsset), buyQuantity)
+                    val tx = init.convertCurrency(price)
+                    val (feeAsset, feeQuantity) = if (this.feeAsset == price.asset.coin2) {
+                        price.asset.coin1 to init.copy(price = feeQuantity).convertCurrency(price).price
+                    } else feeAsset to feeQuantity
+                    this.copy(
+                        buyAsset = price.asset.coin1, buyQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
+                    )
+                }
+                else -> throw UnsupportedOperationException("Unhandled case:$this, price:$price")
+            }
+        }
     }
 }
