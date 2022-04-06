@@ -11,6 +11,7 @@ interface AppSettings {
     var lastSelectedAsset: Asset?
     var latestLedger: String?
     var ledgers: List<String>?
+    var primaryCurrency: String?
 
     companion object {
         const val KeyLedgers = "ledgers"
@@ -21,9 +22,9 @@ interface AppSettings {
 class MemoryAppSettings : AppSettings {
     override fun flowChanges(emitOnStart: String?): Flow<String> = throw UnsupportedOperationException()
     override var cryptoCompareApiKey: String? = null
-
     override var fontScale: Float = 1f
     override var lastSelectedAsset: Asset? = null
     override var latestLedger: String? = null
     override var ledgers: List<String>? = null
+    override var primaryCurrency: String? = null
 }

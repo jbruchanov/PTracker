@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.lang.Float.max
-import java.lang.Float.min
 
 @Composable
 @Preview

@@ -110,14 +110,14 @@ class PricesRepository(
                 repeat((prices.size / 2)) {
                     prices.forEachIndexed { index, coinPrice ->
                         if (Random.nextBoolean()) return@forEachIndexed
-                        val offset = 1 + (Random.nextInt(1, 5) / 100f * Random.nextBoolean().sign())
+                        val offset = 1 + (Random.nextInt(3, 6) / 100f * Random.nextBoolean().sign())
                         val marketPrice = coinPrice.copy(price = coinPrice.price * offset.toBigDecimal())
                         _wsMarketPrice.tryEmit(marketPrice)
                         _wsTickToken.tryEmit(WsMessageToken(System.currentTimeMillis(), "Demo"))
                         _latestPrices[marketPrice.asset] = marketPrice
                         prices[index] = marketPrice
-                        delay(Random.nextLong(500, 1500))
                     }
+                    delay(Random.nextLong(1000, 2000))
                 }
             }
         }

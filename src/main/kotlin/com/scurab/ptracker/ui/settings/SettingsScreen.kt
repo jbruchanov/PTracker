@@ -55,7 +55,6 @@ import com.scurab.ptracker.ui.common.WSpacer2
 import com.scurab.ptracker.ui.common.WSpacer4
 import com.scurab.ptracker.ui.model.IconColor
 import com.scurab.ptracker.ui.model.Validity
-import com.scurab.ptracker.ui.stats.StatsScreen
 import kotlin.math.roundToInt
 
 class SettingsUiState {

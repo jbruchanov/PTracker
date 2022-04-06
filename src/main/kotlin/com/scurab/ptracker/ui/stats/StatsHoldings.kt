@@ -48,7 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.scurab.ptracker.app.ext.f2
 import com.scurab.ptracker.app.ext.fiatCoins
 import com.scurab.ptracker.app.ext.firstIf
 import com.scurab.ptracker.app.ext.gf2
@@ -132,7 +131,7 @@ private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, hold
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
             val color = AppTheme.DashboardColors.Candle.get(isEven = totalRoi.isPositive)
             HoldingsText(
-                (totalRoi.f2 + "%"), color = color, textAlign = TextAlign.Right, width = ColumnWidths.ROI.scaled()
+                (totalRoi.gf2 + "%"), color = color, textAlign = TextAlign.Right, width = ColumnWidths.ROI.scaled()
             )
             HSpacer()
             HoldingsText(
@@ -182,7 +181,7 @@ private fun HoldingsRow(onClick: () -> Unit, index: Int, holdings: OnlineHolding
         WSpacer4()
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
             val color = AppTheme.DashboardColors.Candle.get(isEven = holdings.roi.isPositive)
-            HoldingsText(holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.f2?.let { "$it%" } ?: "", color = color, textAlign = TextAlign.Right)
+            HoldingsText(holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.gf2?.let { "$it%" } ?: "", color = color, textAlign = TextAlign.Right)
             HSpacer()
             HoldingsText(
                 holdings.gain.takeIf { it.isNotZero() }?.gf2 ?: "",

@@ -29,8 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
-import com.scurab.ptracker.app.ext.f2
+import com.scurab.ptracker.app.ext.gf2
 import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.model.Asset
@@ -123,7 +124,7 @@ private fun RowScope.StatsPieChart(state: StatsUiState) {
                     WSpacer2()
                     Text(asset.cryptoLabelOnlyIf(true), maxLines = 1)
                 }
-                Text((perc * 100).f2 + "%", textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.width(75.dp))
+                Text((perc.toBigDecimal() * 100.bd).gf2 + "%", textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.width(75.dp))
             }
             HSpacer()
         }

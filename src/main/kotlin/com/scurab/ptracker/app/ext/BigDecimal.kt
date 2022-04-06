@@ -2,7 +2,6 @@ package com.scurab.ptracker.app.ext
 
 import com.scurab.ptracker.app.model.FiatCurrencies
 import java.math.BigDecimal
-import java.math.MathContext
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlin.math.ceil

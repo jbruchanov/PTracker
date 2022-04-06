@@ -4,6 +4,7 @@ import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.pieChartData
+import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.Ledger
@@ -27,6 +28,7 @@ class StatsViewModel(
 
     private var latestLedger: Ledger? = null
     private var ledgerStats = LedgerStats.Empty
+    private var prices = mutableMapOf<Asset, MarketPrice>()
     val uiState = StatsUiState()
 
     init {
@@ -51,8 +53,17 @@ class StatsViewModel(
 
     private suspend fun onNewLedgerSelected(ledger: Ledger) {
         latestLedger = ledger
+        prices.putAll(pricesRepository.getPrices(ledger.assets).associateBy { it.asset })
         ledgerStats = statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions)
-        val prices = pricesRepository.getPrices(ledger.assets).associateBy { it.asset }
+        recalcData(ledgerStats, prices, null)
+    }
+
+    private suspend fun onMarketPrice(marketPrice: MarketPrice) {
+        prices[marketPrice.asset] = marketPrice
+        recalcData(ledgerStats, prices, marketPrice)
+    }
+
+    private suspend fun recalcData(ledgerStats: LedgerStats, prices: Map<Asset, MarketPrice>, tick: MarketPrice?) {
         val onlineHoldingStats = ledgerStats.holdinds
             .map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, prices[asset] ?: CoinPrice(asset, 0.bd)) }
             .sortedBy { it.asset }
@@ -62,23 +73,20 @@ class StatsViewModel(
         val pieChartData = marketPercentage.pieChartData(colorGroupingThreshold)
         //synchronization against the market ticker, sometimes it added a value
         withContext(Dispatchers.Main) {
-            uiState.holdings.clear()
-            uiState.holdings.addAll(onlineHoldingStats)
+            if (tick != null) {
+                ledgerStats.holdinds[tick.asset]?.let { holdings ->
+                    val indexOfFirst = uiState.holdings.indexOfFirst { it.asset == tick.asset }
+                    //missing asset might happen in case of changing ledgers
+                    if (indexOfFirst != -1) {
+                        uiState.holdings[indexOfFirst] = holdings.realtimeStats(tick)
+                    }
+                }
+            } else {
+                uiState.holdings.clear()
+                uiState.holdings.addAll(onlineHoldingStats)
+            }
             uiState.marketPercentage = marketPercentage
             uiState.pieChartData = pieChartData
-        }
-    }
-
-    private suspend fun onMarketPrice(marketPrice: MarketPrice) {
-        val asset = marketPrice.asset
-        withContext(Dispatchers.Main) {
-            ledgerStats.holdinds[asset]?.let { holdings ->
-                val indexOfFirst = uiState.holdings.indexOfFirst { it.asset == asset }
-                //missing asset might happen in case of changing ledgers
-                if (indexOfFirst != -1) {
-                    uiState.holdings[indexOfFirst] = holdings.realtimeStats(marketPrice)
-                }
-            }
         }
     }
 }
