@@ -1,6 +1,7 @@
 package com.scurab.ptracker.ui.settings
 
 import com.scurab.ptracker.AppNavTokens
+import com.scurab.ptracker.app.ext.isNotLastIndex
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.usecase.TestCryptoCompareKeyUseCase
@@ -80,7 +81,7 @@ class SettingsViewModel(
     override fun onDeleteLedger(index: Int, path: String) {
         val ledgers = uiState.predefinedLedgers
 
-        if (index < ledgers.size - 1) {
+        if (ledgers.isNotLastIndex(index)) {
             ledgers.removeAt(index)
         } else {
             ledgers[index] = ""

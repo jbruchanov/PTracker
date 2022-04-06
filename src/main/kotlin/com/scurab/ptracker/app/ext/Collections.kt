@@ -81,3 +81,5 @@ inline fun <I, O> Iterable<I>.setOf(selector: (I) -> O): Set<O> {
     }
     return result
 }
+
+fun List<*>.isNotLastIndex(index: Int) = index < size - 1

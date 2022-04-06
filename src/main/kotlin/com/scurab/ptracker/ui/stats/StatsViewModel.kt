@@ -45,6 +45,10 @@ class StatsViewModel(
         }
     }
 
+    override fun onHoldingsRowClicked(index: Int, onlineHoldingStats: OnlineHoldingStats) {
+        uiState.selectedHoldingsAsset = onlineHoldingStats.asset.takeIf { uiState.selectedHoldingsAsset != onlineHoldingStats.asset }
+    }
+
     private suspend fun onNewLedgerSelected(ledger: Ledger) {
         latestLedger = ledger
         ledgerStats = statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions)

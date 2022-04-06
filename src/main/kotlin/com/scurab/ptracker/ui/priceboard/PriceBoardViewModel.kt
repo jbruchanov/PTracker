@@ -105,7 +105,6 @@ class PriceBoardViewModel(
                 hasTradeOnlyFilter = filter == Filter.ImportantTransactions
                 if (isSelectedAssetMissing) {
                     appStateRepository.setSelectedAsset(Asset.Empty)
-
                 }
             }
             with(uiState.priceBoardState) {

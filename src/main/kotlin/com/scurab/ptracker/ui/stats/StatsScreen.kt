@@ -13,10 +13,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
@@ -35,6 +33,7 @@ import com.scurab.ptracker.app.ext.coloredMarketPercentage
 import com.scurab.ptracker.app.ext.f2
 import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.ext.scaled
+import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.MarketPercentage
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.util.mock
@@ -55,6 +54,9 @@ class StatsUiState {
     var holdings = mutableStateListOf<OnlineHoldingStats>()
     var marketPercentage by mutableStateOf<List<MarketPercentage>>(emptyList())
     var pieChartData by mutableStateOf<List<PieChartSegment>>(emptyList())
+    var selectedHoldingsAsset by mutableStateOf<Asset?>(null)
+
+    fun isHoldingsSelected(onlineHoldingStats: OnlineHoldingStats) = onlineHoldingStats.asset == selectedHoldingsAsset
 
     companion object {
         val IconToGrayscaleDelay = 60_000L
@@ -63,7 +65,7 @@ class StatsUiState {
 
 
 interface StatsEventHandler {
-
+    fun onHoldingsRowClicked(index: Int, onlineHoldingStats: OnlineHoldingStats)
 }
 
 @Composable

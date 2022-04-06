@@ -270,10 +270,12 @@ object AppTheme {
 
 val RandomColors = listOf(Color.Red, Color.Green, Color.Yellow, Color.LightGray, Color.Cyan)
 val CoinColors = mapOf(
+    "ADA" to Color(0xFF0033AD),
+    "AAVE" to Color(0xFF40ACC1),
     "BTC" to Color(0xFFF7931A),
     "ETH" to Color(0xFF62688F),
-    "LTC" to Color(0xFF345D9D),
     "DOT" to Color(0xFFE6007A),
-    "ADA" to Color(0xFFFFD952),
+    "LTC" to Color(0xFF345D9D),
+    "LUNA" to Color(0xFFFFD952),
     "SOL" to Color(0xFFB14AED),
 )

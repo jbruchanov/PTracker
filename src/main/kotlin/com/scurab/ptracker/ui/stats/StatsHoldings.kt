@@ -1,13 +1,18 @@
+@file:OptIn(ExperimentalAnimationApi::class)
+
 package com.scurab.ptracker.ui.stats
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -49,6 +54,7 @@ import com.scurab.ptracker.app.ext.firstIf
 import com.scurab.ptracker.app.ext.gf2
 import com.scurab.ptracker.app.ext.gf4
 import com.scurab.ptracker.app.ext.imageOrNull
+import com.scurab.ptracker.app.ext.isNotLastIndex
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.isPositive
 import com.scurab.ptracker.app.ext.scaled
@@ -67,6 +73,7 @@ import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.LocalTexts
 import com.scurab.ptracker.ui.common.ColorMatrixGreyScale
 import com.scurab.ptracker.ui.common.Divider
+import com.scurab.ptracker.ui.common.ExpandableContent
 import com.scurab.ptracker.ui.common.HSpacer
 import com.scurab.ptracker.ui.common.HSpacer2
 import com.scurab.ptracker.ui.common.WSpacer
@@ -94,9 +101,7 @@ private fun HoldingRowHeader(hasMultipleFiatCoins: Boolean) {
     val texts = LocalTexts.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
-            .defaultMinSize(minHeight = 40.dp)
+        modifier = Modifier.padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2).defaultMinSize(minHeight = 40.dp)
     ) {
         val col1Width = ColumnWidths.Icon + ColumnWidths.IconCoinGap + ColumnWidths.Coin.default2If(hasMultipleFiatCoins).scaled()
         HoldingsText(texts.Asset, isMonoSpace = false, textAlign = TextAlign.Center, width = col1Width)
@@ -113,9 +118,7 @@ private fun HoldingRowHeader(hasMultipleFiatCoins: Boolean) {
 @Composable
 private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, holdings: SnapshotStateList<OnlineHoldingStats>) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
+        verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
     ) {
         CoinIcon(fiatCoin.icon().imageOrNull(), true, 1f)
         WSpacer(ColumnWidths.IconCoinGap)
@@ -129,10 +132,7 @@ private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, hold
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
             val color = AppTheme.DashboardColors.Candle.get(isEven = totalRoi.isPositive)
             HoldingsText(
-                (totalRoi.f2 + "%"),
-                color = color,
-                textAlign = TextAlign.Right,
-                width = ColumnWidths.ROI.scaled()
+                (totalRoi.f2 + "%"), color = color, textAlign = TextAlign.Right, width = ColumnWidths.ROI.scaled()
             )
             HSpacer()
             HoldingsText(
@@ -149,7 +149,7 @@ private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, hold
 }
 
 @Composable
-private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFiats: Boolean) {
+private fun HoldingsRow(onClick: () -> Unit, index: Int, holdings: OnlineHoldingStats, hasMultipleFiats: Boolean, isSelected: Boolean, modifier: Modifier = Modifier) {
     var scale by remember { mutableStateOf(1f) }
     var isColored by remember(holdings.asset, holdings.timeDate) { mutableStateOf(true) }
     LaunchedEffect(index, holdings.asset, holdings.timeDate) {
@@ -165,9 +165,8 @@ private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFia
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .background(AppColors.current.RowBackground.get(isEven = index % 2 == 0))
-            .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space)
+        modifier = Modifier.clickable(onClick = onClick).background(AppColors.current.RowBackground.get(isEven = index % 2 == 0, isSelected = isSelected))
+            .padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space).then(modifier)
     ) {
         CoinIcon(holdings.asset.iconCoin1().imageOrNull(), isColored, scale)
         WSpacer(ColumnWidths.IconCoinGap)
@@ -183,11 +182,7 @@ private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFia
         WSpacer4()
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
             val color = AppTheme.DashboardColors.Candle.get(isEven = holdings.roi.isPositive)
-            HoldingsText(
-                holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.f2?.let { "$it%" } ?: "",
-                color = color,
-                textAlign = TextAlign.Right
-            )
+            HoldingsText(holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.f2?.let { "$it%" } ?: "", color = color, textAlign = TextAlign.Right)
             HSpacer()
             HoldingsText(
                 holdings.gain.takeIf { it.isNotZero() }?.gf2 ?: "",
@@ -214,17 +209,16 @@ private fun HoldingsRow(index: Int, holdings: OnlineHoldingStats, hasMultipleFia
 @Composable
 private fun CoinIcon(image: ImageBitmap?, isColored: Boolean, scale: Float) {
     Box(
-        modifier = Modifier
-            .size(ColumnWidths.Icon)
-            .border(AppSizes.current.ThinLine, AppColors.current.PrimaryVariant, AppTheme.Shapes.RoundedCornersSize2)
-            .clip(AppTheme.Shapes.RoundedCornersSize2)
-            .background(AppColors.current.BackgroundAssetIcon)
-            .padding(AppSizes.current.Space)
+        modifier = Modifier.size(ColumnWidths.Icon).border(AppSizes.current.ThinLine, AppColors.current.PrimaryVariant, AppTheme.Shapes.RoundedCornersSize2)
+            .clip(AppTheme.Shapes.RoundedCornersSize2).background(AppColors.current.BackgroundAssetIcon).padding(AppSizes.current.Space)
     ) {
         val grayscaleColorFilter = remember { ColorFilter.colorMatrix(ColorMatrixGreyScale) }
         if (image != null) {
             Image(
-                image, contentDescription = "", filterQuality = FilterQuality.High, colorFilter = grayscaleColorFilter.takeIf { !isColored },
+                image,
+                contentDescription = "",
+                filterQuality = FilterQuality.High,
+                colorFilter = grayscaleColorFilter.takeIf { !isColored },
                 modifier = Modifier.scale(scale).align(Alignment.Center)
             )
         } else {
@@ -252,12 +246,7 @@ private fun HoldingsText(
     val textStyles = remember { Pair(AppTheme.TextStyles.NormalMonospace, AppTheme.TextStyles.Normal) }
     val value = if (text is AnnotatedString) text else AnnotatedString(text.toString())
     Text(
-        value,
-        maxLines = 1,
-        style = style ?: textStyles.firstIf(isMonoSpace),
-        textAlign = textAlign,
-        color = color,
-        modifier = Modifier.width(width = width).then(modifier)
+        value, maxLines = 1, style = style ?: textStyles.firstIf(isMonoSpace), textAlign = textAlign, color = color, modifier = Modifier.width(width = width).then(modifier)
     )
 }
 
@@ -267,23 +256,22 @@ fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier =
     val fiatCoins = remember(state.holdings.size) { state.holdings.fiatCoins() }
     val hasFiatCoins = fiatCoins.size > 1
     Row(
-        modifier = Modifier
-            .padding(AppSizes.current.Space)
-            .border(AppSizes.current.ThinLine, AppColors.current.PrimaryVariant, AppTheme.Shapes.RoundedCornersSize4)
-            .background(AppColors.current.RowBackground.get(), AppTheme.Shapes.RoundedCornersSize4)
-            .clip(AppTheme.Shapes.RoundedCornersSize4)
-            .then(modifier)
+        modifier = Modifier.padding(AppSizes.current.Space).border(AppSizes.current.ThinLine, AppColors.current.PrimaryVariant, AppTheme.Shapes.RoundedCornersSize4)
+            .background(AppColors.current.RowBackground.get(), AppTheme.Shapes.RoundedCornersSize4).clip(AppTheme.Shapes.RoundedCornersSize4).then(modifier)
     ) {
         Column(
-            modifier = Modifier
-                .width(IntrinsicSize.Min)
-                .wrapContentSize()
+            modifier = Modifier.width(IntrinsicSize.Min).wrapContentSize()
         ) {
             HoldingRowHeader(hasFiatCoins)
             Divider(thickness = AppSizes.current.ThickLine, color = AppColors.current.Primary, modifier = Modifier.fillMaxWidth())
             state.holdings.forEachIndexed { index, onlineHoldingStats ->
-                HoldingsRow(index, onlineHoldingStats, hasFiatCoins)
-                if (index < state.holdings.size - 1) {
+                Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                    val isItemSelected = state.isHoldingsSelected(onlineHoldingStats)
+                    HoldingsElement(
+                        onClick = { event.onHoldingsRowClicked(index, onlineHoldingStats) }, index, onlineHoldingStats, isItemSelected, hasFiatCoins
+                    )
+                }
+                if (state.holdings.isNotLastIndex(index)) {
                     Divider()
                 }
             }
@@ -297,6 +285,18 @@ fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier =
     }
 }
 
+@Composable
+private fun ColumnScope.HoldingsElement(onClick: () -> Unit, index: Int, onlineHoldingStats: OnlineHoldingStats, selected: Boolean, useWideCoinsColumn: Boolean) {
+    HoldingsRow(onClick = onClick, index, onlineHoldingStats, useWideCoinsColumn, isSelected = selected)
+    ExpandableContent(visible = selected) {
+        Column {
+            repeat(3) {
+                Text("Test:$it")
+            }
+        }
+    }
+}
+
 
 @Preview
 @Composable
@@ -305,6 +305,7 @@ private fun PreviewHoldings() {
         val uiState = StatsUiState().apply {
             this.holdings.addAll(StubData.onlineStubHoldings())
             this.pieChartData = StubData.pieChartData()
+            this.selectedHoldingsAsset = StubData.AssetBTCGBP
         }
         CompositionLocalProvider(
             LocalDensity provides Density(1.25f, 1f)
@@ -315,3 +316,4 @@ private fun PreviewHoldings() {
         }
     }
 }
+
