@@ -125,7 +125,7 @@ class PricesRepository(
                         _latestPrices[marketPrice.asset] = marketPrice
                         prices[index] = marketPrice
                     }
-                    delay(Random.nextLong(100, 500))
+                    delay(Random.nextLong(2000, 5000))
                 }
             }
         }

@@ -106,6 +106,9 @@ object AppTheme {
             default2 = Primary.copy(alpha = 0.15f),
             selected = Secondary.copy(alpha = .15f).compositeOver(Primary.copy(alpha = 0.1f))
         )
+        val Red = Color(0xFFEF5350)
+        val Green = Color(0xFF26A69A)
+        val RedGreen = StateContainer(Red, default2 = Green)
 
         val DarkMaterial = darkColors(
             primary = Primary,
@@ -197,9 +200,9 @@ object AppTheme {
         val BackgroundAxis = Color(0xFF202020).copy(alpha = 0.75f)
         val BackgroundPriceBubble = Color(0xFF404040)
         val MouseCross = Color.White
-        val CandleRed = Color(0xFFEF5350)
-        val CandleGreen = Color(0xFF26A69A)
-        val Candle = StateContainer(CandleGreen, default2 = CandleRed)
+        val CandleRed = Colors.Red
+        val CandleGreen = Colors.Green
+        val Candle = Colors.RedGreen
         val CandleTransaction = Colors.Primary
     }
 

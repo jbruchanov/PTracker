@@ -2,6 +2,7 @@ package com.scurab.ptracker.ui.settings
 
 import com.scurab.ptracker.AppNavTokens
 import com.scurab.ptracker.app.ext.isNotLastIndex
+import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.usecase.TestCryptoCompareKeyUseCase
@@ -15,6 +16,7 @@ interface SettingsEventHandler {
     fun onSaveClicked()
     fun onFontScaleChanged(value: Float)
     fun onCryptoCompareKeyChanged(value: String)
+    fun onPrimaryCoinChanged(value: String)
     fun onLedgerChanged(index: Int, path: String)
     fun onDeleteLedger(index: Int, path: String)
 }
@@ -34,7 +36,7 @@ class SettingsViewModel(
         with(uiState) {
             fontScale = appSettings.fontScale
             cryptoCompareKey = appSettings.cryptoCompareApiKey ?: ""
-
+            onPrimaryCoinChanged(appSettings.primaryCoin ?: "")
             val ledgers: Collection<String> = appSettings.ledgers ?: emptyList()
             predefinedLedgers.addAll(ledgers)
             if (ledgers.size < maxLedgers) {
@@ -95,8 +97,19 @@ class SettingsViewModel(
         appSettings.fontScale = uiState.fontScale
         appSettings.cryptoCompareApiKey = uiState.cryptoCompareKey
         appSettings.ledgers = uiState.predefinedLedgers.filter { it.isNotBlank() }.distinct()
+        appSettings.primaryCoin = uiState.primaryCoin.takeIf { FiatCurrencies.contains(it) }
         //currently disabled, strange bug here, after scale change, can't click anymore on left menu button :/
         //appStateRepository.setDensity(uiState.fontScale)
         navController.popTo(AppNavTokens.PriceDashboard)
+    }
+
+    override fun onPrimaryCoinChanged(value: String) {
+        val value = value.take(3).uppercase()
+        uiState.primaryCoin = value
+        uiState.primaryCoinValidity = when {
+            value.isBlank() -> Validity.Unknown
+            FiatCurrencies.contains(value) -> Validity.Valid
+            else -> Validity.Invalid
+        }
     }
 }

@@ -63,6 +63,8 @@ class SettingsUiState {
     var isTestingCryptoCompareKey by mutableStateOf(false)
     var isCryptoCompareKeyValid by mutableStateOf(Validity.Valid)
     var predefinedLedgers = mutableStateListOf<String>()
+    var primaryCoin by mutableStateOf<String>("")
+    var primaryCoinValidity by mutableStateOf(Validity.Unknown)
 
     @Composable
     fun cryptoCompareIcon() = when (isCryptoCompareKeyValid) {
@@ -128,6 +130,27 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
         )
         WSpacer2()
         Text(LocalTexts.current.RestartNeeded, fontSize = 14.sp * state.fontScale, modifier = Modifier.align(Alignment.CenterVertically))
+    }
+
+    Label(text = texts.PrimaryCoin)
+    Row {
+        TextField(
+            value = state.primaryCoin,
+            onValueChange = { handler.onPrimaryCoinChanged(it) },
+            textStyle = AppTheme.TextStyles.Monospace,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("USD") },
+            trailingIcon = {
+                val icon = when (state.primaryCoinValidity) {
+                    Validity.Valid -> IconColor(imageVector = Icons.Default.Check, color = AppColors.current.Green)
+                    Validity.Invalid -> IconColor(imageVector = Icons.Default.Clear, color = AppColors.current.Red)
+                    else -> null
+                }
+                if (icon != null) {
+                    Image(imageVector = icon.imageVector.get(), contentDescription = "", colorFilter = ColorFilter.tint(icon.color.get()))
+                }
+            }
+        )
     }
 
     Label(text = texts.CryptoCompareApiKey)

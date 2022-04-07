@@ -31,7 +31,7 @@ class PriceItem(
 ) : IPriceItem by item, WithCache by MapCache() {
     private val rectHeight = (open - close).abs().toFloat()
     val rectOffsetY = open.min(close).toFloat()
-    val color = if (open >= close) DashboardColors.CandleRed else DashboardColors.CandleGreen
+    val color = DashboardColors.Candle.default2If(open < close)
     val rectSize = Size(AppTheme.DashboardSizes.PriceItemWidth, rectHeight)
     val centerY = (open + close).toFloat() / 2f
     val spikeOffsetY1 = high.max(low).toFloat()

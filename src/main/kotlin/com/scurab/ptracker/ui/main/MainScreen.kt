@@ -129,7 +129,7 @@ private fun ColumnScope.Menu(navToken: NavToken<*>, uiState: MainUiState, eventH
 @Composable
 private fun PriceTickShape(tick: WsMessageToken?) {
     var scale by remember { mutableStateOf(1f) }
-    var color by remember(tick?.timestamp) { mutableStateOf(AppTheme.DashboardColors.Candle.default) }
+    var color by remember(tick?.timestamp) { mutableStateOf(AppTheme.Colors.Green) }
 
     LaunchedEffect(tick?.timestamp, color) {
         val scalePeak = 1.25f
@@ -138,7 +138,7 @@ private fun PriceTickShape(tick: WsMessageToken?) {
     }
     LaunchedEffect(tick?.timestamp) {
         delay(30000)
-        color = AppTheme.DashboardColors.Candle.default2
+        color = AppTheme.Colors.Red
     }
     Box(
         modifier = Modifier

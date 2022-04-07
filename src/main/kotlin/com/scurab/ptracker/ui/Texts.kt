@@ -23,6 +23,7 @@ interface Texts {
     val RestartNeeded: String
     val Unit: String
     val Stats: String
+    val PrimaryCoin: String
 }
 
 object English : Texts {
@@ -43,4 +44,5 @@ object English : Texts {
     override val RestartNeeded: String = "Restart needed"
     override val Unit: String = "Unit"
     override val Stats: String = "Stats"
+    override val PrimaryCoin: String = "Primary Fiat Currency"
 }
