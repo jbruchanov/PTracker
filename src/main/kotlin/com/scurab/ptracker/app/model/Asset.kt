@@ -59,6 +59,16 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
 
     fun flipCoins(): Asset = Asset(coin2, coin1)
 
+    fun exchangeFiatAsset(coin: String): Asset {
+        val isCoin1Fiat = FiatCurrencies.contains(coin1)
+        val isCoin2Fiat = FiatCurrencies.contains(coin2)
+        return when {
+            isCoin1Fiat && !isCoin2Fiat -> Asset(coin1, coin)
+            !isCoin1Fiat && isCoin2Fiat -> Asset(coin2, coin)
+            else -> throw IllegalStateException("Invalid asset for replacement:$this, can't replace coin:$coin")
+        }
+    }
+
     override fun toString(): String = "$coin1-$coin2"
 
     companion object {

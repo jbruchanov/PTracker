@@ -12,6 +12,7 @@ val ZERO = "0".bd
 fun BigDecimal.isZero() = compareTo(ZERO) == 0
 fun BigDecimal.isNotZero() = !isZero()
 fun BigDecimal.base() = ceil(log10(toDouble())).toInt()
+fun BigDecimal.inverse() = (1.bd / this).align
 fun BigDecimal.round(asset: String?, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal =
     round(asset != null && FiatCurrencies.contains(asset), scaleFiat, scaleCrypto)
 

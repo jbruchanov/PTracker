@@ -1,6 +1,7 @@
 package com.scurab.ptracker.app.usecase
 
 import com.scurab.ptracker.app.ext.ZERO
+import com.scurab.ptracker.app.ext.convertTradePrice
 import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.model.AnyCoin
 import com.scurab.ptracker.app.model.CoinCalculation
@@ -13,14 +14,28 @@ import com.scurab.ptracker.app.model.HasOutcome
 import com.scurab.ptracker.app.model.Holdings
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.LedgerStats
+import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.repository.AppSettings
 import java.math.BigDecimal
 
-class StatsCalculatorUseCase {
+class StatsCalculatorUseCase(
+    private val appSettings: AppSettings
+) {
 
-    fun calculateStats(ledger: Ledger, filter: Filter<Transaction>): LedgerStats {
+    fun calculateStats(
+        ledger: Ledger,
+        filter: Filter<Transaction>,
+        prices: List<MarketPrice> = emptyList(),
+        primaryCurrency: String? = appSettings.primaryCoin
+    ): LedgerStats {
         //predata
-        val data = ledger.items.filter(filter)
+        val pricesMap = prices.associateBy { it.asset }
+        val data = ledger.items.filter(filter).let { data ->
+            if (primaryCurrency == null) data else data.map { transaction ->
+                transaction.convertTradePrice(pricesMap, primaryCurrency)
+            }
+        }
         val allCoins = data.map { it.assets }.flatten().toSet()
         val fiatCoins = allCoins.filter { FiatCurrencies.contains(it) }.toSet()
         val cryptoCoins = allCoins - fiatCoins
@@ -41,13 +56,13 @@ class StatsCalculatorUseCase {
                 })
 
         //currently, what I have on exchange/wallet
-        val actualOwnership = cryptoTradingAssets.associateWith { asset -> CoinCalculation(asset, ledger.items.filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.coin1) }) }
+        val actualOwnership = cryptoTradingAssets.associateWith { asset -> CoinCalculation(asset, data.filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.coin1) }) }
         //traded amounts => values what I'd have had if without losts/gifts/etc => value used for price per unit
         val tradedAmount =
             cryptoTradingAssets.associateWith { asset ->
                 CoinCalculation(
                     asset,
-                    ledger.items.filterIsInstance<Transaction.Trade>().filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.coin1) })
+                    data.filterIsInstance<Transaction.Trade>().filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.coin1) })
             }
         val spentFiatByCrypto = cryptoTradingAssets.associateWith { asset ->
             CoinCalculation(CryptoCoin(asset.coin1), data.filter { it.hasAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })

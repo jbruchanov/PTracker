@@ -5,6 +5,7 @@ import com.scurab.ptracker.app.ext.parallelMapIndexed
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.model.Locations
+import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.net.CryptoCompareClient
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -14,6 +15,7 @@ import io.ktor.utils.io.copyTo
 import java.io.File
 
 class LoadIconsUseCase(
+    private val appSettings: AppSettings,
     private val httpClient: HttpClient,
     private val cryptoCompareClient: CryptoCompareClient
 ) {
@@ -21,7 +23,8 @@ class LoadIconsUseCase(
     private val location = File(Locations.Icons)
 
     suspend fun loadIcons(assets: List<Asset>): List<Pair<String, File?>> {
-        val allCoins = (assets.map { it.coin2 } + assets.map { it.coin1 }).toSet()
+        val primaryCoin = appSettings.primaryCoin?.let { listOf(it) } ?: emptyList()
+        val allCoins = (assets.map { it.coin2 } + assets.map { it.coin1 } + primaryCoin).toSet()
         location.mkdirs()
 
         val result = allCoins

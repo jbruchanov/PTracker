@@ -11,7 +11,7 @@ interface AppSettings {
     var lastSelectedAsset: Asset?
     var latestLedger: String?
     var ledgers: List<String>?
-    var primaryCurrency: String?
+    var primaryCoin: String?
 
     companion object {
         const val KeyLedgers = "ledgers"
@@ -26,5 +26,5 @@ class MemoryAppSettings : AppSettings {
     override var lastSelectedAsset: Asset? = null
     override var latestLedger: String? = null
     override var ledgers: List<String>? = null
-    override var primaryCurrency: String? = null
+    override var primaryCoin: String? = null
 }

@@ -86,17 +86,20 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     ) : Transaction(), HasIncome, HasOutcome {
         override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset, sellAsset) || isRelatedAsset(asset)
         private fun isRelatedAsset(asset: Asset) = (sellAsset.isEmpty() && asset.has(buyAsset)) || (buyAsset.isEmpty() && asset.has(sellAsset))
+
         override val assetsLabel: String = asset.label
 
         override val assets: Set<String> = setOf(buyAsset, sellAsset)
     }
 
     fun isTransactionWithAsset(asset: Asset) = this is Trade && hasAsset(asset)
+    fun isTransactionWithCoin(coin: String) = this is Trade && hasCoin(coin)
 
-    fun hasCoin(coin: String) = (this is HasIncome && this.buyAsset == coin) || (this is Outcome && this.sellAsset == coin)
+    fun hasCoin(coin: String) = (this is HasIncome && this.buyAsset == coin) || (this is HasOutcome && this.sellAsset == coin)
 
-    val isCryptoBuy by lazy { (this as? Trade)?.let { FiatCurrencies.contains(sellAsset) } ?: false }
-    val isCryptoSell by lazy { (this as? Trade)?.let { !FiatCurrencies.contains(sellAsset) } ?: false }
+    val isCryptoBuy by lazy { (this as? Trade)?.let { !FiatCurrencies.contains(buyAsset) && FiatCurrencies.contains(sellAsset) } ?: false }
+    val isCryptoSell by lazy { (this as? Trade)?.let { FiatCurrencies.contains(buyAsset) && !FiatCurrencies.contains(sellAsset) } ?: false }
+    val isCryptoTrade by lazy { isCryptoBuy || isCryptoSell }
     val isCryptoDeposit by lazy { (this as? HasIncome)?.let { type == TypeDeposit && !FiatCurrencies.contains(it.buyAsset) } ?: false }
     val isCryptoWithdrawal by lazy { (this as? HasOutcome)?.let { type == TypeWithdrawal && !FiatCurrencies.contains(it.sellAsset) } ?: false }
 

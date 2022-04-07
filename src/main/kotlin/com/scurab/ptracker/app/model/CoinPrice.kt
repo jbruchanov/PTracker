@@ -1,6 +1,8 @@
 package com.scurab.ptracker.app.model
 
+import com.scurab.ptracker.app.ext.align
 import com.scurab.ptracker.app.ext.bd
+import com.scurab.ptracker.app.ext.inverse
 import com.scurab.ptracker.app.serialisation.BigDecimalAsStringSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -19,15 +21,21 @@ data class CoinPrice(
 
         val (coin, price) = when {
             asset.coin2 == marketPrice.asset.coin1 -> marketPrice.asset.coin2 to price * marketPrice.price
-            asset.coin2 == marketPrice.asset.coin2 -> marketPrice.asset.coin1 to price * (1.bd / marketPrice.price)
+            asset.coin2 == marketPrice.asset.coin2 -> marketPrice.asset.coin1 to price * marketPrice.price.inverse()
             else -> throw IllegalStateException("Unsupported combination, asset:${asset}, marketPrice:${marketPrice}")
         }
-        return CoinPrice(Asset(asset.coin1, coin), price)
+        return CoinPrice(Asset(asset.coin1, coin), price.align)
     }
 
-    fun flipAsset() = CoinPrice(asset.flipCoins(), 1.bd / price)
+    override fun flipAsset() = CoinPrice(asset.flipCoins(), price.inverse())
 
     companion object {
         fun MarketPrice.asCoinPrice() = if (this is CoinPrice) this else CoinPrice(asset, price)
+
+        fun fromUnknownPairOrNull(coin1: String?, coin2: String?, price: BigDecimal): CoinPrice? {
+            val asset = Asset.fromUnknownPairOrNull(coin1, coin2) ?: return null
+            val price = if(asset.coin1 == coin1) price else price.inverse()
+            return CoinPrice(asset, price)
+        }
     }
 }

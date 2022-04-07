@@ -47,7 +47,7 @@ class AppSettingsJsonRepository(
     override var lastSelectedAsset: Asset? by data::lastSelectedAsset.notifying()
     override var latestLedger: String? by data::latestLedger.notifying()
     override var ledgers: List<String>? by data::ledgers.notifying()
-    override var primaryCurrency by data::primaryCurrency.notifying()
+    override var primaryCoin by data::primaryCoin.notifying()
 
     companion object {
 

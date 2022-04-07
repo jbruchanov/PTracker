@@ -85,8 +85,8 @@ private object ColumnWidths {
     val IconCoinGap = 16.dp
     val Coin = StateContainer(40.dp, default2 = 64.dp)
     val Balance = 96.dp
-    val Cost = 96.dp
-    val MarketValue = 96.dp
+    val Cost = 110.dp
+    val MarketValue = 110.dp
     val ROI = 72.dp
 }
 

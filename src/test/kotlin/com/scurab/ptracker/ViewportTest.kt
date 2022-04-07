@@ -43,7 +43,7 @@ class ViewportTest {
         state.canvasSize = Size(1000f, 500f)
         state.scale = Offset(2f, 0.5f)
         val rect = state.viewport()
-        val expected = Rect(470f, 750f, 970f, -250f)
+        val expected = Rect(467.5f, 750f, 967.5f, -250f)
 
         assertEquals(expected.left, rect.left, 1e-6f)
         assertEquals(expected.bottom, rect.bottom, 1e-6f)

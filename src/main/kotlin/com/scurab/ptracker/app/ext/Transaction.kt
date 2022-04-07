@@ -73,34 +73,38 @@ fun Transaction.formattedPrices(): TransactionTextPrices {
     }
 }
 
-fun Transaction.convertTradePrice(price: MarketPrice): Transaction {
-    return when (this) {
-        is Transaction.Income -> this
-        is Transaction.Outcome -> this
-        is Transaction.Trade -> {
-            when {
-                (this.sellAsset == price.asset.coin2) -> {
-                    val init = CoinPrice(Asset(buyAsset, sellAsset), sellQuantity)
-                    val tx = init.convertCurrency(price)
-                    val (feeAsset, feeQuantity) = if (this.feeAsset == price.asset.coin2) {
-                        price.asset.coin1 to init.copy(price = feeQuantity).convertCurrency(price).price
-                    } else feeAsset to feeQuantity
-                    this.copy(
-                        sellAsset = price.asset.coin1, sellQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
-                    )
-                }
-                (this.buyAsset == price.asset.coin2) -> {
-                    val init = CoinPrice(Asset(sellAsset, buyAsset), buyQuantity)
-                    val tx = init.convertCurrency(price)
-                    val (feeAsset, feeQuantity) = if (this.feeAsset == price.asset.coin2) {
-                        price.asset.coin1 to init.copy(price = feeQuantity).convertCurrency(price).price
-                    } else feeAsset to feeQuantity
-                    this.copy(
-                        buyAsset = price.asset.coin1, buyQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
-                    )
-                }
-                else -> throw UnsupportedOperationException("Unhandled case:$this, price:$price")
-            }
+fun Transaction.convertTradePrice(prices: Map<Asset, MarketPrice>, targetFiatCurrency: String): Transaction {
+    if (this !is Transaction.Trade) return this
+    if (this.asset.has(targetFiatCurrency)) return this
+    if (!this.isCryptoTrade) return this
+    val exchangeAsset = asset.exchangeFiatAsset(targetFiatCurrency)
+    val price = requireNotNull(prices[exchangeAsset] ?: prices[exchangeAsset.flipCoins()]) {
+        "Unable to find exchangeAsset:$exchangeAsset in prices:$prices for trade:$this"
+    }.let {
+        if (sellAsset == it.asset.coin1 || buyAsset == it.asset.coin1) it.flipAsset() else it
+    }
+
+    return when {
+        sellAsset == price.asset.coin2 -> {
+            val init = CoinPrice(Asset(buyAsset, sellAsset), sellQuantity)
+            val tx = init.convertCurrency(price, targetFiatCurrency)
+            val (feeAsset, feeQuantity) = if (this.feeAsset == price.asset.coin2) {
+                price.asset.coin1 to init.copy(price = feeQuantity).convertCurrency(price).price
+            } else feeAsset to feeQuantity
+            copy(
+                sellAsset = price.asset.coin1, sellQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
+            )
         }
+        buyAsset == price.asset.coin2 -> {
+            val init = CoinPrice(Asset(sellAsset, buyAsset), buyQuantity)
+            val tx = init.convertCurrency(price)
+            val (feeAsset, feeQuantity) = if (this.feeAsset == price.asset.coin2) {
+                price.asset.coin1 to init.copy(price = feeQuantity).convertCurrency(price).price
+            } else feeAsset to feeQuantity
+            copy(
+                buyAsset = price.asset.coin1, buyQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
+            )
+        }
+        else -> throw UnsupportedOperationException("Unhandled case:$this, price:$price")
     }
 }

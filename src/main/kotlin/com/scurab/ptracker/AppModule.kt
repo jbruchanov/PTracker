@@ -49,15 +49,15 @@ fun createKoinModule(appArgs: Array<String>) = module {
     single { defaultHttpClient() }
     single<AppSettings> { AppSettingsJsonRepository.default(get()) }
     single { CryptoCompareClient(get(), get(), get()) }
-    single { PricesRepository(get()) }
+    single { PricesRepository(get(), get()) }
 
     factory { LoadPriceHistoryUseCase(get(), get()) }
     factory { LoadLedgerUseCase() }
     factory { LoadDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
     factory { PriceBoardDataProcessingUseCase() }
-    factory { LoadIconsUseCase(get(), get()) }
+    factory { LoadIconsUseCase(get(), get(), get()) }
     factory { TestCryptoCompareKeyUseCase(get()) }
-    factory { StatsCalculatorUseCase() }
+    factory { StatsCalculatorUseCase(get()) }
 
     fun Scope.getAppNavController() = get<NavController>(NavigationScope.App)
     fun Scope.getMainNavController() = get<NavController>(NavigationScope.Main)
@@ -66,5 +66,5 @@ fun createKoinModule(appArgs: Array<String>) = module {
     factory { MainViewModel(get(), get(), get(), get(), getMainNavController()) }
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), get(), get(), getMainNavController()) }
-    factory { StatsViewModel(get(), get(), get()) }
+    factory { StatsViewModel(get(), get(), get(), get()) }
 }

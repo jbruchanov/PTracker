@@ -3,7 +3,6 @@ package com.scurab.ptracker.ui.stats
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
 import com.scurab.ptracker.app.ext.now
-import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.ext.pieChartData2
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
@@ -12,6 +11,7 @@ import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.LedgerStats
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
+import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class StatsViewModel(
+    private val appSettings: AppSettings,
     private val appStateRepository: AppStateRepository,
     private val statsCalculatorUseCase: StatsCalculatorUseCase,
     private val pricesRepository: PricesRepository
@@ -31,7 +32,9 @@ class StatsViewModel(
     private var latestLedger: Ledger? = null
     private var ledgerStats = LedgerStats.Empty
     private var prices = mutableMapOf<Asset, MarketPrice>()
-    val uiState = StatsUiState()
+    val uiState = StatsUiState().also {
+        it.primaryCoin = appSettings.primaryCoin
+    }
 
     init {
         launch {
@@ -55,8 +58,9 @@ class StatsViewModel(
 
     private suspend fun onNewLedgerSelected(ledger: Ledger) {
         latestLedger = ledger
-        prices.putAll(pricesRepository.getPrices(ledger.assets).associateBy { it.asset })
-        ledgerStats = statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions)
+        val actualPrices = pricesRepository.getPrices(ledger.assets)
+        prices.putAll(actualPrices.associateBy { it.asset })
+        ledgerStats = statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions, actualPrices)
         recalcData(ledgerStats, prices, null)
     }
 

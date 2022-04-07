@@ -1,11 +1,13 @@
 package com.scurab.ptracker.app.repository
 
+import com.scurab.ptracker.app.ext.fiatCoins
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.sign
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.CoinPrice.Companion.asCoinPrice
 import com.scurab.ptracker.app.model.ExchangeWallet
+import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.model.MarketPrice
@@ -32,6 +34,7 @@ import java.io.File
 import kotlin.random.Random
 
 class PricesRepository(
+    private val appSettings: AppSettings,
     private val client: CryptoCompareClient
 ) {
     data class Subscription(
@@ -55,13 +58,16 @@ class PricesRepository(
 
     private val folder = File(Locations.Prices)
     suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {
-        if (_latestPrices.keys.containsAll(assets)) {
+        val primaryCoin = appSettings.primaryCoin?.let { FiatCoin(it) }
+        val primaryCoinAssets = primaryCoin?.let { primaryCurrency -> assets.fiatCoins().map { coin -> Asset(coin, primaryCurrency.item) } } ?: emptyList()
+        val request = (assets + primaryCoinAssets).distinct()
+        if (_latestPrices.keys.containsAll(request)) {
             return _latestPrices.values.map { it.asCoinPrice() }
         }
         folder.mkdirs()
         val file = File(folder, "prices-${now().toJavaLocalDateTime().format(DateTimeFormats.debugFullDate)}.json")
         val localData = (if (file.exists()) JsonBridge.deserialize<List<CoinPrice>>(file.readText()).toSet() else emptySet()).associateBy { it.asset }
-        val onlineData = (if (!localData.keys.containsAll(assets)) client.getPrices(assets).toSet() else emptySet()).associateBy { it.asset }
+        val onlineData = (if (!localData.keys.containsAll(request)) client.getPrices(request, primaryCoin).toSet() else emptySet()).associateBy { it.asset }
         val result = (localData.keys + onlineData.keys).mapNotNull { onlineData[it] ?: localData[it] }
         if (onlineData.isNotEmpty()) {
             file.writeText(JsonBridge.serialize(result, beautify = true))
@@ -79,6 +85,7 @@ class PricesRepository(
 
     //TODO: handle missing CC API Key
     fun subscribeWs(data: Map<ExchangeWallet, List<Asset>>) {
+        //TODO: values for primary coin
         _wsSubscriptionJob?.cancel()
         _wsSubscriptionJob = ProcessScope.launch(Dispatchers.IO) {
             while (isActive) {
@@ -86,6 +93,7 @@ class PricesRepository(
                     flowPrices(data).consumeEach {
                         when (it) {
                             is WsExchangeResponse.MarketPrice -> {
+                                println("RCV MarketPrice:$it")
                                 _wsMarketPrice.tryEmit(it)
                                 _latestPrices[it.asset] = it
                             }
@@ -117,7 +125,7 @@ class PricesRepository(
                         _latestPrices[marketPrice.asset] = marketPrice
                         prices[index] = marketPrice
                     }
-                    delay(Random.nextLong(1000, 2000))
+                    delay(Random.nextLong(100, 500))
                 }
             }
         }

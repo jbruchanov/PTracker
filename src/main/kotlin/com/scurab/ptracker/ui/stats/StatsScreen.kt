@@ -12,13 +12,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
@@ -31,14 +28,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
 import com.scurab.ptracker.app.ext.gf2
 import com.scurab.ptracker.app.ext.pieChartData
-import com.scurab.ptracker.app.ext.reduceOf
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.MarketPercentage
@@ -64,12 +59,13 @@ class StatsUiState() {
     var marketPercentage by mutableStateOf<List<MarketPercentage>>(emptyList())
     var pieChartData by mutableStateOf<List<PieChartSegment>>(emptyList())
     var selectedHoldingsAsset by mutableStateOf<Asset?>(null)
+    var primaryCoin by mutableStateOf<String?>(null)
 
     fun isHoldingsSelected(onlineHoldingStats: OnlineHoldingStats) = onlineHoldingStats.asset == selectedHoldingsAsset
 
     companion object {
-        val IconToGrayscaleDelay = 60_000L
-        val MarketPercentageGroupingThreshold = 0.1f
+        const val IconToGrayscaleDelay = 120_000L
+        const val MarketPercentageGroupingThreshold = 0.1f
     }
 }
 
@@ -90,7 +86,7 @@ fun StatsScreen(vm: StatsViewModel) {
 @Composable
 private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
     Column {
-        Text(text = LocalTexts.current.Stats, style = AppTheme.TextStyles.Header, modifier = Modifier)
+        Text(text = LocalTexts.current.Stats + (state.primaryCoin?.let { " - $it" } ?: ""), style = AppTheme.TextStyles.Header, modifier = Modifier)
         HSpacer2()
         val vScrollState = rememberScrollState()
         val hScrollState = rememberScrollState()

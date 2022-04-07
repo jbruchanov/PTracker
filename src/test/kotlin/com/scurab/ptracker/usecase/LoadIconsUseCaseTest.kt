@@ -1,5 +1,6 @@
 package com.scurab.ptracker.usecase
 
+import com.scurab.ptracker.app.repository.AppSettingsJsonRepository
 import com.scurab.ptracker.net.CryptoCompareClient
 import com.scurab.ptracker.net.defaultHttpClient
 import com.scurab.ptracker.app.serialisation.JsonBridge
@@ -20,7 +21,7 @@ internal class LoadIconsUseCaseTest {
         val ledger = kotlin.runCatching { LoadLedgerUseCase().load(File("data/output.xlsx")) }.getOrNull()
         val httpClient = defaultHttpClient()
         val assets = ledger?.assets ?: TestCoins
-        val loadIconsUseCase = LoadIconsUseCase(httpClient, CryptoCompareClient(httpClient, mockk(), JsonBridge))
+        val loadIconsUseCase = LoadIconsUseCase(AppSettingsJsonRepository.default(JsonBridge), httpClient, CryptoCompareClient(httpClient, mockk(), JsonBridge))
         runBlocking {
             loadIconsUseCase.loadIcons(assets)
         }

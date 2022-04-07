@@ -5,7 +5,7 @@ import com.scurab.ptracker.app.model.Transaction
 import kotlinx.datetime.LocalDateTime
 import java.math.BigDecimal
 
-private fun trade(
+fun trade(
     buy: BigDecimal, buyAsset: String,
     sell: BigDecimal, sellAsset: String,
     fee: BigDecimal, feeAsset: String,

@@ -1,5 +1,6 @@
 package com.scurab.ptracker.net
 
+import com.scurab.ptracker.app.ext.align
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.FiatCoin
@@ -49,17 +50,14 @@ class CryptoCompareClient(
         return httpClient.get(coinUrl(cryptoSymbol))
     }
 
-    suspend fun getPrices(assets: List<Asset>, primaryFiatCoin: FiatCoin? = FiatCoin("GBP")): List<CoinPrice> {
+    suspend fun getPrices(assets: List<Asset>, primaryFiatCoin: FiatCoin? = null): List<CoinPrice> {
         if (assets.isEmpty()) return emptyList()
         val fromSyms = assets.mapNotNull { it.fiatCoinOrNull()?.item }.distinct().joinToString(separator = ",")
         val toCoins = (assets.mapNotNull { it.cryptoCoinOrNull()?.item } + primaryFiatCoin?.item).filterNotNull().distinct()
         val toSyms = toCoins.joinToString(separator = ",")
         val rawData = httpClient.get<Map<String, Map<String, Double>>>(pricesUrl(toSyms, fromSyms))
-        val result = rawData.map { (c1, v) -> v.map { (c2, price) -> Asset.fromUnknownPairOrNull(c1, c2) to price.toBigDecimal() } }
+        val result = rawData.mapNotNull { (c1, v) -> v.mapNotNull { (c2, price) -> CoinPrice.fromUnknownPairOrNull(c1, c2, price.toBigDecimal()) } }
             .flatten()
-            .filter { it.first != null }
-            .let { it as List<Pair<Asset, BigDecimal>> }
-            .map { CoinPrice(it.first, it.second) }
         return result
     }
 
