@@ -64,7 +64,7 @@ fun createKoinModule(appArgs: Array<String>) = module {
 
     single { args -> AppViewModel(args.get(), get(), get(), get(), getAppNavController()) }
     factory { MainViewModel(get(), get(), get(), get(), getMainNavController()) }
-    factory { PriceBoardViewModel(get(), get(), get(), get()) }
+    factory { PriceBoardViewModel(get(), get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), get(), get(), getMainNavController()) }
     factory { StatsViewModel(get(), get(), get(), get()) }
 }

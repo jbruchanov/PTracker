@@ -15,6 +15,7 @@ import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.LoadPriceHistoryUseCase
@@ -31,9 +32,10 @@ import java.awt.event.KeyEvent
 
 class PriceBoardUiState(
     localDensity: Density,
-    grouping: GroupStrategy
+    grouping: GroupStrategy,
+    isDebugVisible: Boolean
 ) {
-    var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping))
+    var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping, isDebugVisible))
     var assets by mutableStateOf(emptyList<AssetIcon>())
     var hasTradeOnlyFilter by mutableStateOf(true)
     val prices = mutableStateMapOf<Asset, MarketPrice>()
@@ -49,6 +51,7 @@ interface PriceBoardEventDelegate {
 }
 
 class PriceBoardViewModel(
+    private val appSettings: AppSettings,
     private val appStateRepository: AppStateRepository,
     private val loadPriceHistoryUseCase: LoadPriceHistoryUseCase,
     private val pricesRepository: PricesRepository,
@@ -57,7 +60,7 @@ class PriceBoardViewModel(
 
     private val filters = Pair(Filter.ImportantTransactions, Filter.AllTransactions)
     private val grouping = GroupStrategy.Day
-    val uiState = PriceBoardUiState(appStateRepository.density.value, grouping)
+    val uiState = PriceBoardUiState(appStateRepository.density.value, grouping, appSettings.debug)
 
     //state for merging, 2 different datasources for 1 output
     private val ledger = appStateRepository.ledger

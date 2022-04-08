@@ -38,7 +38,12 @@ import java.awt.Cursor
 import kotlin.math.ceil
 import kotlin.math.max
 
-class PriceBoardState(items: List<PriceItem>, private val localDensity: Density, grouping: GroupStrategy) {
+class PriceBoardState(
+    items: List<PriceItem>,
+    private val localDensity: Density,
+    grouping: GroupStrategy,
+    val isDebugVisible: Boolean
+) {
     var scale by mutableStateOf(Offset(1f, 1f))
     var offset by mutableStateOf(Offset.Zero)
     var pointer by mutableStateOf(Point.ZERO)

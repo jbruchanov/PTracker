@@ -19,6 +19,7 @@ interface SettingsEventHandler {
     fun onPrimaryCoinChanged(value: String)
     fun onLedgerChanged(index: Int, path: String)
     fun onDeleteLedger(index: Int, path: String)
+    fun onDebugCheckedChanged(checked: Boolean)
 }
 
 class SettingsViewModel(
@@ -111,5 +112,9 @@ class SettingsViewModel(
             FiatCurrencies.contains(value) -> Validity.Valid
             else -> Validity.Invalid
         }
+    }
+
+    override fun onDebugCheckedChanged(checked: Boolean) {
+        uiState.debug = checked
     }
 }

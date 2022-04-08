@@ -106,7 +106,6 @@ import kotlin.math.roundToInt
 object PriceDashboardConfig {
     val ScaleRangeX = floatArrayOf(1e-2f, 20f)
     val ScaleRangeY = floatArrayOf(1e-6f, 1e7f)
-    const val Debug = true
     const val SnappingMouseCrossHorizontally = true
     const val AxisYContentCoef = 0.5f
     const val DefaultMinColumns = 200
@@ -242,7 +241,7 @@ private fun PriceBoardScreen(state: PriceBoardState, eventDelegate: PriceBoardEv
         AxisContent(state)
         Mouse(state)
         AxisEdgeLines(state)
-        if (PriceDashboardConfig.Debug) {
+        if (state.isDebugVisible) {
             PriceBoardDebug(state)
         }
 
