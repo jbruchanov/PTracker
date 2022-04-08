@@ -42,6 +42,8 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
     @Transient
     val isFiatTradingAsset by lazy { isTradingAsset && FiatCurrencies.contains(coin1) && FiatCurrencies.contains(coin2) }
 
+    val isIdentity get() = coin1 == coin2
+
     fun cryptoLabelOnlyIf(value: Boolean) = if (value) coin1 else label
 
     fun iconCoin1() = File(Locations.Icons, coin1.lowercase() + ".png")

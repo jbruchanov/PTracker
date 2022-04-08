@@ -1,5 +1,6 @@
 package com.scurab.ptracker.app.repository
 
+import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.fiatCoins
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.sign
@@ -67,7 +68,11 @@ class PricesRepository(
         folder.mkdirs()
         val file = File(folder, "prices-${now().toJavaLocalDateTime().format(DateTimeFormats.debugFullDate)}.json")
         val localData = (if (file.exists()) JsonBridge.deserialize<List<CoinPrice>>(file.readText()).toSet() else emptySet()).associateBy { it.asset }
-        val onlineData = (if (!localData.keys.containsAll(request)) client.getPrices(request, primaryCoin).toSet() else emptySet()).associateBy { it.asset }
+        val onlineData = (if (!localData.keys.containsAll(request)) {
+            val missingAssets = request - localData.keys
+            val toRequest = missingAssets.filter { !it.isIdentity }
+            if (toRequest.isNotEmpty()) client.getPrices(request, primaryCoin).toSet() else missingAssets.map { CoinPrice(it, 1.bd) }
+        } else emptySet()).associateBy { it.asset }
         val result = (localData.keys + onlineData.keys).mapNotNull { onlineData[it] ?: localData[it] }
         if (onlineData.isNotEmpty()) {
             file.writeText(JsonBridge.serialize(result, beautify = true))
