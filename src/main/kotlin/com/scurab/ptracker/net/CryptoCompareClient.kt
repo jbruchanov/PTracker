@@ -1,6 +1,5 @@
 package com.scurab.ptracker.net
 
-import com.scurab.ptracker.app.ext.align
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.FiatCoin
@@ -26,7 +25,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 import kotlin.coroutines.CoroutineContext
 
 class CryptoCompareClient(

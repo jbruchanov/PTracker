@@ -1,7 +1,6 @@
 package com.scurab.ptracker.app.model
 
 import com.scurab.ptracker.app.ext.align
-import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.inverse
 import com.scurab.ptracker.app.serialisation.BigDecimalAsStringSerializer
 import kotlinx.serialization.SerialName
