@@ -19,9 +19,12 @@ data class OnlineHoldingStats(
     val pricePerUnit: BigDecimal get() = holdings.pricePerUnit
     val actualPricePerUnit: BigDecimal get() = holdings.actualPricePerUnit
     val freeIncome: BigDecimal get() = holdings.freeIncome
+    val freeIncomeMarketPrice: BigDecimal get() = holdings.freeIncome * marketPriceItem.price
     val nonProfitableOutcome: BigDecimal get() = holdings.nonProfitableOutcome
+    val nonProfitableOutcomeMarketPrice: BigDecimal get() = holdings.nonProfitableOutcome * marketPriceItem.price
     val balance get() = holdings.actualCryptoBalance
     val costUnit = cost.safeDiv(balance)
+    val costTotalUnit = cost.safeDiv(totalCryptoBalance)
     val marketValue = (actualCryptoBalance * marketPriceItem.price).setScale(4, RoundingMode.HALF_UP)
     val marketValueUnitPrice = marketPriceItem.price
     val gain = marketValue - cost

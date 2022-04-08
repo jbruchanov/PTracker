@@ -36,6 +36,7 @@ import com.scurab.ptracker.app.ext.gf2
 import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.MarketPercentage
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.util.mock
@@ -60,6 +61,7 @@ class StatsUiState() {
     var pieChartData by mutableStateOf<List<PieChartSegment>>(emptyList())
     var selectedHoldingsAsset by mutableStateOf<Asset?>(null)
     var primaryCoin by mutableStateOf<String?>(null)
+    var coinSumPerExchange by mutableStateOf<Map<String, List<CoinExchangeStats>>>(emptyMap())
 
     fun isHoldingsSelected(onlineHoldingStats: OnlineHoldingStats) = onlineHoldingStats.asset == selectedHoldingsAsset
 

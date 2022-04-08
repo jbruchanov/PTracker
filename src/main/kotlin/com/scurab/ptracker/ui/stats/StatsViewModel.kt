@@ -92,6 +92,7 @@ class StatsViewModel(
             }
             uiState.marketPercentage = marketPercentage
             uiState.pieChartData = pieChartData
+            uiState.coinSumPerExchange = ledgerStats.coinSumPerExchange
         }
     }
 }

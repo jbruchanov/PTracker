@@ -2,9 +2,12 @@ package com.scurab.ptracker.app.usecase
 
 import com.scurab.ptracker.app.ext.ZERO
 import com.scurab.ptracker.app.ext.convertTradePrice
+import com.scurab.ptracker.app.ext.isNotZero
+import com.scurab.ptracker.app.ext.safeDiv
 import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.model.AnyCoin
 import com.scurab.ptracker.app.model.CoinCalculation
+import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.CryptoCoin
 import com.scurab.ptracker.app.model.ExchangeWallet
 import com.scurab.ptracker.app.model.FiatCurrencies
@@ -43,6 +46,9 @@ class StatsCalculatorUseCase(
         val exchanges = data.setOf { it.exchange }
         val transactionTypes = data.setOf { it.type }
         val transactionsByExchange = data.groupBy { it.exchange }
+        val sumOfCoins = allCoins.associateWith { coin ->
+            data.filter { it.asset.has(coin) }.map { it.getAmount(coin) }.sumOf { it }
+        }
         val assetsByExchange = exchanges
             .mapNotNull { exchange -> exchange.normalizedExchange()?.let { normalized -> exchange to normalized } }
             .associateBy(
@@ -76,9 +82,14 @@ class StatsCalculatorUseCase(
             )
         }
 
-        val exchangeSumOfCoins = transactionsByExchange.map { (exchange, transactions) ->
-            ExchangeWallet(exchange) to allCoins.map { anyCoin -> CoinCalculation(AnyCoin(anyCoin), transactions.sumOf { it.getAmount(anyCoin) }) }
-        }.toMap()
+        val exchangeSumOfCoins = transactionsByExchange
+            .mapNotNull { (exchange, transactions) ->
+                ExchangeWallet(exchange) to allCoins
+                    .map { anyCoin -> CoinCalculation(AnyCoin(anyCoin), transactions.sumOf { it.getAmount(anyCoin) }) }
+                    .filter { it.value.isNotZero() }
+            }
+            .filter { it.second.isNotEmpty() }
+            .toMap()
 
         val transactionsPerAssetPerType = transactionTypes.map { type -> type to data.filter { it.type == type } }
             .map { (type, transactions) -> Triple(type, transactions.map { it.asset }.toSet(), transactions) }.map { (type, assets, transactions) ->
@@ -87,16 +98,23 @@ class StatsCalculatorUseCase(
                 }
             }
 
-        return LedgerStats(cryptoTradingAssets.toList(), assetsByExchange, holdings, exchangeSumOfCoins, transactionsPerAssetPerType)
+        val coinSumPerExchange = allCoins.associateWith { coin ->
+            data.filter { it.asset.has(coin) }
+                .groupBy { it.exchange }
+                .mapValues { (_, transactions) -> transactions.sumOf { transaction -> transaction.getAmount(coin) } }
+                .filter { it.value.isNotZero() }
+                .map { (exchange, sum) -> CoinExchangeStats(AnyCoin(coin), ExchangeWallet(exchange), sum, sum.safeDiv(sumOfCoins.getValue(coin))) }
+        }
+
+        return LedgerStats(cryptoTradingAssets.toList(), assetsByExchange, holdings, coinSumPerExchange, exchangeSumOfCoins, transactionsPerAssetPerType)
     }
 
     private fun String.normalizedExchange(): String? {
-        val name = this.lowercase()
         return when {
-            name.contains("kraken") -> "Kraken"
-            name.contains("coinbase") -> "Coinbase"
-            name.contains("binance") -> "Binance"
-            name.contains("trezor") -> null
+            contains("kraken", ignoreCase = true) -> "Kraken"
+            contains("coinbase", ignoreCase = true) -> "Coinbase"
+            contains("binance", ignoreCase = true) -> "Binance"
+            contains("trezor", ignoreCase = true) -> null
             else -> null
         }
     }
