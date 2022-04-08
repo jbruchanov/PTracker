@@ -3,8 +3,11 @@ package stub
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.marketPercentage
 import com.scurab.ptracker.app.ext.pieChartData
+import com.scurab.ptracker.app.model.AnyCoin
 import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.CoinPrice
+import com.scurab.ptracker.app.model.ExchangeWallet
 import com.scurab.ptracker.app.model.Holdings
 import com.scurab.ptracker.ui.common.PieChartSegment
 
@@ -27,6 +30,13 @@ object StubData {
         Holdings(AssetBTCGBP, 0.4.bd, 0.5.bd, 10000.bd),
         Holdings(AssetETHGBP, 3.bd, 3.bd, 10000.bd),
         Holdings(AssetLTCBGP, 40.5.bd, 40.5.bd, 4000.bd),
+    )
+
+    fun coinExchangeStats() = listOf(
+        CoinExchangeStats(AnyCoin("GBP"), ExchangeWallet("Blainance"), 100.bd, 0.5.bd),
+        CoinExchangeStats(AnyCoin("BTC"), ExchangeWallet("Wallet"), 0.000005.bd, 0.001.bd),
+        CoinExchangeStats(AnyCoin("ETH"), ExchangeWallet("Quippo"), 1.0.bd, 0.01.bd),
+        CoinExchangeStats(AnyCoin("ADA"), ExchangeWallet("AdaLite"), 1000.0.bd, 0.5.bd),
     )
 
     fun onlineStubHoldings() = stubHoldings().map { it.realtimeStats(cryptoPrices.getValue(it.asset)) }

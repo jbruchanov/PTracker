@@ -26,6 +26,7 @@ data class OnlineHoldingStats(
     val costUnit = cost.safeDiv(balance)
     val costTotalUnit = cost.safeDiv(totalCryptoBalance)
     val marketValue = (actualCryptoBalance * marketPriceItem.price).setScale(4, RoundingMode.HALF_UP)
+    val totalMarketValue = (totalCryptoBalance * marketPriceItem.price).setScale(4, RoundingMode.HALF_UP)
     val marketValueUnitPrice = marketPriceItem.price
     val gain = marketValue - cost
     val roi = (marketValue.safeDiv(cost)).roi()

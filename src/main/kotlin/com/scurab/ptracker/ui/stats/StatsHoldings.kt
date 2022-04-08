@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.fiatCoins
 import com.scurab.ptracker.app.ext.firstIf
 import com.scurab.ptracker.app.ext.gf2
@@ -56,11 +57,13 @@ import com.scurab.ptracker.app.ext.imageOrNull
 import com.scurab.ptracker.app.ext.isNotLastIndex
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.isPositive
+import com.scurab.ptracker.app.ext.percf2
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.ext.totalCost
 import com.scurab.ptracker.app.ext.totalGains
 import com.scurab.ptracker.app.ext.totalMarketValue
 import com.scurab.ptracker.app.ext.totalRoi
+import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.compose.StateContainer
@@ -75,6 +78,7 @@ import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.ExpandableContent
 import com.scurab.ptracker.ui.common.HSpacer
 import com.scurab.ptracker.ui.common.HSpacer2
+import com.scurab.ptracker.ui.common.HSpacer4
 import com.scurab.ptracker.ui.common.WSpacer
 import com.scurab.ptracker.ui.common.WSpacer4
 import kotlinx.coroutines.delay
@@ -88,6 +92,11 @@ private object ColumnWidths {
     val Cost = 110.dp
     val MarketValue = 110.dp
     val ROI = 72.dp
+
+    val DetailColumnElementWidthMin = 100.dp
+    val DetailContentLabel = 200.dp
+    val DetailContentBalance = 110.dp
+    val ExchangePerc = 150.dp
 }
 
 @Composable
@@ -96,11 +105,14 @@ fun OnlineHoldingStats.costUnitFormatted() = buildAnnotatedString {
 }
 
 @Composable
+private fun Modifier.defaultTableRow() = Modifier.padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
+
+@Composable
 private fun HoldingRowHeader(hasMultipleFiatCoins: Boolean) {
     val texts = LocalTexts.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2).defaultMinSize(minHeight = 40.dp)
+        modifier = Modifier.defaultTableRow().defaultMinSize(minHeight = 40.dp)
     ) {
         val col1Width = ColumnWidths.Icon + ColumnWidths.IconCoinGap + ColumnWidths.Coin.default2If(hasMultipleFiatCoins).scaled()
         HoldingsText(texts.Asset, isMonoSpace = false, textAlign = TextAlign.Center, width = col1Width)
@@ -117,7 +129,7 @@ private fun HoldingRowHeader(hasMultipleFiatCoins: Boolean) {
 @Composable
 private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, holdings: SnapshotStateList<OnlineHoldingStats>) {
     Row(
-        verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
+        verticalAlignment = Alignment.CenterVertically, modifier = Modifier.defaultTableRow().defaultMinSize(minHeight = 40.dp)
     ) {
         CoinIcon(fiatCoin.icon().imageOrNull(), true, 1f)
         WSpacer(ColumnWidths.IconCoinGap)
@@ -236,7 +248,7 @@ private fun CoinIcon(image: ImageBitmap?, isColored: Boolean, scale: Float) {
 private fun HoldingsText(
     text: CharSequence,
     isMonoSpace: Boolean = true,
-    textAlign: TextAlign = TextAlign.Right,
+    textAlign: TextAlign = TextAlign.End,
     width: Dp = Dp.Unspecified,
     color: Color = Color.Unspecified,
     style: TextStyle? = null,
@@ -266,8 +278,13 @@ fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier =
             state.holdings.forEachIndexed { index, onlineHoldingStats ->
                 Column(modifier = Modifier.width(IntrinsicSize.Max)) {
                     val isItemSelected = state.isHoldingsSelected(onlineHoldingStats)
-                    HoldingsElement(
-                        onClick = { event.onHoldingsRowClicked(index, onlineHoldingStats) }, index, onlineHoldingStats, isItemSelected, hasFiatCoins
+                    HoldingsItemDetail(
+                        onClick = { event.onHoldingsRowClicked(index, onlineHoldingStats) },
+                        index = index,
+                        onlineHoldingStats = onlineHoldingStats,
+                        exchangeCoverage = state.coinSumPerExchange[onlineHoldingStats.asset.cryptoCoinOrNull()?.item ?: ""] ?: emptyList(),
+                        selected = isItemSelected,
+                        useWideCoinsColumn = hasFiatCoins
                     )
                 }
                 if (state.holdings.isNotLastIndex(index)) {
@@ -285,14 +302,110 @@ fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier =
 }
 
 @Composable
-private fun ColumnScope.HoldingsElement(onClick: () -> Unit, index: Int, onlineHoldingStats: OnlineHoldingStats, selected: Boolean, useWideCoinsColumn: Boolean) {
+private fun ColumnScope.HoldingsItemDetail(
+    onClick: () -> Unit,
+    index: Int,
+    onlineHoldingStats: OnlineHoldingStats,
+    exchangeCoverage: List<CoinExchangeStats>,
+    selected: Boolean,
+    useWideCoinsColumn: Boolean
+) {
     HoldingsRow(onClick = onClick, index, onlineHoldingStats, useWideCoinsColumn, isSelected = selected)
     ExpandableContent(visible = selected) {
-        Column {
-            repeat(3) {
-                Text("Test:$it")
+
+        Column(
+            modifier = Modifier
+                .border(AppSizes.current.ThickLine, AppColors.current.SecondaryVariant)
+                .padding(AppSizes.current.Space6)
+        ) {
+            ExchangeWalletDetail(exchangeCoverage)
+            HoldingsDetail(onlineHoldingStats)
+        }
+    }
+}
+
+@Composable
+private fun HoldingsDetail(onlineHoldingStats: OnlineHoldingStats) {
+    val texts = LocalTexts.current
+    HSpacer4()
+    Row(modifier = Modifier.fillMaxWidth()) {
+        val showFullCryptoBalance = onlineHoldingStats.actualCryptoBalance != onlineHoldingStats.totalCryptoBalance
+        val hasFreeIncome = onlineHoldingStats.freeIncome.isNotZero()
+        val hasNoProfitOutcome = onlineHoldingStats.nonProfitableOutcome.isNotZero()
+        if (showFullCryptoBalance || hasFreeIncome || hasNoProfitOutcome) {
+            Column(modifier = Modifier) {
+                val asset = onlineHoldingStats.asset
+                HoldingsText("", isMonoSpace = false)
+                HSpacer()
+                HoldingsText(asset.cryptoCoinOrNull()?.item ?: "", isMonoSpace = false, textAlign = TextAlign.Start)
+                HoldingsText(asset.fiatCoinOrNull()?.item ?: "", isMonoSpace = false, textAlign = TextAlign.Start)
+            }
+            WSpacer4()
+        }
+        if (showFullCryptoBalance) {
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
+                HoldingsText(texts.TotalBoughtOwned, isMonoSpace = false, textAlign = TextAlign.Start)
+                HSpacer()
+                HoldingsText(onlineHoldingStats.totalCryptoBalance.gf4, color = AppColors.current.Secondary)
+                HoldingsText(onlineHoldingStats.totalMarketValue.gf2)
+            }
+            WSpacer4()
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
+                HoldingsText(texts.TotalBoughtOwned, isMonoSpace = false, textAlign = TextAlign.Start)
+                HSpacer()
+                HoldingsText("1.0", color = AppColors.current.Secondary)
+                HoldingsText(onlineHoldingStats.costTotalUnit.gf4)
+            }
+            WSpacer4()
+        }
+        if (hasFreeIncome) {
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
+                HoldingsText(texts.FreeIncome, isMonoSpace = false, textAlign = TextAlign.Start)
+                HSpacer()
+                HoldingsText(onlineHoldingStats.freeIncome.gf2, color = AppColors.current.Green)
+                HoldingsText(onlineHoldingStats.freeIncomeMarketPrice.gf2, color = AppColors.current.Green)
+            }
+            WSpacer4()
+        }
+        if (hasNoProfitOutcome) {
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
+                HoldingsText(texts.NoProfitableOutcome, isMonoSpace = false, textAlign = TextAlign.Start)
+                HSpacer()
+                HoldingsText(onlineHoldingStats.nonProfitableOutcome.gf2, color = AppColors.current.Red)
+                HoldingsText(onlineHoldingStats.nonProfitableOutcomeMarketPrice.gf2, color = AppColors.current.Red)
             }
         }
+    }
+}
+
+@Composable
+private fun ExchangeWalletDetail(exchangeCoverage: List<CoinExchangeStats>) {
+    val texts = LocalTexts.current
+    if (exchangeCoverage.isNotEmpty()) {
+        Row(modifier = Modifier.padding(AppSizes.current.Space2)) {
+            HoldingsText(texts.ExchangeWallet, isMonoSpace = false, textAlign = TextAlign.Start, modifier = Modifier.width(ColumnWidths.DetailContentLabel))
+            WSpacer()
+            HoldingsText(texts.Balance, isMonoSpace = false, modifier = Modifier.width(ColumnWidths.DetailContentBalance))
+        }
+        Divider(color = AppColors.current.PrimaryVariant, thickness = AppSizes.current.ThickLine)
+        exchangeCoverage.forEachIndexed { index, stats ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AppColors.current.RowBackground.get(isEven = index % 2 == 0))
+                    .padding(AppSizes.current.Space2)
+            ) {
+                HoldingsText(stats.exchange.item, width = ColumnWidths.DetailContentLabel, textAlign = TextAlign.Start)
+                WSpacer()
+                HoldingsText(
+                    if (stats.quantity > 1.bd) stats.quantity.gf4 else stats.quantity.stripTrailingZeros().toPlainString(),
+                    width = ColumnWidths.DetailContentBalance
+                )
+                WSpacer()
+                HoldingsText(stats.perc.percf2, width = ColumnWidths.ExchangePerc)
+            }
+        }
+        Divider(color = AppColors.current.PrimaryVariant, thickness = AppSizes.current.ThinLine)
     }
 }
 

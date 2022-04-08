@@ -2,9 +2,9 @@ package com.scurab.ptracker.net
 
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Locations
-import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.app.usecase.LoadLedgerUseCase
+import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

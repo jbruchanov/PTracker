@@ -21,3 +21,5 @@ fun String.colored(color: Color) = AnnotatedString(
     text = this,
     spanStyle = SpanStyle(color = color)
 )
+
+fun String.toAnnotedString() = AnnotatedString(this)

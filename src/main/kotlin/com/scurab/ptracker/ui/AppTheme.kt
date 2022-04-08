@@ -169,6 +169,7 @@ object AppTheme {
 
     object TextRendering {
         val small = 12.sp
+        val xlarge = 24.sp
         val font = Font(Typeface.makeFromName("monospace", FontStyle.NORMAL))
         val fontAxis = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
         val fontLabels = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))

@@ -116,9 +116,7 @@ private fun RowScope.StatsPieChart(state: StatsUiState) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.Center).width(intrinsicSize = IntrinsicSize.Max)
         ) {
-            Text("x%", color = AppColors.current.PrimaryVariant)
-            Divider(color = AppColors.current.Primary, thickness = AppSizes.current.ThickLine)
-            Text("x10%", color = AppColors.current.PrimaryVariant)
+            Text("%", color = AppColors.current.PrimaryVariant, fontSize = AppTheme.TextRendering.xlarge)
         }
     }
     WSpacer4()

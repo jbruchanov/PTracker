@@ -14,7 +14,9 @@ interface ValueWithLocalIcon<T> : ValueContainer<T> {
 data class CoinCalculation<T>(val key: T, val value: BigDecimal)
 
 @JvmInline
-value class AnyCoin(override val item: String) : ValueContainer<String>, ValueWithLocalIcon<String>
+value class AnyCoin(override val item: String) : ValueContainer<String>, ValueWithLocalIcon<String> {
+    fun isFiat() = FiatCurrencies.contains(item)
+}
 
 @JvmInline
 value class FiatCoin(override val item: String) : ValueContainer<String>, ValueWithLocalIcon<String>

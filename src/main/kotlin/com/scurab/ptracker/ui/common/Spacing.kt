@@ -29,6 +29,9 @@ fun HSpacer05(modifier: Modifier = Modifier) = HSpacer(AppSizes.current.Space05,
 fun HSpacer2(modifier: Modifier = Modifier) = HSpacer(AppSizes.current.Space2, modifier)
 
 @Composable
+fun HSpacer4(modifier: Modifier = Modifier) = HSpacer(AppSizes.current.Space4, modifier)
+
+@Composable
 fun RowScope.FSpacer(weight: Float = 1f, modifier: Modifier = Modifier) = Spacer(modifier = modifier.weight(weight))
 
 @Composable

@@ -31,7 +31,7 @@ val BigDecimal.f6 get() = f(6)
 val BigDecimal.f4: String get() = f(4)
 val BigDecimal.gf4: String get() = gf(4)
 val BigDecimal.f2 get() = f(2)
-val BigDecimal.percf2 get() = (this * 100.bd).f(2)
+val BigDecimal.percf2 get() = (this * 100.bd).f(2) + "%"
 val BigDecimal.gf2 get() = gf(2)
 fun BigDecimal.f(digits: Int): String = BigDecimalFormats.formats[digits].value.format(this)
 fun BigDecimal.gf(digits: Int): String = BigDecimalFormats.groupingFormats[digits].value.format(this)
@@ -67,5 +67,6 @@ object BigDecimalFormats {
             }
         }
     }
+    val justGrouping get() = groupingFormats[8].value
 }
 

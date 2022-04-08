@@ -1,7 +1,6 @@
 package com.scurab.ptracker.app.model
 
 import com.scurab.ptracker.app.ext.bd
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class CoinPriceTest {
