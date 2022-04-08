@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.WbCloudy
@@ -200,10 +201,7 @@ object AppTheme {
         val BackgroundAxis = Color(0xFF202020).copy(alpha = 0.75f)
         val BackgroundPriceBubble = Color(0xFF404040)
         val MouseCross = Color.White
-        val CandleRed = Colors.Red
-        val CandleGreen = Colors.Green
         val Candle = Colors.RedGreen
-        val CandleTransaction = Colors.Primary
     }
 
     object DashboardSizes {
@@ -245,6 +243,8 @@ object AppTheme {
             Transaction._TypeCryptoWithdrawal to IconColor(92, Icons.Default.ArrowUpward, ColorRed, Offset(0f, -4f)),
             Transaction._TypeTradeIn to IconColor(98, Icons.Default.TriangleDown, ColorGreen, Offset(0f, 4f), candleScale = IconColor.CandleScaleTrade),
             Transaction._TypeTradeOut to IconColor(99, Icons.Default.TriangleUp, ColorRed, Offset(0f, -4f), candleScale = IconColor.CandleScaleTrade),
+            Transaction._TypeCryptoExchange to IconColor(81, Icons.Default.SwapHoriz, ColorGreen, Offset(0f, 0f)),
+            Transaction._TypeFiatExchange to IconColor(88, Icons.Default.SwapHoriz, ColorWhite, Offset(0f, 0f)),
         )
     }
 

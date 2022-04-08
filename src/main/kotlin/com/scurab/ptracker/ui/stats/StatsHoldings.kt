@@ -129,7 +129,7 @@ private fun HoldingRowFooter(fiatCoin: FiatCoin, hasMultipleFiats: Boolean, hold
         WSpacer4()
         val totalRoi = holdings.totalRoi(fiatCoin)
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
-            val color = AppTheme.DashboardColors.Candle.get(isEven = totalRoi.isPositive)
+            val color = AppTheme.Colors.RedGreen.default2If(totalRoi.isPositive)
             HoldingsText(
                 (totalRoi.gf2 + "%"), color = color, textAlign = TextAlign.Right, width = ColumnWidths.ROI.scaled()
             )
@@ -180,7 +180,7 @@ private fun HoldingsRow(onClick: () -> Unit, index: Int, holdings: OnlineHolding
         HoldingsText(holdings.marketValue.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.MarketValue.scaled())
         WSpacer4()
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
-            val color = AppTheme.DashboardColors.Candle.get(isEven = holdings.roi.isPositive)
+            val color = AppTheme.Colors.RedGreen.default2If(holdings.roi.isPositive)
             HoldingsText(holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.gf2?.let { "$it%" } ?: "", color = color, textAlign = TextAlign.Right)
             HSpacer()
             HoldingsText(

@@ -97,11 +97,13 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
 
     fun hasCoin(coin: String) = (this is HasIncome && this.buyAsset == coin) || (this is HasOutcome && this.sellAsset == coin)
 
-    val isCryptoBuy by lazy { (this as? Trade)?.let { !FiatCurrencies.contains(buyAsset) && FiatCurrencies.contains(sellAsset) } ?: false }
-    val isCryptoSell by lazy { (this as? Trade)?.let { FiatCurrencies.contains(buyAsset) && !FiatCurrencies.contains(sellAsset) } ?: false }
+    val isCryptoBuy by lazy { this is Trade && !FiatCurrencies.contains(buyAsset) && FiatCurrencies.contains(sellAsset) }
+    val isCryptoSell by lazy { this is Trade && FiatCurrencies.contains(buyAsset) && !FiatCurrencies.contains(sellAsset) }
     val isCryptoTrade by lazy { isCryptoBuy || isCryptoSell }
-    val isCryptoDeposit by lazy { (this as? HasIncome)?.let { type == TypeDeposit && !FiatCurrencies.contains(it.buyAsset) } ?: false }
-    val isCryptoWithdrawal by lazy { (this as? HasOutcome)?.let { type == TypeWithdrawal && !FiatCurrencies.contains(it.sellAsset) } ?: false }
+    val isCryptoDeposit by lazy { this is HasIncome && type == TypeDeposit && !FiatCurrencies.contains(buyAsset) }
+    val isCryptoWithdrawal by lazy { this is HasOutcome && type == TypeWithdrawal && !FiatCurrencies.contains(sellAsset) }
+    val isCryptoExchange by lazy { this is Trade && !FiatCurrencies.contains(buyAsset) && !FiatCurrencies.contains(sellAsset) }
+    val isFiatExchange by lazy { this is Trade && FiatCurrencies.contains(buyAsset) && FiatCurrencies.contains(sellAsset) }
 
     fun unitPrice(): BigDecimal? {
         if (this !is Trade) return null
@@ -158,6 +160,8 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         val _TypeTradeOut = "TradeOut"
         val _TypeCryptoDeposit = "CryptoDeposit"
         val _TypeCryptoWithdrawal = "CryptoWithdrawal"
+        val _TypeCryptoExchange = "CryptoExchange"
+        val _TypeFiatExchange = "FiatExchange"
 
         private val UnImportantType = setOf(
             TypeDeposit, TypeWithdrawal
