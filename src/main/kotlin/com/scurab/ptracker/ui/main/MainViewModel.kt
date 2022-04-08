@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 interface MainEventHandler {
-    fun onOpenPriceDashboardClick()
-    fun onOpenSettingsClick()
-    fun onOpenStatsClick()
+    fun onOpenPriceDashboardClicked()
+    fun onOpenSettingsClicked()
+    fun onOpenStatsClicked()
     fun onKeyPressed(key: Key): Boolean
     fun onLedgerClicked(path: String)
     fun onOpenFileClicked()
@@ -46,17 +46,19 @@ class MainViewModel(
         uiState.activeLedger = appSettings.latestLedger
     }
 
-    override fun onOpenSettingsClick() {
-        navController.popToTop()
-        navController.push(AppNavTokens.Settings)
+    override fun onOpenSettingsClicked() = with(navController) {
+        if (activeScreenNavToken == AppNavTokens.Settings) return@with
+        popToTop()
+        push(AppNavTokens.Settings)
     }
 
-    override fun onOpenStatsClick() {
-        navController.popToTop()
-        navController.push(AppNavTokens.Stats)
+    override fun onOpenStatsClicked() = with(navController) {
+        if (activeScreenNavToken == AppNavTokens.Stats) return@with
+        popToTop()
+        push(AppNavTokens.Stats)
     }
 
-    override fun onOpenPriceDashboardClick() {
+    override fun onOpenPriceDashboardClicked() {
         navController.popTo(AppNavTokens.PriceDashboard)
     }
 

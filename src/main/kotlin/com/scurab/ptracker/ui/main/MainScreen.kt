@@ -108,9 +108,9 @@ private fun ColumnScope.Menu(navToken: NavToken<*>, uiState: MainUiState, eventH
     val ledgers = uiState.ledgers
     val buttons = remember {
         listOf(
-            LeftMenuButton(Icons.Default.WaterfallChart, AppNavTokens.PriceDashboard, eventHandler::onOpenPriceDashboardClick),
-            LeftMenuButton(Icons.Default.DataUsage, AppNavTokens.Stats, eventHandler::onOpenStatsClick),
-            LeftMenuButton(Icons.Default.Settings, AppNavTokens.Settings, eventHandler::onOpenSettingsClick),
+            LeftMenuButton(Icons.Default.WaterfallChart, AppNavTokens.PriceDashboard, eventHandler::onOpenPriceDashboardClicked),
+            LeftMenuButton(Icons.Default.DataUsage, AppNavTokens.Stats, eventHandler::onOpenStatsClicked),
+            LeftMenuButton(Icons.Default.Settings, AppNavTokens.Settings, eventHandler::onOpenSettingsClicked),
         )
     }
     buttons.forEach { (icon, token, handler) ->
