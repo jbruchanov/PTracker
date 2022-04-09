@@ -52,7 +52,7 @@ class StatsCalculatorUseCase(
         }
         val feesPerCoin = allCoins.associateWith { coin -> data.sumOf { transaction -> transaction.getFees(coin) } }
         val assetsByExchange = exchanges
-            .mapNotNull { exchange -> exchange.normalizedExchange()?.let { normalized -> exchange to normalized } }
+            .mapNotNull { exchange -> exchange to exchange.normalizedExchange() }
             .associateBy(
                 keySelector = { ExchangeWallet(it.second) },
                 valueTransform = { (exchange, normalized) ->
@@ -109,19 +109,18 @@ class StatsCalculatorUseCase(
                 .groupBy { it.exchange }
                 .mapValues { (_, transactions) -> transactions.sumOf { transaction -> transaction.getAmount(coin) } }
                 .filter { it.value.isNotZero() }
-                .map { (exchange, sum) -> CoinExchangeStats(AnyCoin(coin), ExchangeWallet(exchange), sum, sum.safeDiv(sumOfCoins.getValue(coin))) }
+                .map { (exchange, sum) -> CoinExchangeStats(AnyCoin(coin), ExchangeWallet(exchange.normalizedExchange()), sum, sum.safeDiv(sumOfCoins.getValue(coin))) }
         }
 
         return LedgerStats(tradingAssets.toList(), assetsByExchange, feesPerCoin, cryptoHoldings, coinSumPerExchange, exchangeSumOfCoins, transactionsPerAssetPerType)
     }
 
-    private fun String.normalizedExchange(): String? {
+    private fun String.normalizedExchange(): String {
         return when {
             contains("kraken", ignoreCase = true) -> "Kraken"
-            contains("coinbase", ignoreCase = true) -> "Coinbase"
             contains("binance", ignoreCase = true) -> "Binance"
-            contains("trezor", ignoreCase = true) -> null
-            else -> null
+            contains("trezor", ignoreCase = true) -> "Trezor"
+            else -> this
         }
     }
 }
