@@ -104,7 +104,8 @@ class StatsCalculatorUseCase(
             }
 
         val coinSumPerExchange = allCoins.associateWith { coin ->
-            data.filter { it.asset.has(coin) }
+            //!!Original items must be used!!!, otherwise converted values would screw the real amounts
+            ledger.items.filter { it.asset.has(coin) }
                 .groupBy { it.exchange }
                 .mapValues { (_, transactions) -> transactions.sumOf { transaction -> transaction.getAmount(coin) } }
                 .filter { it.value.isNotZero() }

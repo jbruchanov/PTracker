@@ -95,7 +95,7 @@ fun Transaction.convertTradePrice(prices: Map<Asset, MarketPrice>, targetFiatCur
             } else feeAsset to feeQuantity
             copy(
                 sellAsset = price.asset.coin1, sellQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
-            )
+            ).also { it.originalTransaction = this }
         }
         buyAsset == price.asset.coin2 -> {
             val init = CoinPrice(Asset(sellAsset, buyAsset), buyQuantity)
@@ -105,7 +105,7 @@ fun Transaction.convertTradePrice(prices: Map<Asset, MarketPrice>, targetFiatCur
             } else feeAsset to feeQuantity
             copy(
                 buyAsset = price.asset.coin1, buyQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
-            )
+            ).also { it.originalTransaction = this }
         }
         else -> throw UnsupportedOperationException("Unhandled case:$this, price:$price")
     }

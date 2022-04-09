@@ -31,6 +31,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     abstract val assets: Set<String>
 
     var priceItem: PriceItem? by cache
+    var originalTransaction: Transaction? = null
 
     data class Income(
         override val exchange: String,
