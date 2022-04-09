@@ -26,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.event.KeyEvent
@@ -63,7 +64,7 @@ class PriceBoardViewModel(
     val uiState = PriceBoardUiState(appStateRepository.density.value, grouping, appSettings.debug)
 
     //state for merging, 2 different datasources for 1 output
-    private val ledger = appStateRepository.ledger
+    private val ledger = appStateRepository.appData.map { it.ledger }
     private val prices = MutableStateFlow(Asset.Empty to emptyList<PriceItem>())
 
     private var data = PriceBoardDataProcessingUseCase.RawData(Ledger.Empty, Asset.Empty, emptyList())

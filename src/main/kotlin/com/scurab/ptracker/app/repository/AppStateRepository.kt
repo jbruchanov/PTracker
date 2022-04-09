@@ -4,7 +4,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.Asset
-import com.scurab.ptracker.app.model.Ledger
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class AppStateRepository(private val appSettings: AppSettings) {
 
-    private var appData: AppData? = null
+    private val _appData = MutableStateFlow(AppData.Empty)
+    var appData = _appData.asStateFlow()
 
     private val _selectedAsset = MutableStateFlow(Asset.Empty)
     val selectedAsset = _selectedAsset.asStateFlow()
@@ -24,9 +24,6 @@ class AppStateRepository(private val appSettings: AppSettings) {
     private val _density = MutableStateFlow(Density(1f, appSettings.fontScale))
     val density = _density.asStateFlow()
 
-    private val _ledger = MutableStateFlow(Ledger.Empty)
-    val ledger = _ledger.asStateFlow()
-
     fun setSelectedAsset(value: Asset) {
         _selectedAsset.tryEmit(value)
         appSettings.lastSelectedAsset = value
@@ -36,18 +33,13 @@ class AppStateRepository(private val appSettings: AppSettings) {
         _latestKeyPress.tryEmit(key)
     }
 
-    fun setLedger(ledger: Ledger) {
-        _ledger.tryEmit(ledger)
-    }
-
     fun setDensity(value: Float) {
         val d = _density.value
         _density.tryEmit(Density(d.density, value))
     }
 
     fun setAppData(appData: AppData) {
-        this.appData = appData
-        _ledger.tryEmit(appData.ledger)
+        _appData.tryEmit(appData)
         appSettings.lastSelectedAsset
             ?.takeIf { appData.ledger.assetsTradings.contains(it) }
             ?.let {

@@ -4,18 +4,15 @@ import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.pieChartData2
+import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.FiatCoin
-import com.scurab.ptracker.app.model.Filter
-import com.scurab.ptracker.app.model.Ledger
-import com.scurab.ptracker.app.model.LedgerStats
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
-import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.ui.stats.StatsUiState.Companion.MarketPercentageGroupingThreshold
 import kotlinx.coroutines.Dispatchers
@@ -26,12 +23,10 @@ import kotlinx.coroutines.withContext
 class StatsViewModel(
     private val appSettings: AppSettings,
     private val appStateRepository: AppStateRepository,
-    private val statsCalculatorUseCase: StatsCalculatorUseCase,
     private val pricesRepository: PricesRepository
 ) : ViewModel(), StatsEventHandler {
 
-    private var latestLedger: Ledger? = null
-    private var ledgerStats = LedgerStats.Empty
+    private var latestData = AppData.Empty
     private var prices = mutableMapOf<Asset, MarketPrice>()
     val uiState = StatsUiState().also {
         it.primaryCoin = appSettings.primaryCoin
@@ -39,10 +34,10 @@ class StatsViewModel(
 
     init {
         launch {
-            appStateRepository.ledger
-                .filter { it != Ledger.Empty }
-                .collect { ledger ->
-                    onNewLedgerSelected(ledger)
+            appStateRepository.appData
+                .filter { it != AppData.Empty }
+                .collect { data ->
+                    onNewDataSelected(data)
                 }
         }
 
@@ -61,22 +56,21 @@ class StatsViewModel(
         uiState.selectedHoldingsAsset = Asset("", fiatCoin.item).takeIf { uiState.selectedHoldingsAsset != it }
     }
 
-    private suspend fun onNewLedgerSelected(ledger: Ledger) {
-        latestLedger = ledger
-        val actualPrices = pricesRepository.getPrices(ledger.assetsForPrices)
-        prices.putAll(actualPrices.associateBy { it.asset })
-        ledgerStats = statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions, actualPrices)
-        recalcData(ledgerStats, prices, null)
+    private suspend fun onNewDataSelected(data: AppData) {
+        latestData = data
+        prices.putAll(data.prices)
+        recalcData(data, prices, null)
     }
 
     private suspend fun onMarketPrice(marketPrice: MarketPrice) {
         prices[marketPrice.asset] = marketPrice
-        recalcData(ledgerStats, prices, marketPrice)
+        recalcData(latestData, prices, marketPrice)
     }
 
-    private suspend fun recalcData(ledgerStats: LedgerStats, prices: Map<Asset, MarketPrice>, tick: MarketPrice?) {
-        val onlineHoldingStats = ledgerStats.cryptoHoldings
-            .map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, prices[asset] ?: CoinPrice(asset, 0.bd)) }
+    private suspend fun recalcData(data: AppData, latestPrices: Map<Asset, MarketPrice>, tick: MarketPrice?) {
+        val ledger = data.ledgerStats
+        val onlineHoldingStats = ledger.cryptoHoldings
+            .map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, latestPrices[asset] ?: CoinPrice(asset, 0.bd)) }
             .sortedBy { it.asset }
 
         val marketPercentage = onlineHoldingStats.coloredMarketPercentage()
@@ -84,7 +78,7 @@ class StatsViewModel(
         //synchronization against the market ticker, sometimes it added a value
         withContext(Dispatchers.Main) {
             if (tick != null) {
-                ledgerStats.cryptoHoldings[tick.asset]?.let { holdings ->
+                ledger.cryptoHoldings[tick.asset]?.let { holdings ->
                     val indexOfFirst = uiState.cryptoHoldings.indexOfFirst { it.asset == tick.asset }
                     //missing asset might happen in case of changing ledgers
                     if (indexOfFirst != -1) {
@@ -97,8 +91,8 @@ class StatsViewModel(
             }
             uiState.marketPercentage = marketPercentage
             uiState.pieChartData = pieChartData
-            uiState.coinSumPerExchange = ledgerStats.coinSumPerExchange
-            uiState.feesPerCoin.putAll(ledgerStats.feesPerCoin)
+            uiState.coinSumPerExchange = ledger.coinSumPerExchange
+            uiState.feesPerCoin.putAll(ledger.feesPerCoin)
         }
     }
 }

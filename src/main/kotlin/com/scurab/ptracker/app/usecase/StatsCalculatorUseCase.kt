@@ -6,6 +6,7 @@ import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.safeDiv
 import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.model.AnyCoin
+import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinCalculation
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.CryptoCoin
@@ -30,14 +31,13 @@ class StatsCalculatorUseCase(
     fun calculateStats(
         ledger: Ledger,
         filter: Filter<Transaction>,
-        prices: List<MarketPrice> = emptyList(),
+        prices: Map<Asset, MarketPrice> = emptyMap(),
         primaryCurrency: String? = appSettings.primaryCoin
     ): LedgerStats {
         //predata
-        val pricesMap = prices.associateBy { it.asset }
         val data = ledger.items.filter(filter).let { data ->
             if (primaryCurrency == null) data else data.map { transaction ->
-                transaction.convertTradePrice(pricesMap, primaryCurrency)
+                transaction.convertTradePrice(prices, primaryCurrency)
             }
         }
         val allCoins = data.map { it.assets }.flatten().toSet()
@@ -78,14 +78,14 @@ class StatsCalculatorUseCase(
         val cryptoHoldings = tradingAssets
             .filter { it.hasCryptoCoin }
             .associateWith { asset ->
-            CryptoHoldings(
-                asset,
-                actualOwnership.getValue(asset).value,
-                tradedAmount.getValue(asset).value,
-                spentFiatByCrypto.getValue(asset).value.abs(),
-                feesPerCoin[asset.cryptoCoinOrNull()?.item] ?: ZERO
-            )
-        }
+                CryptoHoldings(
+                    asset,
+                    actualOwnership.getValue(asset).value,
+                    tradedAmount.getValue(asset).value,
+                    spentFiatByCrypto.getValue(asset).value.abs(),
+                    feesPerCoin[asset.cryptoCoinOrNull()?.item] ?: ZERO
+                )
+            }
 
         val exchangeSumOfCoins = transactionsByExchange
             .mapNotNull { (exchange, transactions) ->
