@@ -371,7 +371,7 @@ private fun HoldingsDetail(onlineHoldingStats: OnlineHoldingStats) {
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 HoldingsText(texts.NoProfitableOutcome, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                HoldingsText(onlineHoldingStats.nonProfitableOutcome.gf2, color = AppColors.current.Red)
+                HoldingsText(onlineHoldingStats.nonProfitableOutcome.gf4, color = AppColors.current.Red)
                 HoldingsText(onlineHoldingStats.nonProfitableOutcomeMarketPrice.gf2, color = AppColors.current.Red)
             }
         }
@@ -399,7 +399,8 @@ private fun ExchangeWalletDetail(exchangeCoverage: List<CoinExchangeStats>) {
                 WSpacer()
                 HoldingsText(
                     if (stats.quantity > 1.bd) stats.quantity.gf4 else stats.quantity.stripTrailingZeros().toPlainString(),
-                    width = ColumnWidths.DetailContentBalance
+                    width = ColumnWidths.DetailContentBalance,
+                    color = if (stats.coin.isFiat()) AppColors.current.OnBackground else AppColors.current.Secondary
                 )
                 WSpacer()
                 HoldingsText(stats.perc.percf2, width = ColumnWidths.ExchangePerc)
