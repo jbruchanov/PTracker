@@ -107,6 +107,7 @@ object AppTheme {
             default2 = Primary.copy(alpha = 0.15f),
             selected = Secondary.copy(alpha = .15f).compositeOver(Primary.copy(alpha = 0.1f))
         )
+        val FooterBackground = RowBackground.copy(default = Color.Transparent, default2 = Color.Transparent)
         val Red = Color(0xFFEF5350)
         val Green = Color(0xFF26A69A)
         val RedGreen = StateContainer(Red, default2 = Green)
