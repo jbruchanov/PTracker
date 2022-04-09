@@ -30,13 +30,14 @@ value class ExchangeWallet(override val item: String) : ValueContainer<String>
 class LedgerStats(
     val assets: List<Asset>,
     val assetsByExchange: Map<ExchangeWallet, List<Asset>>,
-    val holdinds: Map<Asset, Holdings>,
+    val feesPerCoin: Map<String, BigDecimal>,
+    val cryptoHoldings: Map<Asset, CryptoHoldings>,
     val coinSumPerExchange: Map<String, List<CoinExchangeStats>>,
     val exchangeSumOfCoins: Map<ExchangeWallet, List<CoinCalculation<AnyCoin>>>,
     val transactionsPerAssetPerType: List<Pair<String, List<Pair<Asset, Pair<BigDecimal, BigDecimal>>>>>
 ) {
     companion object {
-        val Empty = LedgerStats(emptyList(), emptyMap(), emptyMap(), emptyMap(), emptyMap(), emptyList())
+        val Empty = LedgerStats(emptyList(), emptyMap(), emptyMap(), emptyMap(), emptyMap(), emptyMap(), emptyList())
     }
 }
 

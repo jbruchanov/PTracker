@@ -6,6 +6,7 @@ import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.pieChartData2
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
+import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.LedgerStats
@@ -56,6 +57,10 @@ class StatsViewModel(
         uiState.selectedHoldingsAsset = onlineHoldingStats.asset.takeIf { uiState.selectedHoldingsAsset != onlineHoldingStats.asset }
     }
 
+    override fun onFiatRowClicked(fiatCoin: FiatCoin) {
+        uiState.selectedHoldingsAsset = Asset("", fiatCoin.item).takeIf { uiState.selectedHoldingsAsset != it }
+    }
+
     private suspend fun onNewLedgerSelected(ledger: Ledger) {
         latestLedger = ledger
         val actualPrices = pricesRepository.getPrices(ledger.assets)
@@ -70,7 +75,7 @@ class StatsViewModel(
     }
 
     private suspend fun recalcData(ledgerStats: LedgerStats, prices: Map<Asset, MarketPrice>, tick: MarketPrice?) {
-        val onlineHoldingStats = ledgerStats.holdinds
+        val onlineHoldingStats = ledgerStats.cryptoHoldings
             .map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, prices[asset] ?: CoinPrice(asset, 0.bd)) }
             .sortedBy { it.asset }
 
@@ -79,20 +84,21 @@ class StatsViewModel(
         //synchronization against the market ticker, sometimes it added a value
         withContext(Dispatchers.Main) {
             if (tick != null) {
-                ledgerStats.holdinds[tick.asset]?.let { holdings ->
-                    val indexOfFirst = uiState.holdings.indexOfFirst { it.asset == tick.asset }
+                ledgerStats.cryptoHoldings[tick.asset]?.let { holdings ->
+                    val indexOfFirst = uiState.cryptoHoldings.indexOfFirst { it.asset == tick.asset }
                     //missing asset might happen in case of changing ledgers
                     if (indexOfFirst != -1) {
-                        uiState.holdings[indexOfFirst] = holdings.realtimeStats(tick)
+                        uiState.cryptoHoldings[indexOfFirst] = holdings.realtimeStats(tick)
                     }
                 }
             } else {
-                uiState.holdings.clear()
-                uiState.holdings.addAll(onlineHoldingStats)
+                uiState.cryptoHoldings.clear()
+                uiState.cryptoHoldings.addAll(onlineHoldingStats)
             }
             uiState.marketPercentage = marketPercentage
             uiState.pieChartData = pieChartData
             uiState.coinSumPerExchange = ledgerStats.coinSumPerExchange
+            uiState.feesPerCoin.putAll(ledgerStats.feesPerCoin)
         }
     }
 }

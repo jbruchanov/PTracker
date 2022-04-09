@@ -23,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,7 @@ import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinExchangeStats
+import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.model.MarketPercentage
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.util.mock
@@ -53,15 +55,17 @@ import com.scurab.ptracker.ui.common.WSpacer2
 import com.scurab.ptracker.ui.common.WSpacer4
 import com.scurab.ptracker.ui.stats.StatsUiState.Companion.MarketPercentageGroupingThreshold
 import stub.StubData
+import java.math.BigDecimal
 
 class StatsUiState() {
     var isLoading by mutableStateOf(false)
-    var holdings = mutableStateListOf<OnlineHoldingStats>()
+    var cryptoHoldings = mutableStateListOf<OnlineHoldingStats>()
     var marketPercentage by mutableStateOf<List<MarketPercentage>>(emptyList())
     var pieChartData by mutableStateOf<List<PieChartSegment>>(emptyList())
     var selectedHoldingsAsset by mutableStateOf<Asset?>(null)
     var primaryCoin by mutableStateOf<String?>(null)
     var coinSumPerExchange by mutableStateOf<Map<String, List<CoinExchangeStats>>>(emptyMap())
+    var feesPerCoin = mutableStateMapOf<String, BigDecimal>()
 
     fun isHoldingsSelected(onlineHoldingStats: OnlineHoldingStats) = onlineHoldingStats.asset == selectedHoldingsAsset
 
@@ -74,6 +78,7 @@ class StatsUiState() {
 
 interface StatsEventHandler {
     fun onHoldingsRowClicked(index: Int, onlineHoldingStats: OnlineHoldingStats)
+    fun onFiatRowClicked(fiatCoin: FiatCoin)
 }
 
 @Composable
@@ -159,7 +164,7 @@ private fun RowScope.StatsPieChart(state: StatsUiState) {
 private fun PreviewStatsScreen() {
     AppTheme {
         val uiState = StatsUiState().apply {
-            this.holdings.addAll(StubData.onlineStubHoldings())
+            this.cryptoHoldings.addAll(StubData.onlineStubHoldings())
             this.marketPercentage = StubData.onlineStubHoldings().coloredMarketPercentage(0f)
             this.pieChartData = this.marketPercentage.pieChartData(0f)
         }

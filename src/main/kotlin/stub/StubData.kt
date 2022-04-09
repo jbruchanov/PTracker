@@ -8,7 +8,7 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.ExchangeWallet
-import com.scurab.ptracker.app.model.Holdings
+import com.scurab.ptracker.app.model.CryptoHoldings
 import com.scurab.ptracker.ui.common.PieChartSegment
 
 object StubData {
@@ -27,9 +27,9 @@ object StubData {
     val cryptoPrices = listOf(PriceBTCGBP, PriceETHGBP, PriceETHUSD, PriceLTCGBP).associateBy { it.asset }
 
     fun stubHoldings() = listOf(
-        Holdings(AssetBTCGBP, 0.4.bd, 0.5.bd, 10000.bd),
-        Holdings(AssetETHGBP, 3.bd, 3.bd, 10000.bd),
-        Holdings(AssetLTCBGP, 40.5.bd, 40.5.bd, 4000.bd),
+        CryptoHoldings(AssetBTCGBP, 0.4.bd, 0.5.bd, 10000.bd, 0.001.bd),
+        CryptoHoldings(AssetETHGBP, 3.bd, 3.bd, 10000.bd, 0.02.bd),
+        CryptoHoldings(AssetLTCBGP, 40.5.bd, 40.5.bd, 4000.bd, 0.bd),
     )
 
     fun coinExchangeStats() = listOf(

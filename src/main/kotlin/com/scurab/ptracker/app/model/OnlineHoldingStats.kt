@@ -9,7 +9,7 @@ import java.math.RoundingMode
 
 data class OnlineHoldingStats(
     val timeDate: LocalDateTime,
-    private val holdings: Holdings,
+    private val holdings: CryptoHoldings,
     private val marketPriceItem: MarketPrice
 ) {
     val asset get() = marketPriceItem.asset
@@ -20,8 +20,8 @@ data class OnlineHoldingStats(
     val actualPricePerUnit: BigDecimal get() = holdings.actualPricePerUnit
     val freeIncome: BigDecimal get() = holdings.freeIncome
     val freeIncomeMarketPrice: BigDecimal get() = holdings.freeIncome * marketPriceItem.price
-    val nonProfitableOutcome: BigDecimal get() = holdings.nonProfitableOutcome
-    val nonProfitableOutcomeMarketPrice: BigDecimal get() = holdings.nonProfitableOutcome * marketPriceItem.price
+    val nonProfitableOutcome: BigDecimal get() = -holdings.nonProfitableOutcome
+    val nonProfitableOutcomeMarketPrice: BigDecimal get() = nonProfitableOutcome * marketPriceItem.price
     val balance get() = holdings.actualCryptoBalance
     val costUnit = cost.safeDiv(balance)
     val costTotalUnit = cost.safeDiv(totalCryptoBalance)
@@ -30,6 +30,8 @@ data class OnlineHoldingStats(
     val marketValueUnitPrice = marketPriceItem.price
     val gain = marketValue - cost
     val roi = (marketValue.safeDiv(cost)).roi()
+    val feesCrypto = -holdings.feesCrypto
+    val feesCryptoMarketValue = feesCrypto * marketValueUnitPrice
 
     fun marketValue(fiatCoin: FiatCoin?) = marketValue.takeIf { fiatCoin == null || asset.has(fiatCoin.item) } ?: ZERO
     fun gain(fiatCoin: FiatCoin?) = gain.takeIf { fiatCoin == null || asset.has(fiatCoin.item) } ?: ZERO

@@ -14,7 +14,7 @@ import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.HasIncome
 import com.scurab.ptracker.app.model.HasOutcome
-import com.scurab.ptracker.app.model.Holdings
+import com.scurab.ptracker.app.model.CryptoHoldings
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.LedgerStats
 import com.scurab.ptracker.app.model.MarketPrice
@@ -49,6 +49,7 @@ class StatsCalculatorUseCase(
         val sumOfCoins = allCoins.associateWith { coin ->
             data.filter { it.asset.has(coin) }.map { it.getAmount(coin) }.sumOf { it }
         }
+        val feesPerCoin = allCoins.associateWith { coin -> data.sumOf { transaction -> transaction.getFees(coin) } }
         val assetsByExchange = exchanges
             .mapNotNull { exchange -> exchange.normalizedExchange()?.let { normalized -> exchange to normalized } }
             .associateBy(
@@ -73,12 +74,13 @@ class StatsCalculatorUseCase(
         val spentFiatByCrypto = cryptoTradingAssets.associateWith { asset ->
             CoinCalculation(CryptoCoin(asset.coin1), data.filter { it.hasAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })
         }
-        val holdings = cryptoTradingAssets.associateWith { asset ->
-            Holdings(
+        val cryptoHoldings = cryptoTradingAssets.associateWith { asset ->
+            CryptoHoldings(
                 asset,
                 actualOwnership.getValue(asset).value,
                 tradedAmount.getValue(asset).value,
-                spentFiatByCrypto.getValue(asset).value.abs()
+                spentFiatByCrypto.getValue(asset).value.abs(),
+                feesPerCoin[asset.cryptoCoinOrNull()?.item] ?: ZERO
             )
         }
 
@@ -106,7 +108,7 @@ class StatsCalculatorUseCase(
                 .map { (exchange, sum) -> CoinExchangeStats(AnyCoin(coin), ExchangeWallet(exchange), sum, sum.safeDiv(sumOfCoins.getValue(coin))) }
         }
 
-        return LedgerStats(cryptoTradingAssets.toList(), assetsByExchange, holdings, coinSumPerExchange, exchangeSumOfCoins, transactionsPerAssetPerType)
+        return LedgerStats(cryptoTradingAssets.toList(), assetsByExchange, feesPerCoin, cryptoHoldings, coinSumPerExchange, exchangeSumOfCoins, transactionsPerAssetPerType)
     }
 
     private fun String.normalizedExchange(): String? {
@@ -128,3 +130,5 @@ fun Transaction.getAmount(asset: String): BigDecimal {
         else -> ZERO
     }
 }
+
+fun Transaction.getFees(asset: String): BigDecimal = if (feeAsset == asset) -feeQuantity else ZERO

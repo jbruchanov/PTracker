@@ -6,11 +6,12 @@ import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.safeDiv
 import java.math.BigDecimal
 
-data class Holdings(
+data class CryptoHoldings(
     val asset: Asset,
     val actualCryptoBalance: BigDecimal,
     val totalCryptoBalance: BigDecimal,
-    val cost: BigDecimal
+    val cost: BigDecimal,
+    val feesCrypto: BigDecimal
 ) {
     val pricePerUnit = cost.safeDiv(totalCryptoBalance)
     val actualPricePerUnit = cost.safeDiv(actualCryptoBalance)

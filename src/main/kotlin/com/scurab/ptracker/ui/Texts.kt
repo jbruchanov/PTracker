@@ -29,6 +29,7 @@ interface Texts {
     val FreeIncome: String
     val TotalBoughtOwned: String
     val PerUnit: String
+    val Fees: String
 }
 
 object English : Texts {
@@ -55,4 +56,5 @@ object English : Texts {
     override val NoProfitableOutcome: String = "Giveaway/Lost"
     override val TotalBoughtOwned: String = "Total bought/owned"
     override val PerUnit: String = "/unit"
+    override val Fees: String = "Fees"
 }
