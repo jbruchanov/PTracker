@@ -111,6 +111,7 @@ object AppTheme {
         val Red = Color(0xFFEF5350)
         val Green = Color(0xFF26A69A)
         val RedGreen = StateContainer(Red, default2 = Green)
+        val RedGreenWhite = StateContainer(default = Red, default2 = Green, disabled = OnBackground)
 
         val DarkMaterial = darkColors(
             primary = Primary,

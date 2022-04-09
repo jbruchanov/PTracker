@@ -146,7 +146,7 @@ private fun RowFooter(
             WSpacer4()
             val totalRoi = holdings.totalRoi(fiatCoin)
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
-                val color = AppTheme.Colors.RedGreen.default2If(totalRoi.isPositive)
+                val color = AppTheme.Colors.RedGreenWhite.get(isEnabled = totalRoi.isNotZero(), isEven = !totalRoi.isPositive)
                 TextCell(
                     (totalRoi.gf2 + "%"), color = color, textAlign = TextAlign.Right, width = ColumnWidths.ROI.scaled()
                 )
@@ -209,7 +209,7 @@ private fun RowItem(onClick: () -> Unit, index: Int, holdings: OnlineHoldingStat
         TextCell(holdings.marketValue.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.MarketValue.scaled())
         WSpacer4()
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
-            val color = AppTheme.Colors.RedGreen.default2If(holdings.roi.isPositive)
+            val color = AppTheme.Colors.RedGreenWhite.get(isEnabled = holdings.roi.isNotZero(), isEven = !holdings.roi.isPositive)
             TextCell(holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.gf2?.let { "$it%" } ?: "", color = color, textAlign = TextAlign.Right)
             HSpacer()
             TextCell(

@@ -43,7 +43,8 @@ fun List<MarketPercentage>.pieChartData2(groupingThreshold: Float = 0f): List<Pi
         val startAngle = angle + angleOffset
         val startAngle2 = if (groupRest) angle2 + angleOffset else 0f
         val sweep = if (isLastIndex(index)) maxAngle - startAngle else ((perc * 360f).roundToInt().toFloat())
-        val sweep2 = ((if (groupRest) coef else 0f) * perc * 360f).roundToInt().toFloat()
+        //show even 0% as at least 1deg sweep
+        val sweep2 = ((if (groupRest) coef else 0f) * perc * 360f).roundToInt().coerceAtLeast(1).toFloat()
         val color = colors[index]
         result.add(PieChartSegment(startAngle, sweep.coerceAtMost(maxAngle), color, strokeWidth = 30.dp))
         if (groupRest) {
