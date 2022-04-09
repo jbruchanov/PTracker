@@ -11,5 +11,5 @@ fun List<Transaction>.tradingAssets(primaryFiatCoin: String? = null): List<Asset
     val (missedFiat, missedCrypto) = (allCoins - allTradingCoins).partition { FiatCurrencies.contains(it) }
     val missedAssets =
         primaryFiatCoin?.let { primaryFiatCoin -> (missedFiat + primaryFiatCoin).map { f -> missedCrypto.map { c -> Asset(c, f) } } }?.flatten() ?: emptyList()
-    return allTradingAssets + missedAssets
+    return (allTradingAssets + missedAssets).sorted()
 }
