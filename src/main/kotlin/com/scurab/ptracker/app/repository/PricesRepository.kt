@@ -58,7 +58,7 @@ class PricesRepository(
     suspend fun getPrices(ledger: Ledger) = client.getPrices(ledger.assetsForPrices)
 
     private val folder = File(Locations.Prices)
-    suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {
+    suspend fun getPrices(assets: Collection<Asset>): List<CoinPrice> {
         val primaryCoin = appSettings.primaryCoin?.let { FiatCoin(it) }
         val primaryCoinAssets = primaryCoin?.let { primaryCurrency -> assets.fiatCoins().map { coin -> Asset(coin, primaryCurrency.item) } } ?: emptyList()
         val request = (assets + primaryCoinAssets).distinct()

@@ -19,7 +19,11 @@ class Ledger(
     val assetsForPrices by lazy {
         val coins = items.setOf { it.asset }.distinct().allCoins()
         val (fiat, crypto) = coins.partition { FiatCurrencies.contains(it) }
-        crypto.map { c -> fiat.map { f -> Asset(c, f) } }.flatten()
+        //in case of having like UST staking only
+        val allCombinations = crypto.map { c -> fiat.map { f -> Asset(c, f) } }.flatten().toSet()
+        //if there was some Fiat2Fiat exchange, ^ would remove it
+        val allTradedAssets = items.setOf { it.asset }.filter { it.isTradingAsset }.toSet()
+        (allCombinations + allTradedAssets)
     }
 
     fun getGroupedData(by: GroupStrategy = GroupStrategy.Day): Map<Long, List<Transaction>> {

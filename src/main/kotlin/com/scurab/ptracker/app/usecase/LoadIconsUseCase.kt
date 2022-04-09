@@ -22,7 +22,7 @@ class LoadIconsUseCase(
 
     private val location = File(Locations.Icons)
 
-    suspend fun loadIcons(assets: List<Asset>): List<Pair<String, File?>> {
+    suspend fun loadIcons(assets: Collection<Asset>): List<Pair<String, File?>> {
         val primaryCoin = appSettings.primaryCoin?.let { listOf(it) } ?: emptyList()
         val allCoins = (assets.map { it.coin2 } + assets.map { it.coin1 } + primaryCoin).toSet()
         location.mkdirs()

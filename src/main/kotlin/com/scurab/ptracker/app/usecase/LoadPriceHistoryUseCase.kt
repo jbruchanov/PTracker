@@ -16,7 +16,7 @@ class LoadPriceHistoryUseCase(
 
     private val location = File(Locations.Daily)
 
-    suspend fun loadAll(assets: List<Asset>): Map<Asset, Result<List<PriceItem>>> = assets.associateWith { kotlin.runCatching { load(it) } }
+    suspend fun loadAll(assets: Collection<Asset>): Map<Asset, Result<List<PriceItem>>> = assets.associateWith { kotlin.runCatching { load(it) } }
 
     suspend fun load(asset: Asset): List<PriceItem> {
         location.mkdirs()

@@ -26,7 +26,7 @@ class AppStateRepository(private val appSettings: AppSettings) {
 
     fun setSelectedAsset(value: Asset) {
         _selectedAsset.tryEmit(value)
-        appSettings.lastSelectedAsset = value
+        appSettings.lastSelectedAsset = value.takeIf { !it.isEmpty }
     }
 
     fun onKey(key: Key) {

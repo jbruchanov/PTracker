@@ -18,15 +18,19 @@ import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
-import com.scurab.ptracker.app.usecase.LoadPriceHistoryUseCase
 import com.scurab.ptracker.app.usecase.PriceBoardDataProcessingUseCase
+import com.scurab.ptracker.component.ProcessScope
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.ui.model.AssetIcon
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.event.KeyEvent
@@ -54,20 +58,19 @@ interface PriceBoardEventDelegate {
 class PriceBoardViewModel(
     private val appSettings: AppSettings,
     private val appStateRepository: AppStateRepository,
-    private val loadPriceHistoryUseCase: LoadPriceHistoryUseCase,
     private val pricesRepository: PricesRepository,
     private val dataUseCase: PriceBoardDataProcessingUseCase
 ) : ViewModel(), PriceBoardEventDelegate {
 
     private val filters = Pair(Filter.ImportantTransactions, Filter.AllTransactions)
     private val grouping = GroupStrategy.Day
-    val uiState = PriceBoardUiState(appStateRepository.density.value, grouping, appSettings.debug)
-
-    //state for merging, 2 different datasources for 1 output
-    private val ledger = appStateRepository.appData.map { it.ledger }
     private val prices = MutableStateFlow(Asset.Empty to emptyList<PriceItem>())
 
+    //state for merging, 2 different datasources for 1 output
+    private val appData = appStateRepository.appData
     private var data = PriceBoardDataProcessingUseCase.RawData(Ledger.Empty, Asset.Empty, emptyList())
+
+    val uiState = PriceBoardUiState(appStateRepository.density.value, grouping, appSettings.debug)
 
     init {
         launch {
@@ -81,12 +84,13 @@ class PriceBoardViewModel(
         }
 
         launch(Dispatchers.Main) {
-            ledger.combine(prices) { i1, i2 -> Pair(i1, i2) }.collect { (ledger, pricePair) ->
+            appData.combine(prices) { i1, i2 -> Pair(i1, i2) }.collect { (appData, pricePair) ->
                 val (asset, prices) = pricePair
-                data = PriceBoardDataProcessingUseCase.RawData(ledger, asset, prices)
+                data = PriceBoardDataProcessingUseCase.RawData(appData.ledger, asset, prices)
                 updateData(data, filters.firstIf(uiState.hasTradeOnlyFilter), resetViewport = uiState.priceBoardState.selectedAsset != asset)
             }
         }
+
         launch(Dispatchers.Main) {
             uiState.prices.putAll(pricesRepository.latestPrices)
             pricesRepository.wsMarketPrice
@@ -128,9 +132,7 @@ class PriceBoardViewModel(
             prices.value = Pair(asset, emptyList())
             return
         }
-        launch(Dispatchers.IO) {
-            prices.value = asset to loadPriceHistoryUseCase.load(asset)
-        }
+        prices.value = asset to appData.value.historyPrices.getValue(asset)
     }
 
     override fun onAssetSelected(item: Asset) {
@@ -139,13 +141,9 @@ class PriceBoardViewModel(
 
     override fun onTransactionClicked(item: Transaction, doubleClick: Boolean) {
         val state = uiState.priceBoardState
-        launch {
-            val priceItem = requireNotNull(item.priceItem) { "item.priceItem:${item}" }
-            if (doubleClick || !priceItem.isVisible(state)) {
-                withContext(Dispatchers.Main) {
-                    state.setViewport(state.initViewport(priceItemIndex = priceItem.index + 1, alignCenter = true), animate = true)
-                }
-            }
+        val priceItem = requireNotNull(item.priceItem) { "item.priceItem:${item}" }
+        if (doubleClick || !priceItem.isVisible(state)) {
+            state.setViewport(state.initViewport(priceItemIndex = priceItem.index + 1, alignCenter = true), animate = true)
         }
         state.highlightTransaction = item
     }

@@ -48,7 +48,7 @@ class CryptoCompareClient(
         return httpClient.get(coinUrl(cryptoSymbol))
     }
 
-    suspend fun getPrices(assets: List<Asset>, primaryFiatCoin: FiatCoin? = null): List<CoinPrice> {
+    suspend fun getPrices(assets: Collection<Asset>, primaryFiatCoin: FiatCoin? = null): List<CoinPrice> {
         if (assets.isEmpty()) return emptyList()
         val fromSyms = assets.mapNotNull { it.fiatCoinOrNull()?.item }.distinct().joinToString(separator = ",")
         val toCoins = (assets.mapNotNull { it.cryptoCoinOrNull()?.item } + primaryFiatCoin?.item).filterNotNull().distinct()

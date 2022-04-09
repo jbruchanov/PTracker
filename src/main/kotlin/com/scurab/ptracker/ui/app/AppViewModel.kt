@@ -30,10 +30,8 @@ class AppViewModel(
             val ledgerLocation = appSettings.latestLedger
             if (ledgerLocation != null) {
                 _uiState.tryEmit(AppUiState.Loading)
-                runCatching {
-                    loadDataUseCase.loadAndSetAllData(ledgerLocation)
-                    navController.replace(AppNavTokens.Main)
-                }
+                loadDataUseCase.loadAndSetAllData(ledgerLocation)
+                navController.replace(AppNavTokens.Main)
             } else {
                 _uiState.tryEmit(AppUiState.Intro)
             }

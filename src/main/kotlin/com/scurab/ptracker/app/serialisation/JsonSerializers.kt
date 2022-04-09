@@ -84,6 +84,8 @@ object AssetAsStringSerializer : KSerializer<Asset> {
     }
 
     override fun serialize(encoder: Encoder, value: Asset) {
+        val label = value.label
+        require(label.isNotEmpty()) { "Invalid asset:$value for serialisation" }
         encoder.encodeString(value.label)
     }
 }

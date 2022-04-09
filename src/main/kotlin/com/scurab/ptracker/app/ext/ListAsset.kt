@@ -12,4 +12,4 @@ fun List<Asset>.colors(): List<Color> {
 }
 
 fun Collection<Asset>.allCoins() = (map { it.coin1 } + map { it.coin2 }).distinct().filter { it.isNotBlank() }
-fun List<Asset>.fiatCoins() = allCoins().filter { FiatCurrencies.contains(it) }
+fun Collection<Asset>.fiatCoins() = allCoins().filter { FiatCurrencies.contains(it) }
