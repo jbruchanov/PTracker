@@ -1,10 +1,12 @@
 package com.scurab.ptracker.app.model
 
+import com.scurab.ptracker.app.ext.allCoins
 import com.scurab.ptracker.app.ext.groupValue
 import com.scurab.ptracker.app.ext.setOf
 
 class Ledger(
     val items: List<Transaction>,
+    val primaryFiatCoin: String? = null
 ) {
     private val cacheByGroupStrategy = mutableMapOf<GroupStrategy, Map<Long, List<Transaction>>>()
     private val cacheByItemAndAsset = mutableMapOf<KeyAssetGroupingKey, List<Transaction>>()
@@ -12,7 +14,13 @@ class Ledger(
     val coins by lazy { items.setOf { it.assets }.flatten().distinct().sorted() }
     val fiatCoins by lazy { coins.filter { FiatCurrencies.contains(it) }.toSet() }
     val cryptoCoins by lazy { coins - fiatCoins }
-    val assets by lazy { items.setOf { it.asset }.filter { it.isTradingAsset }.sorted() }
+    val assetsTradings by lazy { items.tradingAssets(primaryFiatCoin) }
+
+    val assetsForPrices by lazy {
+        val coins = items.setOf { it.asset }.distinct().allCoins()
+        val (fiat, crypto) = coins.partition { FiatCurrencies.contains(it) }
+        crypto.map { c -> fiat.map { f -> Asset(c, f) } }.flatten()
+    }
 
     fun getGroupedData(by: GroupStrategy = GroupStrategy.Day): Map<Long, List<Transaction>> {
         return cacheByGroupStrategy.getOrPut(by) {

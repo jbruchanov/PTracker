@@ -49,7 +49,7 @@ class AppStateRepository(private val appSettings: AppSettings) {
         this.appData = appData
         _ledger.tryEmit(appData.ledger)
         appSettings.lastSelectedAsset
-            ?.takeIf { appData.ledger.assets.contains(it) }
+            ?.takeIf { appData.ledger.assetsTradings.contains(it) }
             ?.let {
                 _selectedAsset.tryEmit(it)
             }

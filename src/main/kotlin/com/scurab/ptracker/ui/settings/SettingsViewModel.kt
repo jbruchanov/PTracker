@@ -5,10 +5,12 @@ import com.scurab.ptracker.app.ext.isNotLastIndex
 import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
+import com.scurab.ptracker.app.usecase.LoadDataUseCase
 import com.scurab.ptracker.app.usecase.TestCryptoCompareKeyUseCase
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.ui.model.Validity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 interface SettingsEventHandler {
@@ -26,6 +28,7 @@ class SettingsViewModel(
     private val appStateRepository: AppStateRepository,
     private val appSettings: AppSettings,
     private val testCryptoCompareKeyUseCase: TestCryptoCompareKeyUseCase,
+    private val loadDataUseCase: LoadDataUseCase,
     private val navController: NavController
 ) : ViewModel(), SettingsEventHandler {
 
@@ -98,10 +101,17 @@ class SettingsViewModel(
         appSettings.fontScale = uiState.fontScale
         appSettings.cryptoCompareApiKey = uiState.cryptoCompareKey
         appSettings.ledgers = uiState.predefinedLedgers.filter { it.isNotBlank() }.distinct()
+        val oldPrimaryCoin = appSettings.primaryCoin
         appSettings.primaryCoin = uiState.primaryCoin.takeIf { FiatCurrencies.contains(it) }
-        //currently disabled, strange bug here, after scale change, can't click anymore on left menu button :/
-        //appStateRepository.setDensity(uiState.fontScale)
-        navController.popTo(AppNavTokens.PriceDashboard)
+        launch(Dispatchers.IO) {
+            //if primary coin change reload completely ledger to handle non cost crypto income
+            if (oldPrimaryCoin != appSettings.primaryCoin) {
+                appSettings.latestLedger?.let { loadDataUseCase.loadAndSetAllData(it) }
+            }
+            //currently disabled, strange bug here, after scale change, can't click anymore on left menu button :/
+            //appStateRepository.setDensity(uiState.fontScale)
+            navController.popTo(AppNavTokens.PriceDashboard)
+        }
     }
 
     override fun onPrimaryCoinChanged(value: String) {

@@ -27,8 +27,8 @@ class PriceBoardDataProcessingUseCase {
     fun prepareData(data: RawData, filter: Filter<Transaction>, grouping: GroupStrategy): Result = with(data) {
         data.ledger.fillPriceItems(data.prices, grouping)
         return Result(
-            ledger.assets,
-            ledger.assets.map { AssetIcon(it, kotlin.runCatching { loadImageBitmap(it.iconCoin1().inputStream()) }.getOrNull()) },
+            ledger.assetsTradings,
+            ledger.assetsTradings.map { AssetIcon(it, kotlin.runCatching { loadImageBitmap(it.iconCoin1().inputStream()) }.getOrNull()) },
             ledger.getTransactions(asset, filter),
             prices.associateBy(keySelector = { it }, valueTransform = { ledger.getTransactionsMap(it, filter) })
         )

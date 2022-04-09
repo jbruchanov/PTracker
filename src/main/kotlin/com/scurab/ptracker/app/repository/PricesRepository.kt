@@ -55,7 +55,7 @@ class PricesRepository(
     private val _latestPrices = mutableMapOf<Asset, MarketPrice>()
     val latestPrices: Map<Asset, MarketPrice> = _latestPrices
 
-    suspend fun getPrices(ledger: Ledger) = client.getPrices(ledger.assets)
+    suspend fun getPrices(ledger: Ledger) = client.getPrices(ledger.assetsForPrices)
 
     private val folder = File(Locations.Prices)
     suspend fun getPrices(assets: List<Asset>): List<CoinPrice> {

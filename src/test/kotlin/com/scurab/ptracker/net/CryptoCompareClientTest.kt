@@ -2,6 +2,7 @@ package com.scurab.ptracker.net
 
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Locations
+import com.scurab.ptracker.app.repository.MemoryAppSettings
 import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.app.usecase.LoadLedgerUseCase
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
@@ -38,8 +39,8 @@ internal class CryptoCompareClientTest {
 
     @Test
     fun getHistoryData() {
-        val ledger = kotlin.runCatching { LoadLedgerUseCase().load(File("data/output.xlsx")) }.getOrNull()
-        val symbols = ledger?.assets?.takeIf { it.isNotEmpty() } ?: testAssets
+        val ledger = kotlin.runCatching { LoadLedgerUseCase(MemoryAppSettings()).load(File("data/output.xlsx")) }.getOrNull()
+        val symbols = ledger?.assetsTradings?.takeIf { it.isNotEmpty() } ?: testAssets
         val folder = File(Locations.Daily)
         folder.mkdirs()
         runBlocking {

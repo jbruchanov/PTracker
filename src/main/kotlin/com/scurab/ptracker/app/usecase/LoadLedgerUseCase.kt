@@ -2,13 +2,16 @@ package com.scurab.ptracker.app.usecase
 
 import BittyTaxParser
 import com.scurab.ptracker.app.model.Ledger
+import com.scurab.ptracker.app.repository.AppSettings
 import okhttp3.internal.closeQuietly
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 
 
-class LoadLedgerUseCase : BittyTaxParser {
+class LoadLedgerUseCase(
+    private val appSettings: AppSettings
+) : BittyTaxParser {
 
     fun load(file: File): Ledger {
         val workbook: Workbook = XSSFWorkbook(file)
@@ -24,6 +27,6 @@ class LoadLedgerUseCase : BittyTaxParser {
             .flatten()
             .sortedByDescending { it.dateTime }
         workbook.closeQuietly()
-        return Ledger(items)
+        return Ledger(items, appSettings.primaryCoin)
     }
 }

@@ -63,7 +63,7 @@ class StatsViewModel(
 
     private suspend fun onNewLedgerSelected(ledger: Ledger) {
         latestLedger = ledger
-        val actualPrices = pricesRepository.getPrices(ledger.assets)
+        val actualPrices = pricesRepository.getPrices(ledger.assetsForPrices)
         prices.putAll(actualPrices.associateBy { it.asset })
         ledgerStats = statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions, actualPrices)
         recalcData(ledgerStats, prices, null)

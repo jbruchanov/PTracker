@@ -7,8 +7,8 @@ import com.scurab.ptracker.app.model.AnyCoin
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.CoinPrice
-import com.scurab.ptracker.app.model.ExchangeWallet
 import com.scurab.ptracker.app.model.CryptoHoldings
+import com.scurab.ptracker.app.model.ExchangeWallet
 import com.scurab.ptracker.ui.common.PieChartSegment
 
 object StubData {

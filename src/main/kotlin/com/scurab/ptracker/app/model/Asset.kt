@@ -40,6 +40,12 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
     val isCryptoTradingAsset by lazy { isTradingAsset && !(FiatCurrencies.contains(coin1) && FiatCurrencies.contains(coin2)) }
 
     @Transient
+    val hasCryptoCoin by lazy {
+        (coin1.isNotEmpty() && !FiatCurrencies.contains(coin1)) ||
+        (coin2.isNotEmpty() && !FiatCurrencies.contains(coin2))
+    }
+
+    @Transient
     val isFiatTradingAsset by lazy { isTradingAsset && FiatCurrencies.contains(coin1) && FiatCurrencies.contains(coin2) }
 
     val isIdentity get() = coin1 == coin2
