@@ -54,6 +54,7 @@ import com.scurab.ptracker.app.ext.isNotLastIndex
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.isPositive
 import com.scurab.ptracker.app.ext.percf2
+import com.scurab.ptracker.app.ext.s2
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.ext.totalCost
 import com.scurab.ptracker.app.ext.totalGains
@@ -397,8 +398,9 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.NoProfitableOutcome, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                TextCell(onlineHoldingStats.nonProfitableOutcome.gf4, color = AppColors.current.Red)
-                TextCell(onlineHoldingStats.nonProfitableOutcomeMarketPrice.gf2, color = AppColors.current.Red)
+                TextCell(onlineHoldingStats.nonProfitableOutcome.gf4p(), color = AppColors.current.Red)
+                val nonProfitableOutcomeMarketPrice = onlineHoldingStats.nonProfitableOutcomeMarketPrice.s2
+                TextCell(nonProfitableOutcomeMarketPrice.gf2, color = AppColors.current.RedGreenWhite.get(isEnabled = nonProfitableOutcomeMarketPrice.abs().isNotZero(), isEven = true))
             }
         }
         if (hasFees) {
@@ -406,7 +408,8 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
                 TextCell(texts.Fees, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell(onlineHoldingStats.feesCrypto.gf4p(), color = AppColors.current.Red)
-                TextCell(onlineHoldingStats.feesCryptoMarketValue.gf2, color = AppColors.current.Red)
+                val feesCryptoMarketValue = onlineHoldingStats.feesCryptoMarketValue.s2
+                TextCell(feesCryptoMarketValue.gf2, color = AppColors.current.RedGreenWhite.get(isEnabled = feesCryptoMarketValue.abs().isNotZero(), isEven = true))
             }
         }
     }

@@ -30,7 +30,7 @@ data class OnlineHoldingStats(
     val marketValueUnitPrice = marketPriceItem.price
     val gain = marketValue - cost
     val roi = (marketValue.safeDiv(cost)).roi()
-    val feesCrypto = -holdings.feesCrypto
+    val feesCrypto = holdings.feesCrypto
     val feesCryptoMarketValue = feesCrypto * marketValueUnitPrice
 
     fun marketValue(fiatCoin: FiatCoin?) = marketValue.takeIf { fiatCoin == null || asset.has(fiatCoin.item) } ?: ZERO

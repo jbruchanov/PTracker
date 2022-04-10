@@ -33,6 +33,7 @@ val BigDecimal.gf4: String get() = gf(4)
 val BigDecimal.f2 get() = f(2)
 val BigDecimal.percf2 get() = (this * 100.bd).f(2) + "%"
 val BigDecimal.gf2 get() = gf(2)
+val BigDecimal.s2 get() = (this.setScale(2, RoundingMode.HALF_UP))
 fun BigDecimal.f(digits: Int): String = BigDecimalFormats.formats[digits].value.format(this)
 fun BigDecimal.gf(digits: Int): String = BigDecimalFormats.groupingFormats[digits].value.format(this)
 fun BigDecimal.gf4p() = (this.setScale(4, RoundingMode.HALF_UP).takeIf { it.isNotZero() } ?: this).toPlainString()
