@@ -2,6 +2,7 @@ package com.scurab.ptracker.app.ext
 
 import com.scurab.ptracker.app.model.GroupStrategy
 import com.scurab.ptracker.app.model.HasDateTime
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.joinAll
@@ -61,7 +62,7 @@ suspend fun <I, O> Collection<I>.parallelMapIndexed(parallelism: Int = 4, map: s
         }
 
         (0 until parallelism).map {
-            launch {
+            launch(Dispatchers.IO) {
                 for ((i, v) in input) {
                     result[i] = map(i, v)
                 }

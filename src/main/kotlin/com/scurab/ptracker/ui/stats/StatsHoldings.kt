@@ -101,6 +101,48 @@ private object ColumnWidths {
 private fun Modifier.defaultTableRow() = padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
 
 @Composable
+fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier = Modifier) {
+    val fiatCoins = remember(state.cryptoHoldings.size) { state.cryptoHoldings.fiatCoins() }
+    val hasFiatCoins = fiatCoins.size > 1
+    Row(modifier = Modifier.statsContentBackground()) {
+        Column(
+            modifier = Modifier.width(IntrinsicSize.Min).wrapContentSize()
+        ) {
+            RowHeader(hasFiatCoins)
+            Divider(thickness = AppSizes.current.ThickLine, color = AppColors.current.Primary, modifier = Modifier.fillMaxWidth())
+            state.cryptoHoldings.forEachIndexed { index, onlineHoldingStats ->
+                Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                    val isItemSelected = state.isHoldingsSelected(onlineHoldingStats)
+                    DetailHoldingsCryptoItem(
+                        onClick = { event.onHoldingsRowClicked(index, onlineHoldingStats) },
+                        index = index,
+                        onlineHoldingStats = onlineHoldingStats,
+                        exchangeCoverage = state.coinSumPerExchange[onlineHoldingStats.asset.cryptoCoinOrNull()?.item ?: ""] ?: emptyList(),
+                        selected = isItemSelected,
+                        useWideCoinsColumn = hasFiatCoins
+                    )
+                }
+                if (state.cryptoHoldings.isNotLastIndex(index)) {
+                    Divider()
+                }
+            }
+            Divider(thickness = AppSizes.current.ThickLine, color = AppColors.current.Primary, modifier = Modifier.fillMaxWidth())
+            fiatCoins.forEach {
+                RowFooter(
+                    onClick = { event.onFiatRowClicked(it) },
+                    fiatCoin = it,
+                    hasMultipleFiats = hasFiatCoins,
+                    state = state,
+                    exchangeCoverage = state.coinSumPerExchange[it.item] ?: emptyList(),
+                    selected = state.selectedHoldingsAsset?.has("", it.item) ?: false
+                )
+            }
+            HSpacer2()
+        }
+    }
+}
+
+@Composable
 private fun RowHeader(hasMultipleFiatCoins: Boolean) {
     val texts = LocalTexts.current
     Row(
@@ -281,54 +323,6 @@ private fun TextCell(
 
 
 @Composable
-fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier = Modifier) {
-    val fiatCoins = remember(state.cryptoHoldings.size) { state.cryptoHoldings.fiatCoins() }
-    val hasFiatCoins = fiatCoins.size > 1
-    Row(
-        modifier = Modifier
-            .padding(AppSizes.current.Space)
-            .border(AppSizes.current.ThinLine, AppColors.current.PrimaryVariant, AppTheme.Shapes.RoundedCornersSize4)
-            .background(AppColors.current.RowBackground.get(), AppTheme.Shapes.RoundedCornersSize4)
-            .clip(AppTheme.Shapes.RoundedCornersSize4).then(modifier)
-    ) {
-        Column(
-            modifier = Modifier.width(IntrinsicSize.Min).wrapContentSize()
-        ) {
-            RowHeader(hasFiatCoins)
-            Divider(thickness = AppSizes.current.ThickLine, color = AppColors.current.Primary, modifier = Modifier.fillMaxWidth())
-            state.cryptoHoldings.forEachIndexed { index, onlineHoldingStats ->
-                Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-                    val isItemSelected = state.isHoldingsSelected(onlineHoldingStats)
-                    DetailHoldingsCryptoItem(
-                        onClick = { event.onHoldingsRowClicked(index, onlineHoldingStats) },
-                        index = index,
-                        onlineHoldingStats = onlineHoldingStats,
-                        exchangeCoverage = state.coinSumPerExchange[onlineHoldingStats.asset.cryptoCoinOrNull()?.item ?: ""] ?: emptyList(),
-                        selected = isItemSelected,
-                        useWideCoinsColumn = hasFiatCoins
-                    )
-                }
-                if (state.cryptoHoldings.isNotLastIndex(index)) {
-                    Divider()
-                }
-            }
-            Divider(thickness = AppSizes.current.ThickLine, color = AppColors.current.Primary, modifier = Modifier.fillMaxWidth())
-            fiatCoins.forEach {
-                RowFooter(
-                    onClick = { event.onFiatRowClicked(it) },
-                    fiatCoin = it,
-                    hasMultipleFiats = hasFiatCoins,
-                    state = state,
-                    exchangeCoverage = state.coinSumPerExchange[it.item] ?: emptyList(),
-                    selected = state.selectedHoldingsAsset?.has("", it.item) ?: false
-                )
-            }
-            HSpacer2()
-        }
-    }
-}
-
-@Composable
 private fun ColumnScope.DetailHoldingsCryptoItem(
     onClick: () -> Unit,
     index: Int,
@@ -400,7 +394,10 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
                 HSpacer()
                 TextCell(onlineHoldingStats.nonProfitableOutcome.gf4p(), color = AppColors.current.Red)
                 val nonProfitableOutcomeMarketPrice = onlineHoldingStats.nonProfitableOutcomeMarketPrice.s2
-                TextCell(nonProfitableOutcomeMarketPrice.gf2, color = AppColors.current.RedGreenWhite.get(isEnabled = nonProfitableOutcomeMarketPrice.abs().isNotZero(), isEven = true))
+                TextCell(
+                    nonProfitableOutcomeMarketPrice.gf2,
+                    color = AppColors.current.RedGreenWhite.get(isEnabled = nonProfitableOutcomeMarketPrice.abs().isNotZero(), isEven = true)
+                )
             }
         }
         if (hasFees) {

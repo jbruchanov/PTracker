@@ -13,7 +13,7 @@ fun Dp.toPx(density: Float): Float = value * density
 fun Dp.roundToPx(density: Float): Int = if (value.isInfinite()) Constraints.Infinity else (density * value).roundToInt()
 
 @Composable
-fun Dp.toPx(provider: ProvidableCompositionLocal<Density>): Float = toPx(provider.current.density)
+fun Dp.toPx(provider: ProvidableCompositionLocal<Density> = LocalDensity): Float = toPx(provider.current.density)
 
 @Composable
 fun TextUnit.toPx(provider: ProvidableCompositionLocal<Density>): Float {

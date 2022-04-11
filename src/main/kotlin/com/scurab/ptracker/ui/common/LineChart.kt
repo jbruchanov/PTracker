@@ -14,13 +14,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.toAbsoluteCoordinatesPath
 import com.scurab.ptracker.app.ext.toPx
@@ -38,7 +39,7 @@ private fun PreviewLineChart() {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         LineChart(
             sampleData,
-            strokeWidth = 5.dp,
+            style = Stroke(5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10.dp.toPx(), 10.dp.toPx()))),
             strokeColor = Color.White,
             fillingGradientColors = listOf(Color.White, Color.Black)
         )
@@ -46,9 +47,9 @@ private fun PreviewLineChart() {
 }
 
 @Composable
-private fun LineChart(
-    data: List<Point>,
-    strokeWidth: Dp = 5.dp,
+fun LineChart(
+    relativePoints: List<Point>,
+    style: DrawStyle = Stroke(5.dp.toPx()),
     strokeColor: Color = Color.White,
     fillingGradientColors: List<Color>? = null
 ) {
@@ -56,8 +57,8 @@ private fun LineChart(
     val density = LocalDensity.current.density
     BoxWithConstraints {
         val canvasSize = remember(maxWidth, maxHeight) { Size(maxWidth.toPx(density), maxHeight.toPx(density)) }
-        val lienPath = remember(canvasSize) { data.toAbsoluteCoordinatesPath(canvasSize) }
-        val fillPath = remember(canvasSize, fillingGradientColors) {
+        val lienPath = remember(canvasSize, relativePoints) { relativePoints.toAbsoluteCoordinatesPath(canvasSize) }
+        val fillPath = remember(canvasSize, fillingGradientColors, relativePoints) {
             Path().apply {
                 if (fillingGradientColors != null) {
                     addPath(lienPath)
@@ -75,14 +76,14 @@ private fun LineChart(
             if (debug) {
                 drawCircle(Color.Green, 50f, center = Offset.Zero)
             }
-            drawPath(path = lienPath, color = strokeColor, style = Stroke(strokeWidth.toPx()))
+            drawPath(path = lienPath, color = strokeColor, style = style)
             if (fillingGradientColors != null && fillingGradientColors.isNotEmpty()) {
                 val brush = Brush.linearGradient(fillingGradientColors, end = Offset(0f, size.height))
                 drawPath(path = fillPath, brush = brush)
             }
 
             if (debug) {
-                val points = data.map { Offset(it.x * size.width, it.y * size.height) }
+                val points = relativePoints.map { Offset(it.x * size.width, it.y * size.height) }
                 drawPoints(points, PointMode.Points, Color.Magenta, strokeWidth = 5.dp.toPx(), cap = StrokeCap.Round)
                 translate(left = size.width / 2, top = size.height / 2) {
                     drawLine(Color.Green, start = Offset(-150f, 0f), end = Offset(150f, 0f), strokeWidth = 1f)

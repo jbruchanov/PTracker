@@ -3,6 +3,7 @@ package com.scurab.ptracker.app.model
 import com.scurab.ptracker.app.ext.allCoins
 import com.scurab.ptracker.app.ext.groupValue
 import com.scurab.ptracker.app.ext.setOf
+import com.scurab.ptracker.app.ext.tradingAssets
 
 class Ledger(
     val items: List<Transaction>,

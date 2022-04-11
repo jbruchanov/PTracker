@@ -8,11 +8,13 @@ import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.FiatCoin
+import com.scurab.ptracker.app.model.LineChartData
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
+import com.scurab.ptracker.app.usecase.StatsChartCalcUseCase
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.ui.stats.StatsUiState.Companion.MarketPercentageGroupingThreshold
 import kotlinx.coroutines.Dispatchers
@@ -20,10 +22,17 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+sealed class PortfolioChartUiState {
+    object NoPrimaryCurrency : PortfolioChartUiState()
+    object Loading : PortfolioChartUiState()
+    class Data(val chartData: LineChartData) : PortfolioChartUiState()
+}
+
 class StatsViewModel(
     private val appSettings: AppSettings,
     private val appStateRepository: AppStateRepository,
-    private val pricesRepository: PricesRepository
+    private val pricesRepository: PricesRepository,
+    private val statsChartCalcUseCase: StatsChartCalcUseCase
 ) : ViewModel(), StatsEventHandler {
 
     private var latestData = AppData.Empty
@@ -34,16 +43,25 @@ class StatsViewModel(
 
     init {
         launch {
-            appStateRepository.appData
-                .filter { it != AppData.Empty }
-                .collect { data ->
-                    onNewDataSelected(data)
-                }
+            appStateRepository.appData.filter { it != AppData.Empty }.collect { data ->
+                onNewDataSelected(data)
+            }
         }
 
         launch {
             pricesRepository.wsMarketPrice.collect {
                 onMarketPrice(it)
+            }
+        }
+        launch {
+            appStateRepository.appData.filter { it != AppData.Empty }.collect { data ->
+                val primaryCoin = appSettings.primaryCoin
+                if (primaryCoin == null) {
+                    uiState.portfolioChartUiState = PortfolioChartUiState.NoPrimaryCurrency
+                } else {
+                    uiState.portfolioChartUiState = PortfolioChartUiState.Loading
+                    uiState.portfolioChartUiState = PortfolioChartUiState.Data(statsChartCalcUseCase.getLineChartData(data, primaryCoin))
+                }
             }
         }
     }
@@ -69,9 +87,8 @@ class StatsViewModel(
 
     private suspend fun recalcData(data: AppData, latestPrices: Map<Asset, MarketPrice>, tick: MarketPrice?) {
         val ledger = data.ledgerStats
-        val onlineHoldingStats = ledger.cryptoHoldings
-            .map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, latestPrices[asset] ?: CoinPrice(asset, 0.bd)) }
-            .sortedBy { it.asset }
+        val onlineHoldingStats =
+            ledger.cryptoHoldings.map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, latestPrices[asset] ?: CoinPrice(asset, 0.bd)) }.sortedBy { it.asset }
 
         val marketPercentage = onlineHoldingStats.coloredMarketPercentage()
         val pieChartData = marketPercentage.pieChartData2(MarketPercentageGroupingThreshold)

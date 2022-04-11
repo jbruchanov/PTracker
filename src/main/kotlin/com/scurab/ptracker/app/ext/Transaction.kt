@@ -12,6 +12,7 @@ import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.model.TransactionTextPrices
+import java.math.BigDecimal
 import kotlin.math.max
 
 fun Transaction.iconColor() = getOrPut("TransactionIcon") {
@@ -110,3 +111,14 @@ fun Transaction.convertTradePrice(prices: Map<Asset, MarketPrice>, targetFiatCur
         else -> throw UnsupportedOperationException("Unhandled case:$this, price:$price")
     }
 }
+
+fun Transaction.getAmount(asset: String): BigDecimal {
+    val fee = if (feeAsset == asset) -feeQuantity else ZERO
+    return fee + when {
+        this is HasIncome && buyAsset == asset -> buyQuantity
+        this is HasOutcome && sellAsset == asset -> -sellQuantity
+        else -> ZERO
+    }
+}
+
+fun Transaction.getFees(asset: String): BigDecimal = if (feeAsset == asset) -feeQuantity else ZERO

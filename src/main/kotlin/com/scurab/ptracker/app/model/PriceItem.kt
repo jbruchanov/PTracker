@@ -27,8 +27,8 @@ interface IPriceItem : HasDateTime {
 }
 
 class PriceItem(
-    val index: Int, val asset: Asset, val item: IPriceItem
-) : IPriceItem by item, WithCache by MapCache() {
+    val index: Int, override val asset: Asset, val item: IPriceItem
+) : IPriceItem by item, WithCache by MapCache(), MarketPrice {
     private val rectHeight = (open - close).abs().toFloat()
     val rectOffsetY = open.min(close).toFloat()
     val color = DashboardColors.Candle.default2If(open < close)
@@ -37,6 +37,8 @@ class PriceItem(
     val spikeOffsetY1 = high.max(low).toFloat()
     val spikeOffsetY2 = high.min(low).toFloat()
     val formattedFullDate: String by lazy { DateTimeFormats.fullDate.format(dateTime.toJavaLocalDateTime()) }
+
+    override val price: BigDecimal = item.close
 
     override fun toString(): String {
         return "PriceItem(index=$index, date='$formattedFullDate', centerY:${centerY} asset=$asset)"

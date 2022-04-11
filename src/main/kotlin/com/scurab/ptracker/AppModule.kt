@@ -11,6 +11,7 @@ import com.scurab.ptracker.app.usecase.LoadLedgerUseCase
 import com.scurab.ptracker.app.usecase.LoadPriceHistoryUseCase
 import com.scurab.ptracker.app.usecase.PriceBoardDataProcessingUseCase
 import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
+import com.scurab.ptracker.app.usecase.StatsChartCalcUseCase
 import com.scurab.ptracker.app.usecase.TestCryptoCompareKeyUseCase
 import com.scurab.ptracker.component.KoinViewModelFactory
 import com.scurab.ptracker.component.navigation.ComponentFactory
@@ -58,6 +59,7 @@ fun createKoinModule(appArgs: Array<String>) = module {
     factory { LoadIconsUseCase(get(), get(), get()) }
     factory { TestCryptoCompareKeyUseCase(get()) }
     factory { StatsCalculatorUseCase(get()) }
+    factory { StatsChartCalcUseCase(get(), get()) }
 
     fun Scope.getAppNavController() = get<NavController>(NavigationScope.App)
     fun Scope.getMainNavController() = get<NavController>(NavigationScope.Main)
@@ -66,5 +68,5 @@ fun createKoinModule(appArgs: Array<String>) = module {
     factory { MainViewModel(get(), get(), get(), get(), getMainNavController()) }
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), get(), get(), get(), getMainNavController()) }
-    factory { StatsViewModel(get(), get(), get()) }
+    factory { StatsViewModel(get(), get(), get(), get()) }
 }

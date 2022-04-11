@@ -1,5 +1,6 @@
 package com.scurab.ptracker.app.model
 
+import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.round
 import com.scurab.ptracker.app.ext.sameElseSwap
 import kotlinx.datetime.LocalDateTime
@@ -138,6 +139,13 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
             "$this, fiat:$fiat, crypto:$crypto, both are empty"
         }
         Asset(crypto, fiat)
+    }
+
+    fun coinValues(): List<CoinValue> {
+        val income = if (this is HasIncome /*&& !FiatCurrencies.contains(buyAsset) && buyQuantity.isNotZero()*/) CoinValue(buyAsset, buyQuantity) else null
+        val outcome = if (this is HasOutcome /*&& !FiatCurrencies.contains(sellAsset) && sellQuantity.isNotZero()*/) CoinValue(sellAsset, -sellQuantity) else null
+        val fee = if (feeQuantity.isNotZero()/* && !FiatCurrencies.contains(feeAsset)*/) CoinValue(feeAsset, -feeQuantity) else null
+        return listOfNotNull(income, outcome, fee).groupBy { it.coin }.map { (coin, quantities) -> CoinValue(coin, quantities.sumOf { it.quantity }) }
     }
 
     override fun toString(): String = debugString

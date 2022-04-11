@@ -67,6 +67,11 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
 
     fun flipCoins(): Asset = Asset(coin2, coin1)
 
+    val isCoin1Crypto by lazy { coin1.isNotBlank() && !FiatCurrencies.contains(coin1) }
+    val isCoin2Crypto by lazy { coin2.isNotBlank() && !FiatCurrencies.contains(coin2) }
+    val isCoin1Fiat by lazy { coin1.isNotBlank() && FiatCurrencies.contains(coin1) }
+    val isCoin2Fiat by lazy { coin2.isNotBlank() && FiatCurrencies.contains(coin2) }
+
     fun exchangeFiatAsset(coin: String): Asset {
         val isCoin1Fiat = FiatCurrencies.contains(coin1)
         val isCoin2Fiat = FiatCurrencies.contains(coin2)
