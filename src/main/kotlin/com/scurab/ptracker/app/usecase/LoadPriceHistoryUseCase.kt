@@ -1,12 +1,15 @@
 package com.scurab.ptracker.app.usecase
 
 import com.scurab.ptracker.app.ext.existsAndHasSize
+import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.net.CryptoCompareClient
 import com.scurab.ptracker.net.model.CryptoComparePriceItem
+import com.scurab.ptracker.ui.DateTimeFormats
+import kotlinx.datetime.toJavaLocalDateTime
 import java.io.File
 
 class LoadPriceHistoryUseCase(
@@ -14,7 +17,7 @@ class LoadPriceHistoryUseCase(
     private val jsonBridge: JsonBridge
 ) {
 
-    private val location = File(Locations.Daily)
+    private val location = File(Locations.Daily, now().toJavaLocalDateTime().format(DateTimeFormats.debugFullDate))
 
     suspend fun loadAll(assets: Collection<Asset>): Map<Asset, Result<List<PriceItem>>> = assets.associateWith { kotlin.runCatching { load(it) } }
 
