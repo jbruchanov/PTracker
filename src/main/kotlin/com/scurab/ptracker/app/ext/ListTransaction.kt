@@ -12,9 +12,13 @@ fun List<Transaction>.tradingAssets(primaryFiatCoin: String? = null): List<Asset
     val allTradingAssets = allAssets.filter { it.isTradingAsset }
     val allTradingCoins = allTradingAssets.allCoins()
     val (missedFiat, missedCrypto) = (allCoins - allTradingCoins).partition { FiatCurrencies.contains(it) }
-    val missedAssets = primaryFiatCoin?.let { primaryFiatCoin ->
-        (missedFiat + primaryFiatCoin).map { f -> missedCrypto.map { c -> Asset(c, f) } }
-    }?.flatten() ?: emptyList()
+    val missedAssets = primaryFiatCoin
+        ?.let { coin ->
+            (missedFiat + coin)
+                .filter { it == coin }
+                .map { f -> missedCrypto.map { c -> Asset(c, f) } }
+        }
+        ?.flatten() ?: emptyList()
     return (allTradingAssets + missedAssets).sorted()
 }
 
@@ -28,7 +32,7 @@ fun List<Transaction>.totalMarketValue(prices: Map<Asset, MarketPrice>, primaryC
             val asset = Asset.fromUnknownPair(coin, primaryCurrency)
             val price = when {
                 asset.isIdentity -> 1.bd
-                else -> requireNotNull(prices[asset] /*?: prices[asset.flipCoins()]*/) { "Missing price for asset:$asset" }.price
+                else -> requireNotNull(prices[asset] ?: prices[asset.flipCoins()]) { "Missing price for asset:$asset" }.price
             }
             val fiatValue = (price * value.abs())
             coin to fiatValue

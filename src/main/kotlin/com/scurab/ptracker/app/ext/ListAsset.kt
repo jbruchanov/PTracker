@@ -13,3 +13,7 @@ fun List<Asset>.colors(): List<Color> {
 
 fun Collection<Asset>.allCoins() = (map { it.coin1 } + map { it.coin2 }).distinct().filter { it.isNotBlank() }
 fun Collection<Asset>.fiatCoins() = allCoins().filter { FiatCurrencies.contains(it) }
+fun Collection<Asset>.withPrimaryCoin(primaryCoin: String?): Collection<Asset> {
+    if (primaryCoin == null) return this
+    return (this.toSet() + this.allCoins().map { Asset(it, primaryCoin) })
+}

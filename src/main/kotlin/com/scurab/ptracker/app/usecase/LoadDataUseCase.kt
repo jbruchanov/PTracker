@@ -1,5 +1,6 @@
 package com.scurab.ptracker.app.usecase
 
+import com.scurab.ptracker.app.ext.withPrimaryCoin
 import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.repository.AppSettings
@@ -24,9 +25,10 @@ class LoadDataUseCase(
         //TODO: global uri
         val ledgerFile = File(ledgerUri)
         val ledger = loadLedgerUseCase.load(ledgerFile)
-        val prices = pricesRepository.getPrices(ledger.assetsForPrices).associateBy { it.asset }
-        val historyDef = async(Dispatchers.IO) { loadPriceHistoryUseCase.loadAll(ledger.assetsForPrices) }
-        val iconsDef = async(Dispatchers.IO) { loadIconsUseCase.loadIcons(ledger.assetsForPrices) }
+        val assets = ledger.assetsForPrices.withPrimaryCoin(appSettings.primaryCoin)
+        val prices = pricesRepository.getPrices(assets).associateBy { it.asset }
+        val historyDef = async(Dispatchers.IO) { loadPriceHistoryUseCase.loadAll(assets) }
+        val iconsDef = async(Dispatchers.IO) { loadIconsUseCase.loadIcons(assets) }
         val statsDef = async(Dispatchers.IO) { statsCalculatorUseCase.calculateStats(ledger, Filter.AllTransactions, prices) }
 
         val history = historyDef.await().mapValues { it.value.getOrNull() }.mapValues { it.value ?: emptyList() }
