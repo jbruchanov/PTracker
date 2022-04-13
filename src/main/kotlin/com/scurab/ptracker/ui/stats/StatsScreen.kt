@@ -157,11 +157,12 @@ private fun BoxWithConstraintsScope.PortfolioChart(state: StatsUiState, event: S
             is PortfolioChartUiState.Data -> {
                 val data = chartState.chartData
                 val pathEffect = remember { PathEffect.dashPathEffect(floatArrayOf(sizes.Space2.toPx(density), sizes.Space2.toPx(density))) }
+                val gradientColor = AppColors.current.RedGreen.default2If(chartState.chartData.hasProfit)
                 LineChart(
                     data.marketPrice,
                     style = Stroke(AppSizes.current.ThickLine.toPx()),
                     strokeColor = AppColors.current.Green,
-                    listOf(AppColors.current.SecondaryVariant.copy(alpha = 0.5f), Color.Transparent)
+                    listOf(gradientColor, Color.Transparent)
                 )
                 LineChart(
                     data.cost,
