@@ -26,6 +26,7 @@ sealed class PortfolioChartUiState {
     object NoPrimaryCurrency : PortfolioChartUiState()
     object Loading : PortfolioChartUiState()
     class Data(val chartData: LineChartData) : PortfolioChartUiState()
+    class Error(val msg: String) : PortfolioChartUiState()
 }
 
 class StatsViewModel(
@@ -55,12 +56,16 @@ class StatsViewModel(
         }
         launch {
             appStateRepository.appData.filter { it != AppData.Empty }.collect { data ->
-                val primaryCoin = appSettings.primaryCoin
-                if (primaryCoin == null) {
-                    uiState.portfolioChartUiState = PortfolioChartUiState.NoPrimaryCurrency
-                } else {
-                    uiState.portfolioChartUiState = PortfolioChartUiState.Loading
-                    uiState.portfolioChartUiState = PortfolioChartUiState.Data(statsChartCalcUseCase.getLineChartData(data, primaryCoin))
+                try {
+                    val primaryCoin = appSettings.primaryCoin
+                    if (primaryCoin == null) {
+                        uiState.portfolioChartUiState = PortfolioChartUiState.NoPrimaryCurrency
+                    } else {
+                        uiState.portfolioChartUiState = PortfolioChartUiState.Loading
+                        uiState.portfolioChartUiState = PortfolioChartUiState.Data(statsChartCalcUseCase.getLineChartData(data, primaryCoin))
+                    }
+                } catch (e: Exception) {
+                    uiState.portfolioChartUiState = PortfolioChartUiState.Error(e.message ?: "Null exception message")
                 }
             }
         }

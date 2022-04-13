@@ -152,6 +152,7 @@ private fun BoxWithConstraintsScope.PortfolioChart(state: StatsUiState, event: S
         val sizes = AppSizes.current
         when (chartState) {
             is PortfolioChartUiState.NoPrimaryCurrency -> Text("NoPrimaryCurrency", modifier = Modifier.align(Alignment.Center))
+            is PortfolioChartUiState.Error -> Text(chartState.msg, modifier = Modifier.align(Alignment.Center))
             is PortfolioChartUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             is PortfolioChartUiState.Data -> {
                 val data = chartState.chartData

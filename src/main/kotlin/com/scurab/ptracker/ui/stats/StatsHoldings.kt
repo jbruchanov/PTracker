@@ -242,7 +242,7 @@ private fun RowItem(onClick: () -> Unit, index: Int, holdings: OnlineHoldingStat
         CoinIcon(holdings.asset.iconCoin1().imageOrNull(), isColored, scale)
         WSpacer(ColumnWidths.IconCoinGap)
         TextCell(holdings.asset.cryptoLabelOnlyIf(!hasMultipleFiats), textAlign = TextAlign.Left, width = ColumnWidths.Coin.default2If(hasMultipleFiats).scaled())
-        TextCell(holdings.actualCryptoBalance.gf4, width = ColumnWidths.Balance.scaled())
+        TextCell(holdings.actualCryptoBalance.gf4p(), width = ColumnWidths.Balance.scaled())
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(ColumnWidths.Cost.scaled())) {
             TextCell(holdings.cost.gf2)
             HSpacer()
@@ -451,9 +451,9 @@ private fun DetailExchangeCoinStats(exchangeCoverage: List<CoinExchangeStats>): 
                 WSpacer()
                 TextCell(
                     text = when {
-                        !stats.coin.isFiat() -> stats.quantity.gf4
+                        !stats.coin.isFiat() -> stats.quantity.gf4p()
                         stats.coin.isFiat() && stats.quantity >= 0.01.bd -> stats.quantity.gf2
-                        else -> stats.quantity.stripTrailingZeros().toPlainString()
+                        else -> stats.quantity.gf4p()
                     },
                     width = ColumnWidths.DetailContentBalance,
                     color = if (stats.coin.isFiat()) AppColors.current.OnBackground else AppColors.current.Secondary
