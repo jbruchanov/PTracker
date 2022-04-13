@@ -57,7 +57,7 @@ class StatsCalculatorUseCase(
             data.filter { it.asset.has(coin) }.map { it.getAmount(coin) }.sumOf { it }
         }
         val feesPerCoin = allCoins.associateWith { coin -> data.sumOf { transaction -> transaction.getFees(coin) } }
-        val assetsByExchange = exchanges.mapNotNull { exchange -> exchange to exchange.normalizedExchange() }
+        val assetsByExchange = exchanges.map { exchange -> exchange to exchange.normalizedExchange() }
             .associateBy(keySelector = { ExchangeWallet(it.second) }, valueTransform = { (exchange, normalized) ->
                 data.asSequence().filterIsInstance<Transaction.Trade>().filter { it.exchange == exchange }.filter { it.asset.isTradingAsset }.map { it.asset }.toSet().sorted()
             })
