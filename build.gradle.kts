@@ -3,9 +3,9 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.10"
-    kotlin("plugin.serialization") version "1.6.10"
-    id("org.jetbrains.compose") version "1.2.0-alpha01-dev659"
+    kotlin("jvm") version "1.6.21"
+    kotlin("plugin.serialization") version "1.6.21"
+    id("org.jetbrains.compose") version "1.2.0-alpha01-dev683"
 }
 
 group = "com.scurab"
@@ -23,7 +23,7 @@ dependencies {
     val ktSerialization = "1.3.2"
     val junit = "5.8.2"
     val koinVersion = "3.1.5"
-    val composeVersion = "1.2.0-alpha01-dev659"
+    val composeVersion = "1.2.0-alpha01-dev683"
     val mockKVersion = "1.12.3"
     val coroutines = "1.6.1"
 
