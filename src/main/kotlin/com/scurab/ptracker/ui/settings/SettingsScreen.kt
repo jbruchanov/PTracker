@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Help
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scurab.ptracker.component.util.mock
@@ -125,12 +128,13 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
     Row(modifier = Modifier) {
         Slider(
             state.fontScale,
-            onValueChange = { handler.onFontScaleChanged(it) },
+            onValueChange = { handler.onFontScaleChanged(it, false) },
+            onValueChangeFinished = { handler.onFontScaleChanged(state.fontScale, true) },
             valueRange = 0.75f.rangeTo(3f),
             modifier = Modifier.requiredWidthIn(120.dp, 320.dp).align(Alignment.CenterVertically)
         )
         WSpacer2()
-        Text(LocalTexts.current.RestartNeeded, fontSize = 14.sp * state.fontScale, modifier = Modifier.align(Alignment.CenterVertically))
+        Text(LocalTexts.current.TextSample, fontSize = 14.sp * state.fontScale, modifier = Modifier.align(Alignment.CenterVertically))
     }
 
     Label(text = texts.PrimaryCoin)

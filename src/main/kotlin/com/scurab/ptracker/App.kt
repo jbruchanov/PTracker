@@ -48,7 +48,8 @@ object App : KoinComponent {
             val density by appStateRepo.density.collectAsState()
 
             CompositionLocalProvider(
-                LocalDensity provides density, LocalTexts provides English
+                LocalDensity provides density,
+                LocalTexts provides English
             ) {
                 AppTheme {
                     navigation()

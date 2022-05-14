@@ -1,5 +1,6 @@
 package com.scurab.ptracker.ui.settings
 
+import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.AppNavTokens
 import com.scurab.ptracker.app.ext.isNotLastIndex
 import com.scurab.ptracker.app.model.FiatCurrencies
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 interface SettingsEventHandler {
     fun onTestCryptoCompareKeyClicked()
     fun onSaveClicked()
-    fun onFontScaleChanged(value: Float)
+    fun onFontScaleChanged(value: Float, finalValue: Boolean)
     fun onCryptoCompareKeyChanged(value: String)
     fun onPrimaryCoinChanged(value: String)
     fun onLedgerChanged(index: Int, path: String)
@@ -53,8 +54,11 @@ class SettingsViewModel(
         navController.pop()
     }
 
-    override fun onFontScaleChanged(value: Float) {
+    override fun onFontScaleChanged(value: Float, finalValue: Boolean) {
         uiState.fontScale = value
+        if (finalValue) {
+            appStateRepository.setDensity(value)
+        }
     }
 
     override fun onTestCryptoCompareKeyClicked() {
