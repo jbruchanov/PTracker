@@ -36,6 +36,17 @@ val BigDecimal.gf2 get() = gf(2)
 val BigDecimal.s2 get() = (this.setScale(2, RoundingMode.HALF_UP))
 fun BigDecimal.f(digits: Int): String = BigDecimalFormats.formats[digits].value.format(this)
 fun BigDecimal.gf(digits: Int): String = BigDecimalFormats.groupingFormats[digits].value.format(this)
+
+fun BigDecimal.gfa(): String {
+    repeat(4) {
+        val scale = (it * 2) + 2
+        val v = setScale(scale, RoundingMode.HALF_UP)
+        val scalePlus1 = (it != 0 || v.toInt() == 0)
+        if (!v.isZero()) return gf(scale + scalePlus1.int())
+    }
+    return "0"
+}
+
 fun BigDecimal.gf4p() = (this.setScale(4, RoundingMode.HALF_UP).takeIf { it.isNotZero() } ?: this).toPlainString()
 
 val BigDecimal.align: BigDecimal get() = align(8)

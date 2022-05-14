@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.gf2
+import com.scurab.ptracker.app.ext.gfa
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.ui.AppColors
@@ -105,7 +106,7 @@ fun AssetToggleButton(asset: Asset, price: MarketPrice?, isSelected: Boolean, on
             if (price != null) {
                 HSpacer05()
                 Text(
-                    text = price.price.gf2,
+                    text = price.price.gfa(),
                     color = textColor,
                     style = AppTheme.TextStyles.TinyMonospace,
                     maxLines = 1,

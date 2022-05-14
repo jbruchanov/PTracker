@@ -1,5 +1,6 @@
 package com.scurab.ptracker.app.model
 
+import com.scurab.ptracker.app.ext.align
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.round
 import com.scurab.ptracker.app.ext.sameElseSwap
@@ -114,7 +115,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     fun unitPrice(): BigDecimal? {
         if (this !is Trade) return null
         val (fiat, crypto) = Pair(buyQuantity, sellQuantity).sameElseSwap(FiatCurrencies.contains(buyAsset))
-        return (fiat / crypto).round(true)
+        return (fiat.align / crypto).round(true)
     }
 
     private val debugString by lazy {
