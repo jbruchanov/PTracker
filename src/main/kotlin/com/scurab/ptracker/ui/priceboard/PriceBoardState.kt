@@ -97,7 +97,7 @@ class PriceBoardState(
     fun initViewport(size: Size = this.canvasSize, priceItemIndex: Int = priceItems.size, alignCenter: Boolean = false): Rect {
         if (priceItems.isEmpty()) return Rect.Zero
         val focusItem = priceItems.getOrNull(priceItemIndex.coerceIn(0, priceItems.size - 1)) ?: return Rect(0f, 0f, size.width, size.height)
-        var offsetX = ((priceItemIndex) * DashboardSizes.PriceItemWidth)
+        var offsetX = ((priceItemIndex + 1/*1 piece offset to workaround tiny difference*/) * DashboardSizes.PriceItemWidth)
         //take last n visible items on the screen
         val sample = priceItems.takeAround(
             priceItemIndex.coerceIn(0, priceItems.size - 1),
@@ -109,7 +109,7 @@ class PriceBoardState(
             .coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1])
 
         val maxMinDiff = sample.maxOf { it.high } - sample.minOf { it.low }
-        val scaleY = size.height / (2.25f * maxMinDiff.toFloat())
+        val scaleY = size.height / (2.25f /*vertical coef to shrink space to see more*/ * maxMinDiff.toFloat())
             .coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1])
         if (alignCenter) {
             offsetX += (size.width - verticalPriceBarWidth() - DashboardSizes.PriceItemWidth) / 2 / scaleX
