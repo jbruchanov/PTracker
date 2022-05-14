@@ -45,7 +45,7 @@ fun Flag(code: String, size: Dp, modifier: Modifier = Modifier) {
     val canvasSize = if (isSquare) Size(originalCanvasSize.minDimension, originalCanvasSize.minDimension) else originalCanvasSize
     Canvas(
         modifier = Modifier
-            .sizeAbsolute(canvasSize.width, canvasSize.height)
+            .sizeAbsolute(canvasSize.width, canvasSize.height, LocalDensity.current.density)
             .then(modifier)
     ) {
         val centerY = 0f + textLineF.height / 2 - (textLineF.descent + textLineF.ascent) / 2
