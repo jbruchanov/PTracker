@@ -149,7 +149,6 @@ private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
 @Composable
 private fun BoxWithConstraintsScope.PortfolioChartContent(state: StatsUiState, event: StatsEventHandler) {
     val scrollBarSize = LocalScrollbarStyle.current.thickness
-    val density = LocalDensity.current.density
     Box(
         modifier = Modifier
             .requiredHeightIn(min = 320.dp, max = max(320.dp, maxHeight / 3f) - scrollBarSize)

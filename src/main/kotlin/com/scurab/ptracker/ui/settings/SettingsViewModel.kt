@@ -1,6 +1,5 @@
 package com.scurab.ptracker.ui.settings
 
-import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.AppNavTokens
 import com.scurab.ptracker.app.ext.isNotLastIndex
 import com.scurab.ptracker.app.model.FiatCurrencies
