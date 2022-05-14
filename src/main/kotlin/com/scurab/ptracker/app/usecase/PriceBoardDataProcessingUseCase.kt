@@ -1,6 +1,7 @@
 package com.scurab.ptracker.app.usecase
 
 import androidx.compose.ui.res.loadImageBitmap
+import com.scurab.ptracker.app.ext.iconColor
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.GroupStrategy
@@ -21,7 +22,7 @@ class PriceBoardDataProcessingUseCase {
         val assets: List<Asset>,
         val assetsIcons: List<AssetIcon>,
         val transactions: List<Transaction>,
-        val transactionsPerPriceItem: Map<PriceItem, List<Transaction>>
+        val transactionsPerPriceItem: Map<PriceItem, PriceItemTransactions>
     )
 
     fun prepareData(data: RawData, filter: Filter<Transaction>, grouping: GroupStrategy): Result = with(data) {
@@ -30,7 +31,24 @@ class PriceBoardDataProcessingUseCase {
             ledger.assetsTradings,
             ledger.assetsTradings.map { AssetIcon(it, kotlin.runCatching { loadImageBitmap(it.iconCoin1().inputStream()) }.getOrNull()) },
             ledger.getTransactions(asset, filter),
-            prices.associateBy(keySelector = { it }, valueTransform = { ledger.getTransactionsMap(it, filter) })
+            prices.associateBy(keySelector = { it }, valueTransform = { PriceItemTransactions(it, ledger.getTransactionsMap(it, filter)) })
         )
+    }
+}
+
+class PriceItemTransactions(
+    val priceItem: PriceItem,
+    val transactions: List<Transaction>
+) {
+    val iconPrices = transactions.map { it.iconColor() to it }.distinct()
+
+    val distinctIcons = transactions
+        .map { it.iconColor() }
+        .distinct()
+        .sortedBy { it.priority }
+
+    val iconPricesX by lazy {
+        transactions.map { it.iconColor() to it }?.distinct()
+        /*?.sortedBy { if (state.pointingTransaction == it.second) Int.MAX_VALUE else it.first.priority }*/
     }
 }

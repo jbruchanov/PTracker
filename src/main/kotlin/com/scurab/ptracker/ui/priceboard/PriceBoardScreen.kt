@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
@@ -63,7 +65,6 @@ import com.scurab.ptracker.app.ext.f3
 import com.scurab.ptracker.app.ext.filterVisible
 import com.scurab.ptracker.app.ext.getHorizontalAxisText
 import com.scurab.ptracker.app.ext.getLabelPriceDecimals
-import com.scurab.ptracker.app.ext.iconColor
 import com.scurab.ptracker.app.ext.maxValue
 import com.scurab.ptracker.app.ext.nHeight
 import com.scurab.ptracker.app.ext.nWidth
@@ -79,6 +80,7 @@ import com.scurab.ptracker.app.ext.transformNormToViewPort
 import com.scurab.ptracker.app.ext.withTranslateAndScale
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.model.priceDetails
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
@@ -92,6 +94,7 @@ import com.scurab.ptracker.ui.common.FlatButton
 import com.scurab.ptracker.ui.common.ToggleButton
 import com.scurab.ptracker.ui.common.TransactionRow
 import com.scurab.ptracker.ui.common.VerticalDivider
+import com.scurab.ptracker.ui.model.IconColor
 import org.jetbrains.skia.Point
 import org.jetbrains.skia.TextLine
 import java.lang.Float.min
@@ -136,7 +139,10 @@ fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport(
 
 @Composable
 fun PriceBoardScreen(vm: PriceBoardViewModel) {
-    vm.uiState.priceBoardState.init()
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        vm.uiState.priceBoardState.init(coroutineScope)
+    }
     val uiState = vm.uiState
     val priceBoardState = uiState.priceBoardState
     Box(
@@ -199,7 +205,7 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState, eventDelega
             val priceItem = priceBoardState.pointedPriceItem
             val grouping = priceBoardState.grouping.groupingKey
             LazyColumn(modifier = Modifier.fillMaxWidth(), state = state) {
-                itemsIndexed(priceBoardState.visibleTransactions) { index, transaction ->
+                itemsIndexed(priceBoardState.visibleTransactions, key = { _, v -> v.id }) { index, transaction ->
                     val isSelected = priceItem != null && grouping(priceItem.dateTime) == grouping(transaction.dateTime)
                     TransactionRow(
                         onClick = {
@@ -274,11 +280,7 @@ private fun PriceSelectedDayDetail(state: PriceBoardState) {
 private fun BoxScope.PriceSelectedDayTransactionTypes(state: PriceBoardState) {
     val item = state.pointedPriceItem
     if (item != null) {
-        val iconsPrices = state.visibleTransactionsPerPriceItem[item]
-            ?.map { it.iconColor() }
-            ?.distinct()
-            ?.sortedBy { it.priority }
-            ?: return
+        val iconsPrices = state.visibleTransactionsPerPriceItem[item]?.distinctIcons ?: return
 
         val offsetX = AppSizes.current.Space + Dp(state.verticalPriceBarWidth() / LocalDensity.current.density)
         if (iconsPrices.size > 1) {
@@ -327,29 +329,29 @@ private fun CandleTransactions(state: PriceBoardState) {
     val densityScale = LocalDensity.current.maxValue()
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
 
-    val filterVisible = state.priceItems.filterVisible(state, endOffset = 1)
+    val actualViewPort = state.viewport()
+    val filterVisible = remember(actualViewPort) { state.priceItems.filterVisible(actualViewPort, endOffset = 1) }
+
     filterVisible.forEach { priceItem ->
-        val iconsPrices = state.visibleTransactionsPerPriceItem[priceItem]?.map { it.iconColor() to it }?.distinct()
-            ?.sortedBy { if (state.pointingTransaction == it.second) Int.MAX_VALUE else it.first.priority }
+        val iconsPrices = state.visibleTransactionsPerPriceItem[priceItem]?.iconPrices
         //draw candle transaction
-        iconsPrices?.forEach { (ic, transaction) ->
+        var pointedIconPrice: Pair<IconColor, Transaction>? = null
+        iconsPrices?.forEach iconPrices@{ iconPrice ->
+            val (ic, transaction) = iconPrice
             val painter = rememberVectorPainter(image = ic.imageVector.get())
-            Canvas {
-                withTranslateAndScale(state) {
-                    val x = priceItem.index * DashboardSizes.PriceItemWidth
-                    val y = transaction.unitPrice()?.toFloat() ?: priceItem.centerY
-                    translate(x + priceItemWidthHalf, y) {
-                        resetScale(state) {
-                            translate(ic.candleOffset.x, ic.candleOffset.y) {
-                                val scale = ic.candleScale.get(isSelected = state.pointingTransaction == transaction) * densityScale
-                                draw(painter, scale, colorFilter = tint(color = ic.color.get(isSelected = state.clickedTransaction == transaction)))
-                            }
-                        }
-                    }
-                }
+            if (state.pointingTransaction == transaction) {
+                pointedIconPrice = iconPrice
+                return@iconPrices
             }
+            drawCandleTransactionIcon(state, priceItem, transaction, priceItemWidthHalf, ic, densityScale, painter)
+        }
+        //draw the pointing one latest to overdraw any other
+        pointedIconPrice?.let { (ic, transaction) ->
+            val painter = rememberVectorPainter(image = ic.imageVector.get())
+            drawCandleTransactionIcon(state, priceItem, transaction, priceItemWidthHalf, ic, densityScale, painter)
         }
     }
+
     //transaction highlight
     state.clickedTransaction?.let { (timestamp, transaction) ->
         transaction.priceItem?.let { priceItem ->
@@ -368,6 +370,32 @@ private fun CandleTransactions(state: PriceBoardState) {
                         resetScale(state) {
                             drawCircle(AppTheme.Colors.Secondary, radius = radius.value, center = Offset.Zero, style = drawStyle)
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun drawCandleTransactionIcon(
+    state: PriceBoardState,
+    priceItem: PriceItem,
+    transaction: Transaction,
+    priceItemWidthHalf: Float,
+    ic: IconColor,
+    densityScale: Float,
+    painter: VectorPainter
+) {
+    Canvas {
+        withTranslateAndScale(state) {
+            val x = priceItem.index * DashboardSizes.PriceItemWidth
+            val y = transaction.unitPrice()?.toFloat() ?: priceItem.centerY
+            translate(x + priceItemWidthHalf, y) {
+                resetScale(state) {
+                    translate(ic.candleOffset.x, ic.candleOffset.y) {
+                        val scale = ic.candleScale.get(isSelected = state.pointingTransaction == transaction) * densityScale
+                        draw(painter, scale, colorFilter = tint(color = ic.color.get(isSelected = state.clickedTransaction == transaction)))
                     }
                 }
             }

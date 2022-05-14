@@ -1,5 +1,6 @@
 package com.scurab.ptracker.app.ext
 
+import androidx.compose.ui.geometry.Rect
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
@@ -10,18 +11,24 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
-fun List<PriceItem>.filterVisibleIndexes(state: PriceBoardState, step: Int = 1, startOffset: Int = 0, endOffset: Int = 0): IntProgression {
-    val vp = state.viewport()
+fun List<PriceItem>.filterVisibleIndexes(state: PriceBoardState, step: Int = 1, startOffset: Int = 0, endOffset: Int = 0): IntProgression =
+    filterVisibleIndexes(state.viewport(), step, startOffset, endOffset)
+
+
+fun List<PriceItem>.filterVisibleIndexes(viewPort: Rect, step: Int = 1, startOffset: Int = 0, endOffset: Int = 0): IntProgression {
     val colWidth = AppTheme.DashboardSizes.PriceItemWidth
-    val firstIndex = floor((max(0f, vp.left) / colWidth)).toInt()
-    val widthToFill = vp.nWidth + min(vp.left, 0f)
+    val firstIndex = floor((max(0f, viewPort.left) / colWidth)).toInt()
+    val widthToFill = viewPort.nWidth + min(viewPort.left, 0f)
     val count = ceil(min(widthToFill, size * colWidth) / colWidth).toInt()
     val lastIndex = (firstIndex + count).coerceAtMost(size)
     return (firstIndex + startOffset) until (lastIndex + endOffset) step step
 }
 
-fun List<PriceItem>.filterVisible(state: PriceBoardState, endOffset: Int = 0, step: Int = 1): List<PriceItem> {
-    val range = filterVisibleIndexes(state, step, endOffset = endOffset)
+fun List<PriceItem>.filterVisible(state: PriceBoardState, endOffset: Int = 0, step: Int = 1): List<PriceItem> =
+    filterVisible(state.viewport(), endOffset, step)
+
+fun List<PriceItem>.filterVisible(viewPort: Rect, endOffset: Int = 0, step: Int = 1): List<PriceItem> {
+    val range = filterVisibleIndexes(viewPort, step, endOffset = endOffset)
     return filterIndexed { index, _ -> index in range }
 }
 

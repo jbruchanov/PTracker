@@ -18,6 +18,7 @@ interface HasOutcome {
 
 sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMapOf()) :
     HasDateTime, WithCache by MapCache(cache) {
+    abstract val id: Int
     abstract val exchange: String
     abstract val type: String
     abstract override val dateTime: LocalDateTime
@@ -35,6 +36,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     var originalTransaction: Transaction? = null
 
     data class Income(
+        override val id: Int,
         override val exchange: String,
         override val type: String,
         override val dateTime: LocalDateTime,
@@ -53,6 +55,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     }
 
     data class Outcome(
+        override val id: Int,
         override val exchange: String,
         override val type: String,
         override val dateTime: LocalDateTime,
@@ -71,6 +74,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     }
 
     data class Trade(
+        override val id: Int,
         override val exchange: String,
         override val type: String,
         override val dateTime: LocalDateTime,

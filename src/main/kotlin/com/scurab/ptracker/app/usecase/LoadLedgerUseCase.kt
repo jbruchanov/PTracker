@@ -23,9 +23,8 @@ class LoadLedgerUseCase(
                     .drop(1)
                     .mapIndexedNotNull { index, row ->
                         try {
-                            row.toTransaction(exchange)
+                            row.toTransaction(index, exchange)
                         } catch (e: Exception) {
-                            row.toTransaction(exchange)
                             throw IllegalStateException("Unable to read row:$index sheet:${sheet.sheetName}", e)
                         }
                     }

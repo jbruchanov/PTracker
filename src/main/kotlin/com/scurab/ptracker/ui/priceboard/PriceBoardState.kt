@@ -3,10 +3,8 @@ package com.scurab.ptracker.ui.priceboard
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -26,6 +24,7 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.GroupStrategy
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.usecase.PriceItemTransactions
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +52,7 @@ class PriceBoardState(
     var clickedTransaction by mutableStateOf<Pair<Long, Transaction>?>(null)
     var priceItems by mutableStateOf(items)
     var visibleTransactions by mutableStateOf(emptyList<Transaction>())
-    var visibleTransactionsPerPriceItem by mutableStateOf(emptyMap<PriceItem, List<Transaction>>())
+    var visibleTransactionsPerPriceItem by mutableStateOf(emptyMap<PriceItem, PriceItemTransactions>())
 
     //var ledger by mutableStateOf(Ledger.Empty)
     var selectedAsset by mutableStateOf<Asset?>(null)
@@ -69,9 +68,8 @@ class PriceBoardState(
 
     private lateinit var composeCoroutineScope: CoroutineScope
 
-    @Composable
-    fun init() {
-        composeCoroutineScope = rememberCoroutineScope()
+    fun init(scope: CoroutineScope) {
+        composeCoroutineScope = scope
     }
 
     fun viewportPointer() = pointer.normalize(canvasSize).transformNormToViewPort(viewport())
@@ -111,7 +109,7 @@ class PriceBoardState(
             .coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1])
 
         val maxMinDiff = sample.maxOf { it.high } - sample.minOf { it.low }
-        val scaleY = size.height / (1.25f * maxMinDiff.toFloat())
+        val scaleY = size.height / (2.25f * maxMinDiff.toFloat())
             .coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1])
         if (alignCenter) {
             offsetX += (size.width - verticalPriceBarWidth() - DashboardSizes.PriceItemWidth) / 2 / scaleX
