@@ -16,6 +16,7 @@ class StatsChartCalcUseCase(
         primaryCurrency: String
     ): LineChartData {
         val stats = statsCalculatorUseCase.calculateMarketDailyGains(appData, primaryCurrency)
+        if (stats.isEmpty()) return LineChartData.Empty
         val minY = stats.minOf { it.cost.min(it.marketPrice) }.toFloat()
         val maxY = stats.maxOf { it.cost.max(it.marketPrice) }.toFloat()
         val requiredY = abs(maxY - minY)
@@ -32,7 +33,13 @@ class StatsChartCalcUseCase(
             cost.add(Point(x, yCost))
         }
 
-        return LineChartData(marketPrice, cost)
+        val latestMarketPriceY = marketPrice.last().y
+        val latestMarketPrice = listOf(
+            Point(0f, latestMarketPriceY),
+            Point(1f, latestMarketPriceY)
+        )
+
+        return LineChartData(stats, marketPrice, cost, latestMarketPrice)
     }
 }
 

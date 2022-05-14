@@ -30,6 +30,7 @@ interface Texts {
     val TotalBoughtOwned: String
     val PerUnit: String
     val Fees: String
+    val NoPrimaryCurrencyChart: String
 }
 
 object English : Texts {
@@ -57,4 +58,5 @@ object English : Texts {
     override val TotalBoughtOwned: String = "Total bought/owned"
     override val PerUnit: String = "/unit"
     override val Fees: String = "Fees"
+    override val NoPrimaryCurrencyChart: String = "Set primary currency in settings to see this chart"
 }

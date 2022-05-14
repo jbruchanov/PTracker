@@ -17,11 +17,18 @@ class LoadLedgerUseCase(
         val workbook: Workbook = XSSFWorkbook(file)
         val items = workbook.sheetIterator().asSequence()
             .toList()
-            .map {
-                val exchange = it.sheetName
-                it.rowIterator().asSequence()
+            .map { sheet ->
+                val exchange = sheet.sheetName
+                sheet.rowIterator().asSequence()
                     .drop(1)
-                    .mapNotNull { it.toTransaction(exchange) }
+                    .mapIndexedNotNull { index, row ->
+                        try {
+                            row.toTransaction(exchange)
+                        } catch (e: Exception) {
+                            row.toTransaction(exchange)
+                            throw IllegalStateException("Unable to read row:$index sheet:${sheet.sheetName}", e)
+                        }
+                    }
                     .toList()
             }
             .flatten()

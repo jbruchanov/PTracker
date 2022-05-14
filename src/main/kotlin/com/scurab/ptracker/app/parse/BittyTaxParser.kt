@@ -1,11 +1,13 @@
 import com.scurab.ptracker.app.ext.ZERO
 import com.scurab.ptracker.app.model.Transaction
 import kotlinx.datetime.toKotlinLocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import org.apache.poi.ss.usermodel.Row
 
 interface BittyTaxParser {
     fun Row.shouldSkip() = getCell(TYPE) == null || getCell(TIMESTAMP) == null
-    val Row.timestamp get() = getCell(TIMESTAMP).localDateTimeCellValue.toKotlinLocalDateTime()
+    val Row.timestamp get() = kotlin.runCatching { getCell(TIMESTAMP).localDateTimeCellValue.toKotlinLocalDateTime() }.getOrNull()
+        ?: getCell(TIMESTAMP).stringCellValue.toLocalDateTime()
     val Row.type: String get() = getCell(TYPE).stringCellValue
     val Row.buyQuantity get() = getCell(BUY_QUANTITY)?.numericCellValue?.toBigDecimal()
     val Row.buyAsset get() = getCell(BUY_ASSET).stringCellValue
@@ -23,6 +25,7 @@ interface BittyTaxParser {
         if (shouldSkip()) return null
         val buyQuantity = buyQuantity
         val sellQuantity = sellQuantity
+        val timestamp = timestamp
         return when {
             buyQuantity != null && sellQuantity != null -> {
                 Transaction.Trade(

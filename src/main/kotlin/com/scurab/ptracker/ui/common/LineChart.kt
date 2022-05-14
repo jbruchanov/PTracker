@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -21,6 +24,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.toAbsoluteCoordinatesPath
@@ -57,11 +62,11 @@ fun LineChart(
     val density = LocalDensity.current.density
     BoxWithConstraints {
         val canvasSize = remember(maxWidth, maxHeight) { Size(maxWidth.toPx(density), maxHeight.toPx(density)) }
-        val lienPath = remember(canvasSize, relativePoints) { relativePoints.toAbsoluteCoordinatesPath(canvasSize) }
+        val linePath = remember(canvasSize, relativePoints) { relativePoints.toAbsoluteCoordinatesPath(canvasSize) }
         val fillPath = remember(canvasSize, fillingGradientColors, relativePoints) {
             Path().apply {
                 if (fillingGradientColors != null) {
-                    addPath(lienPath)
+                    addPath(linePath)
                     lineTo(canvasSize.width, canvasSize.height)
                     lineTo(0f, canvasSize.height)
                     close()
@@ -70,13 +75,12 @@ fun LineChart(
             }
         }
         Canvas(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             if (debug) {
                 drawCircle(Color.Green, 50f, center = Offset.Zero)
             }
-            drawPath(path = lienPath, color = strokeColor, style = style)
+            drawPath(path = linePath, color = strokeColor, style = style)
             if (fillingGradientColors != null && fillingGradientColors.isNotEmpty()) {
                 val brush = Brush.linearGradient(fillingGradientColors, end = Offset(0f, size.height))
                 drawPath(path = fillPath, brush = brush)
