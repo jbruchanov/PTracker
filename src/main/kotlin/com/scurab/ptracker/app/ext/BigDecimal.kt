@@ -25,30 +25,22 @@ fun BigDecimal.round(isFiat: Boolean, scaleFiat: Int = 4, scaleCrypto: Int = 8):
 }
 
 fun BigDecimal.valueIf(value: Boolean, falseValue: BigDecimal = ZERO) = if (value) this else falseValue
-
-val BigDecimal.f8: String get() = f(8)
-val BigDecimal.f6 get() = f(6)
-val BigDecimal.f4: String get() = f(4)
-val BigDecimal.gf4: String get() = gf(4)
-val BigDecimal.f2 get() = f(2)
 val BigDecimal.percf2 get() = (this * 100.bd).f(2) + "%"
-val BigDecimal.gf2 get() = gf(2)
 val BigDecimal.s2 get() = (this.setScale(2, RoundingMode.HALF_UP))
 fun BigDecimal.f(digits: Int): String = BigDecimalFormats.formats[digits].value.format(this)
 fun BigDecimal.gf(digits: Int): String = BigDecimalFormats.groupingFormats[digits].value.format(this)
 
-fun BigDecimal.gfa(): String {
+fun BigDecimal.hr(): BigDecimal {
     repeat(4) {
         val scale = (it * 2) + 2
         val v = setScale(scale, RoundingMode.HALF_UP)
-        val scalePlus1 = (it != 0 || v.toInt() == 0)
-        if (!v.isZero()) return gf(scale + scalePlus1.int())
+        val scalePlus1 = (it != 0 || v.toInt() < 10)
+        if (!v.isZero()) return setScale(scale + scalePlus1.int(), RoundingMode.HALF_UP)
     }
-    return "0"
+    return ZERO.setScale(2)
 }
 
-fun BigDecimal.gf4p() = (this.setScale(4, RoundingMode.HALF_UP).takeIf { it.isNotZero() } ?: this).toPlainString()
-
+fun BigDecimal.hrs(): String = hr().toPlainString()
 val BigDecimal.align: BigDecimal get() = align(8)
 fun BigDecimal.align(scale: Int) = setScale(scale, RoundingMode.HALF_UP)
 

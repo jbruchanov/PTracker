@@ -46,9 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.fiatCoins
 import com.scurab.ptracker.app.ext.firstIf
-import com.scurab.ptracker.app.ext.gf2
-import com.scurab.ptracker.app.ext.gf4
-import com.scurab.ptracker.app.ext.gf4p
+import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.ext.imageOrNull
 import com.scurab.ptracker.app.ext.isNotLastIndex
 import com.scurab.ptracker.app.ext.isNotZero
@@ -183,19 +181,19 @@ private fun RowFooter(
             WSpacer(ColumnWidths.IconCoinGap)
             TextCell(fiatCoin.item, textAlign = TextAlign.Left, width = ColumnWidths.Coin.default2If(hasMultipleFiats).scaled())
             WSpacer(ColumnWidths.Balance.scaled())
-            TextCell(holdings.totalCost(fiatCoin).gf2, width = ColumnWidths.Cost.scaled())
+            TextCell(holdings.totalCost(fiatCoin).hrs(), width = ColumnWidths.Cost.scaled())
             WSpacer(ColumnWidths.Cost.scaled())
-            TextCell(holdings.totalMarketValue(fiatCoin).gf2, width = ColumnWidths.MarketValue.scaled())
+            TextCell(holdings.totalMarketValue(fiatCoin).hrs(), width = ColumnWidths.MarketValue.scaled())
             WSpacer4()
             val totalRoi = holdings.totalRoi(fiatCoin)
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
                 val color = AppTheme.Colors.RedGreenWhite.get(isEnabled = totalRoi.isNotZero(), isEven = !totalRoi.isPositive)
                 TextCell(
-                    (totalRoi.gf2 + "%"), color = color, textAlign = TextAlign.Right, width = ColumnWidths.ROI.scaled()
+                    (totalRoi.hrs() + "%"), color = color, textAlign = TextAlign.Right, width = ColumnWidths.ROI.scaled()
                 )
                 HSpacer()
                 TextCell(
-                    holdings.totalGains(fiatCoin).takeIf { it.isNotZero() }?.gf2 ?: "",
+                    holdings.totalGains(fiatCoin).takeIf { it.isNotZero() }?.hrs() ?: "",
                     color = color,
                     textAlign = TextAlign.Right,
                     width = ColumnWidths.ROI.scaled(),
@@ -242,21 +240,21 @@ private fun RowItem(onClick: () -> Unit, index: Int, holdings: OnlineHoldingStat
         CoinIcon(holdings.asset.iconCoin1().imageOrNull(), isColored, scale)
         WSpacer(ColumnWidths.IconCoinGap)
         TextCell(holdings.asset.cryptoLabelOnlyIf(!hasMultipleFiats), textAlign = TextAlign.Left, width = ColumnWidths.Coin.default2If(hasMultipleFiats).scaled())
-        TextCell(holdings.actualCryptoBalance.gf4p(), width = ColumnWidths.Balance.scaled())
+        TextCell(holdings.actualCryptoBalance.hrs(), width = ColumnWidths.Balance.scaled())
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(ColumnWidths.Cost.scaled())) {
-            TextCell(holdings.cost.gf2)
+            TextCell(holdings.cost.hrs())
             HSpacer()
-            TextCell(holdings.costUnit.gf2, color = AppColors.current.SecondaryVariant, style = AppTheme.TextStyles.TinyMonospace)
+            TextCell(holdings.costUnit.hrs(), color = AppColors.current.SecondaryVariant, style = AppTheme.TextStyles.TinyMonospace)
         }
-        TextCell(holdings.marketValueUnitPrice.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.Cost.scaled(), color = AppColors.current.Secondary)
-        TextCell(holdings.marketValue.takeIf { it.isNotZero() }?.gf2 ?: "", width = ColumnWidths.MarketValue.scaled())
+        TextCell(holdings.marketValueUnitPrice.takeIf { it.isNotZero() }?.hrs() ?: "", width = ColumnWidths.Cost.scaled(), color = AppColors.current.Secondary)
+        TextCell(holdings.marketValue.takeIf { it.isNotZero() }?.hrs() ?: "", width = ColumnWidths.MarketValue.scaled())
         WSpacer4()
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(width = ColumnWidths.ROI.scaled())) {
             val color = AppTheme.Colors.RedGreenWhite.get(isEnabled = holdings.roi.isNotZero(), isEven = !holdings.roi.isPositive)
-            TextCell(holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.gf2?.let { "$it%" } ?: "", color = color, textAlign = TextAlign.Right)
+            TextCell(holdings.roi.takeIf { holdings.marketValueUnitPrice.isNotZero() }?.hrs()?.let { "$it%" } ?: "", color = color, textAlign = TextAlign.Right)
             HSpacer()
             TextCell(
-                holdings.gain.takeIf { it.isNotZero() }?.gf2 ?: "",
+                holdings.gain.takeIf { it.isNotZero() }?.hrs() ?: "",
                 color = color,
                 textAlign = TextAlign.Right,
                 width = ColumnWidths.ROI.scaled(),
@@ -367,15 +365,15 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.TotalBoughtOwned, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                TextCell(onlineHoldingStats.totalCryptoBalance.gf4, color = AppColors.current.Secondary)
-                TextCell(onlineHoldingStats.totalMarketValue.gf2)
+                TextCell(onlineHoldingStats.totalCryptoBalance.hrs(), color = AppColors.current.Secondary)
+                TextCell(onlineHoldingStats.totalMarketValue.hrs())
             }
             WSpacer4()
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.TotalBoughtOwned, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell("1.0", color = AppColors.current.Secondary)
-                TextCell(onlineHoldingStats.costTotalUnit.gf4)
+                TextCell(onlineHoldingStats.costTotalUnit.hrs())
             }
             WSpacer4()
         }
@@ -383,8 +381,8 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.FreeIncome, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                TextCell(onlineHoldingStats.freeIncome.gf2, color = AppColors.current.Green)
-                TextCell(onlineHoldingStats.freeIncomeMarketPrice.gf2, color = AppColors.current.Green)
+                TextCell(onlineHoldingStats.freeIncome.hrs(), color = AppColors.current.Green)
+                TextCell(onlineHoldingStats.freeIncomeMarketPrice.hrs(), color = AppColors.current.Green)
             }
             WSpacer4()
         }
@@ -392,10 +390,10 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.NoProfitableOutcome, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                TextCell(onlineHoldingStats.nonProfitableOutcome.gf4p(), color = AppColors.current.Red)
+                TextCell(onlineHoldingStats.nonProfitableOutcome.hrs(), color = AppColors.current.Red)
                 val nonProfitableOutcomeMarketPrice = onlineHoldingStats.nonProfitableOutcomeMarketPrice.s2
                 TextCell(
-                    nonProfitableOutcomeMarketPrice.gf2,
+                    nonProfitableOutcomeMarketPrice.hrs(),
                     color = AppColors.current.RedGreenWhite.get(isEnabled = nonProfitableOutcomeMarketPrice.abs().isNotZero(), isEven = true)
                 )
             }
@@ -404,9 +402,9 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.Fees, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                TextCell(onlineHoldingStats.feesCrypto.gf4p(), color = AppColors.current.Red)
+                TextCell(onlineHoldingStats.feesCrypto.hrs(), color = AppColors.current.Red)
                 val feesCryptoMarketValue = onlineHoldingStats.feesCryptoMarketValue.s2
-                TextCell(feesCryptoMarketValue.gf2, color = AppColors.current.RedGreenWhite.get(isEnabled = feesCryptoMarketValue.abs().isNotZero(), isEven = true))
+                TextCell(feesCryptoMarketValue.hrs(), color = AppColors.current.RedGreenWhite.get(isEnabled = feesCryptoMarketValue.abs().isNotZero(), isEven = true))
             }
         }
     }
@@ -424,7 +422,7 @@ private fun ColumnScope.DetailFiat(fiatCoin: FiatCoin, state: StatsUiState, exch
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
             TextCell(texts.Fees, isMonoSpace = false, textAlign = TextAlign.Start)
             HSpacer()
-            TextCell(fees.gf2, color = if (fees.isNotZero()) AppColors.current.Red else AppColors.current.OnBackground)
+            TextCell(fees.hrs(), color = if (fees.isNotZero()) AppColors.current.Red else AppColors.current.OnBackground)
         }
     }
 }
@@ -451,9 +449,9 @@ private fun DetailExchangeCoinStats(exchangeCoverage: List<CoinExchangeStats>): 
                 WSpacer()
                 TextCell(
                     text = when {
-                        !stats.coin.isFiat() -> stats.quantity.gf4p()
-                        stats.coin.isFiat() && stats.quantity >= 0.01.bd -> stats.quantity.gf2
-                        else -> stats.quantity.gf4p()
+                        !stats.coin.isFiat() -> stats.quantity.hrs()
+                        stats.coin.isFiat() && stats.quantity >= 0.01.bd -> stats.quantity.hrs()
+                        else -> stats.quantity.hrs()
                     },
                     width = ColumnWidths.DetailContentBalance,
                     color = if (stats.coin.isFiat()) AppColors.current.OnBackground else AppColors.current.Secondary

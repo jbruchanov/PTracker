@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
-import com.scurab.ptracker.app.ext.gf2
+import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.ext.toPx
@@ -233,9 +233,9 @@ fun PortfolioChart(chartState: PortfolioChartUiState.Data) {
                 ) {
                     Text(stats.formattedDateTime, style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
                     WSpacer2()
-                    Text("+${stats.marketPrice.gf2}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
+                    Text("+${stats.marketPrice.hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
                     WSpacer2()
-                    Text("-${stats.cost.gf2}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
+                    Text("-${stats.cost.hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
                 }
             }
         }
@@ -277,7 +277,7 @@ private fun RowScope.StatsPieChart(state: StatsUiState) {
                     WSpacer2()
                     Text(asset.cryptoLabelOnlyIf(true), maxLines = 1)
                 }
-                Text((perc.toBigDecimal() * 100.bd).gf2 + "%", textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.width(75.dp))
+                Text((perc.toBigDecimal() * 100.bd).hrs() + "%", textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.width(75.dp))
             }
             HSpacer()
             acc + perc
