@@ -25,7 +25,7 @@ class LoadLedgerUseCase(
                         try {
                             row.toTransaction(index, exchange)
                         } catch (e: Exception) {
-                            throw IllegalStateException("Unable to read row:$index sheet:${sheet.sheetName}", e)
+                            throw IllegalStateException("Unable to read row:${index + 1} sheet:${sheet.sheetName}", e)
                         }
                     }
                     .toList()
