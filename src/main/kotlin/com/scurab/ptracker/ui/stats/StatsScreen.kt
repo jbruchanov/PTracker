@@ -236,6 +236,8 @@ fun PortfolioChart(chartState: PortfolioChartUiState.Data) {
                     Text("+${stats.marketPrice.hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
                     WSpacer2()
                     Text("-${stats.cost.hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
+                    WSpacer2()
+                    Text(stats.percents, style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
                 }
             }
         }
