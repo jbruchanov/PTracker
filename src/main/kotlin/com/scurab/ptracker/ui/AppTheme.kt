@@ -149,6 +149,9 @@ object AppTheme {
         val Space6 = 24.dp
         val Space8 = 32.dp
 
+        val Padding05 = 4.dp
+        val Padding = 8.dp
+
         val ThinLine = 1.dp
         val ThickLine = 2.dp
 

@@ -4,6 +4,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -35,6 +37,8 @@ fun main(args: Array<String>) {
     App.start()
 }
 
+val LocalWindow = staticCompositionLocalOf<ComposeWindow?> { null }
+
 object App : KoinComponent {
     fun start() = application {
         val resolution = Toolkit.getDefaultToolkit().screenSize
@@ -49,7 +53,8 @@ object App : KoinComponent {
 
             CompositionLocalProvider(
                 LocalDensity provides density,
-                LocalTexts provides English
+                LocalTexts provides English,
+                LocalWindow provides window
             ) {
                 AppTheme {
                     navigation()

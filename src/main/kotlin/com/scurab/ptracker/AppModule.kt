@@ -14,10 +14,15 @@ import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
 import com.scurab.ptracker.app.usecase.StatsChartCalcUseCase
 import com.scurab.ptracker.app.usecase.TestCryptoCompareKeyUseCase
 import com.scurab.ptracker.component.KoinViewModelFactory
+import com.scurab.ptracker.component.TextsProvider
+import com.scurab.ptracker.component.error.ErrorHandler
+import com.scurab.ptracker.component.error.JavaErrorHandler
 import com.scurab.ptracker.component.navigation.ComponentFactory
 import com.scurab.ptracker.component.navigation.DefaultNavSpecs
 import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
+import com.scurab.ptracker.component.picker.FilePicker
+import com.scurab.ptracker.component.picker.JavaFilePicker
 import com.scurab.ptracker.net.CryptoCompareClient
 import com.scurab.ptracker.net.defaultHttpClient
 import com.scurab.ptracker.ui.DateTimeFormats
@@ -51,6 +56,9 @@ fun createKoinModule(appArgs: Array<String>) = module {
     single<AppSettings> { AppSettingsJsonRepository.default(get()) }
     single { CryptoCompareClient(get(), get(), get()) }
     single { PricesRepository(get(), get()) }
+    single<FilePicker> { JavaFilePicker() }
+    single<ErrorHandler> { JavaErrorHandler(get()) }
+    single { TextsProvider(get()) }
 
     factory { LoadPriceHistoryUseCase(get(), get()) }
     factory { LoadLedgerUseCase(get()) }
@@ -64,8 +72,8 @@ fun createKoinModule(appArgs: Array<String>) = module {
     fun Scope.getAppNavController() = get<NavController>(NavigationScope.App)
     fun Scope.getMainNavController() = get<NavController>(NavigationScope.Main)
 
-    single { args -> AppViewModel(args.get(), get(), get(), get(), getAppNavController()) }
-    factory { MainViewModel(get(), get(), get(), get(), getMainNavController()) }
+    single { args -> AppViewModel(args.get(), get(), get(), get(), get(), get(), get(), getAppNavController()) }
+    factory { MainViewModel(get(), get(), get(), get(), get(), getMainNavController()) }
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), get(), get(), get(), getMainNavController()) }
     factory { StatsViewModel(get(), get(), get(), get()) }

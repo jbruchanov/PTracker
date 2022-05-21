@@ -6,6 +6,7 @@ import com.scurab.ptracker.app.ext.round
 import com.scurab.ptracker.app.ext.sameElseSwap
 import kotlinx.datetime.LocalDateTime
 import java.math.BigDecimal
+import java.util.UUID
 
 interface HasIncome {
     val buyQuantity: BigDecimal
@@ -33,6 +34,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     abstract val assetsLabel: String
     abstract val assets: Set<String>
 
+    val uuid = UUID.randomUUID()
     var priceItem: PriceItem? by cache
     var originalTransaction: Transaction? = null
 

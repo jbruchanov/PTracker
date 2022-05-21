@@ -32,6 +32,11 @@ interface Texts {
     val Fees: String
     val NoPrimaryCurrencyChart: String
     val TextSample: String
+    val SelectBittyTaxFile: String
+    val FullPath: String
+    val Open: String
+
+    val ErrUnableToOpenXlsFile: String
 }
 
 object English : Texts {
@@ -61,4 +66,8 @@ object English : Texts {
     override val Fees: String = "Fees"
     override val NoPrimaryCurrencyChart: String = "Set primary currency in settings to see this chart"
     override val TextSample: String = "TextSample"
+    override val SelectBittyTaxFile: String = "Select BittyTax Excel file"
+    override val FullPath: String = "Full path to xls file"
+    override val Open: String = "Open"
+    override val ErrUnableToOpenXlsFile = "Unable to open XLS(x) file"
 }
