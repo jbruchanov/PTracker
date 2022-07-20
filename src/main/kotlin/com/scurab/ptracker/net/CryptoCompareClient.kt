@@ -92,6 +92,7 @@ class CryptoCompareClient(
                                 else -> channel.trySend(obj)
                             }
                         }
+                        else -> Unit
                     }
                 }
             }

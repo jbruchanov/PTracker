@@ -65,7 +65,7 @@ class StatsViewModel(
                         uiState.portfolioChartUiState = PortfolioChartUiState.Data(statsChartCalcUseCase.getLineChartData(data, primaryCoin))
                     }
                 } catch (e: Exception) {
-                    uiState.portfolioChartUiState = PortfolioChartUiState.Error(e.message ?: "Null exception message")
+                    uiState.portfolioChartUiState = PortfolioChartUiState.Error((e.message ?: "Null exception message") + "\n" + e.stackTraceToString())
                 }
             }
         }

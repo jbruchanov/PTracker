@@ -90,6 +90,7 @@ internal class TransactionKtTest {
     }
 
     private fun transaction(buyQuantity: BigDecimal, buyAsset: String, sellQuantity: BigDecimal, sellAsset: String, feeQuantity: BigDecimal, feeAsset: String) = Transaction.Trade(
+        id = 0,
         exchange = "Test",
         type = Transaction.TypeTrade,
         dateTime = now(),

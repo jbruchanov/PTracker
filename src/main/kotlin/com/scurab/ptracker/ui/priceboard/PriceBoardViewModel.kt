@@ -169,6 +169,7 @@ class PriceBoardViewModel(
                     updateData(data, filters.firstIf(!uiState.hasTradeOnlyFilter), false)
                 }
             }
+            else -> Unit
         }
     }
 

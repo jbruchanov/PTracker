@@ -29,7 +29,6 @@ open class NavSpecsBuilder(private val componentFactory: ComponentFactory) {
     inline fun <reified LC : LifecycleComponent, T : NavArgs> screen(navToken: NavToken<T>, noinline content: @Composable (LC) -> Unit) {
         register(NavRecord(navToken, LC::class, content))
     }
-
     inline fun <reified LC : LifecycleComponent> screen(key: String, noinline content: @Composable (LC) -> Unit) {
         register(NavRecord(StringNavToken(key), LC::class, content))
     }

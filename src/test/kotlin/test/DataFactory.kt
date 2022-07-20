@@ -9,8 +9,10 @@ fun trade(
     buy: BigDecimal, buyAsset: String,
     sell: BigDecimal, sellAsset: String,
     fee: BigDecimal, feeAsset: String,
-    localDateTime: LocalDateTime = now()
+    localDateTime: LocalDateTime = now(),
+    id: Int = 0
 ) = Transaction.Trade(
+    id = id,
     exchange = "test",
     type = Transaction.TypeTrade,
     dateTime = localDateTime,
