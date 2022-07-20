@@ -3,9 +3,9 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.21"
-    kotlin("plugin.serialization") version "1.6.21"
-    id("org.jetbrains.compose") version "1.2.0-alpha01-dev683"
+    kotlin("jvm") version "1.7.10"
+    kotlin("plugin.serialization") version "1.7.10"
+    id("org.jetbrains.compose") version "1.2.0-alpha01-dev745"
 }
 
 group = "com.scurab"
@@ -28,6 +28,7 @@ dependencies {
     val coroutines = "1.6.1"
 
     implementation(compose.desktop.currentOs)
+    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:$coroutines")
@@ -60,7 +61,10 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions {
+        jvmTarget = "11"
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xcontext-receivers")
+    }
 }
 
 compose.desktop {
