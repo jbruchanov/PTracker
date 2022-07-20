@@ -13,6 +13,7 @@ import com.scurab.ptracker.app.usecase.PriceBoardDataProcessingUseCase
 import com.scurab.ptracker.app.usecase.StatsCalculatorUseCase
 import com.scurab.ptracker.app.usecase.StatsChartCalcUseCase
 import com.scurab.ptracker.app.usecase.TestCryptoCompareKeyUseCase
+import com.scurab.ptracker.app.util.LedgerParsingProcessor
 import com.scurab.ptracker.component.KoinViewModelFactory
 import com.scurab.ptracker.component.TextsProvider
 import com.scurab.ptracker.component.error.ErrorHandler
@@ -31,6 +32,7 @@ import com.scurab.ptracker.ui.main.MainViewModel
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
 import com.scurab.ptracker.ui.stats.StatsViewModel
+import com.scurab.ptracker.ui.stats.dates.LedgerDateStatsViewModel
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
 
@@ -61,7 +63,7 @@ fun createKoinModule(appArgs: Array<String>) = module {
     single { TextsProvider(get()) }
 
     factory { LoadPriceHistoryUseCase(get(), get()) }
-    factory { LoadLedgerUseCase(get()) }
+    factory { LoadLedgerUseCase(get(), LedgerParsingProcessor()) }
     factory { LoadDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
     factory { PriceBoardDataProcessingUseCase() }
     factory { LoadIconsUseCase(get(), get(), get()) }
@@ -77,4 +79,5 @@ fun createKoinModule(appArgs: Array<String>) = module {
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), get(), get(), get(), getMainNavController()) }
     factory { StatsViewModel(get(), get(), get(), get()) }
+    factory { LedgerDateStatsViewModel() }
 }

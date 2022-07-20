@@ -2,6 +2,7 @@ package com.scurab.ptracker.app.usecase
 
 import BittyTaxParser
 import com.scurab.ptracker.app.model.Ledger
+import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.repository.AppSettings
 import okhttp3.internal.closeQuietly
 import org.apache.poi.ss.usermodel.Workbook
@@ -10,7 +11,8 @@ import java.io.File
 
 
 class LoadLedgerUseCase(
-    private val appSettings: AppSettings
+    private val appSettings: AppSettings,
+    private val mapping: (Transaction) -> Transaction?
 ) : BittyTaxParser {
 
     fun load(file: File): Ledger {
@@ -32,7 +34,9 @@ class LoadLedgerUseCase(
             }
             .flatten()
             .sortedByDescending { it.dateTime }
+            .mapNotNull(mapping)
         workbook.closeQuietly()
         return Ledger(items, appSettings.primaryCoin)
     }
 }
+

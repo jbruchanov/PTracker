@@ -122,3 +122,15 @@ fun Transaction.getAmount(asset: String): BigDecimal {
 }
 
 fun Transaction.getFees(asset: String): BigDecimal = if (feeAsset == asset) -feeQuantity else ZERO
+
+fun Transaction.replaceCoin(old: String, new: String): Transaction {
+    return when {
+        this is Transaction.Trade && buyAsset == old -> copy(buyAsset = new, feeAsset = newFeeAssetIfOldEqualsElseOld(old, new))
+        this is Transaction.Trade && sellAsset == old -> copy(sellAsset = new, feeAsset = newFeeAssetIfOldEqualsElseOld(old, new))
+        this is Transaction.Income && buyAsset == old -> copy(buyAsset = new, feeAsset = newFeeAssetIfOldEqualsElseOld(old, new))
+        this is Transaction.Outcome && sellAsset == old -> copy(sellAsset = new, feeAsset = newFeeAssetIfOldEqualsElseOld(old, new))
+        else -> throw IllegalStateException("Unhandled case for:$this")
+    }
+}
+
+fun Transaction.newFeeAssetIfOldEqualsElseOld(old: String, new: String) = if (feeAsset == old) new else old
