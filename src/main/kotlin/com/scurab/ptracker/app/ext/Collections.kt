@@ -1,6 +1,6 @@
 package com.scurab.ptracker.app.ext
 
-import com.scurab.ptracker.app.model.GroupStrategy
+import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.HasDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -12,9 +12,9 @@ import kotlin.math.floor
 import kotlin.math.min
 
 
-fun List<HasDateTime>.firstIndexOf(other: HasDateTime, grouping: GroupStrategy): Int {
-    val v = grouping.groupingKey(other.dateTime)
-    return indexOfFirst { grouping.groupingKey(it.dateTime) == v }
+fun List<HasDateTime>.firstIndexOf(other: HasDateTime, grouping: DateGrouping): Int {
+    val v = grouping.toLongGroup(other.dateTime)
+    return indexOfFirst { grouping.toLongGroup(it.dateTime) == v }
 }
 
 fun <T> List<T>.takeAround(index: Int, n: Int): List<T> {

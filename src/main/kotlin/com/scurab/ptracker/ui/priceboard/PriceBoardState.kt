@@ -21,7 +21,7 @@ import com.scurab.ptracker.app.ext.takeAround
 import com.scurab.ptracker.app.ext.toPx
 import com.scurab.ptracker.app.ext.transformNormToViewPort
 import com.scurab.ptracker.app.model.Asset
-import com.scurab.ptracker.app.model.GroupStrategy
+import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.usecase.PriceItemTransactions
@@ -40,7 +40,7 @@ import kotlin.math.max
 class PriceBoardState(
     items: List<PriceItem>,
     private val localDensity: Density,
-    grouping: GroupStrategy = GroupStrategy.Day,
+    grouping: DateGrouping = DateGrouping.Day,
     val isDebugVisible: Boolean = false
 ) {
     var scale by mutableStateOf(Offset(1f, 1f))

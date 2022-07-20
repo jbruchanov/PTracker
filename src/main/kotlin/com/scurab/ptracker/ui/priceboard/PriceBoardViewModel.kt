@@ -9,8 +9,8 @@ import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.app.ext.firstIf
 import com.scurab.ptracker.app.ext.firstIndexOf
 import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.Filter
-import com.scurab.ptracker.app.model.GroupStrategy
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.PriceItem
@@ -31,7 +31,7 @@ import java.awt.event.KeyEvent
 
 class PriceBoardUiState(
     localDensity: Density,
-    grouping: GroupStrategy,
+    grouping: DateGrouping,
     isDebugVisible: Boolean
 ) {
     var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping, isDebugVisible))
@@ -57,7 +57,7 @@ class PriceBoardViewModel(
 ) : ViewModel(), PriceBoardEventDelegate {
 
     private val filters = Pair(Filter.ImportantTransactions, Filter.AllTransactions)
-    private val grouping = GroupStrategy.Day
+    private val grouping = DateGrouping.Day
     private val prices = MutableStateFlow(Asset.Empty to emptyList<PriceItem>())
 
     //state for merging, 2 different datasources for 1 output

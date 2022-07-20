@@ -6,6 +6,7 @@ import com.scurab.ptracker.app.ext.convertTradePrice
 import com.scurab.ptracker.app.ext.getAmount
 import com.scurab.ptracker.app.ext.getFees
 import com.scurab.ptracker.app.ext.isNotZero
+import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.safeDiv
 import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.ext.totalMarketValue
@@ -17,11 +18,11 @@ import com.scurab.ptracker.app.model.CoinCalculation
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.CryptoCoin
 import com.scurab.ptracker.app.model.CryptoHoldings
+import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.ExchangeWallet
 import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.GroupStatsSum
-import com.scurab.ptracker.app.model.GroupStrategy
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.LedgerStats
 import com.scurab.ptracker.app.model.MarketData
@@ -124,20 +125,20 @@ class StatsCalculatorUseCase(
         require(prices.isNotEmpty()) { "Prices are empty" }
         require(FiatCurrencies.contains(primaryCurrency)) { "Invalid primaryCurrency:${primaryCurrency}, not defined as Fiat" }
 
-        val latestCommonPriceDate = prices.minOf { (_, v) -> v.maxOf { it.dateTime } }
-        val grouping = GroupStrategy.Day
+        val latestCommonPriceDate = prices.minOfOrNull { (_, v) -> v.maxOf { it.dateTime } }
+        val grouping = DateGrouping.Day
         val data = ledger.items/*.filter { it.asset.has("SOL") && it.type != "Staking" }*/.sortedBy { it.dateTime }
-        val groups = data.groupBy { grouping(it.dateTime) }
+        val groups = data.groupBy { grouping.toLongGroup(it.dateTime) }
         val allPrices = prices.values.flatten()
-        val pricesByAssetByGroup = allPrices.groupBy { grouping(it.dateTime) }.mapValues { it.value.associateBy { transactionsInGroup -> transactionsInGroup.asset } }
+        val pricesByAssetByGroup = allPrices.groupBy { grouping.toLongGroup(it.dateTime) }.mapValues { it.value.associateBy { transactionsInGroup -> transactionsInGroup.asset } }
 
         val result = mutableMapOf<Long, MutableMap<Long, GroupStats>>()
         val startDate = grouping.previous(ledger.items.minOf { it.dateTime })
-        val endDate = latestCommonPriceDate
+        val endDate = latestCommonPriceDate ?: now()
         val groupKeys = mutableListOf<Long>()
         var date = startDate
         while (date <= endDate) {
-            val key = grouping(date)
+            val key = grouping.toLongGroup(date)
             groupKeys.add(key)
             date = grouping.next(date)
         }
@@ -155,7 +156,7 @@ class StatsCalculatorUseCase(
         val r = TreeMap<LocalDateTime, GroupStatsSum>()
         date = startDate
         while (date <= endDate) {
-            val key = grouping(date)
+            val key = grouping.toLongGroup(date)
             r[date] = result.sumForGroupKey(key, date)
             date = grouping.next(date)
         }
@@ -164,7 +165,7 @@ class StatsCalculatorUseCase(
         //replace empty values by last with value
         r.forEach { (dateTime, stats) ->
             if (stats.isEmpty) {
-                r[dateTime] = latestDayStatsSum.copy(groupingKey = grouping(dateTime))
+                r[dateTime] = latestDayStatsSum.copy(groupingKey = grouping.toLongGroup(dateTime))
             } else {
                 latestDayStatsSum = stats
             }

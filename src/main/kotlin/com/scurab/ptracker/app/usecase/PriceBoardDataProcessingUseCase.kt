@@ -3,8 +3,8 @@ package com.scurab.ptracker.app.usecase
 import androidx.compose.ui.res.loadImageBitmap
 import com.scurab.ptracker.app.ext.iconColor
 import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.Filter
-import com.scurab.ptracker.app.model.GroupStrategy
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
@@ -25,7 +25,7 @@ class PriceBoardDataProcessingUseCase {
         val transactionsPerPriceItem: Map<PriceItem, PriceItemTransactions>
     )
 
-    fun prepareData(data: RawData, filter: Filter<Transaction>, grouping: GroupStrategy): Result = with(data) {
+    fun prepareData(data: RawData, filter: Filter<Transaction>, grouping: DateGrouping): Result = with(data) {
         data.ledger.fillPriceItems(data.prices, grouping)
         return Result(
             ledger.assetsTradings,

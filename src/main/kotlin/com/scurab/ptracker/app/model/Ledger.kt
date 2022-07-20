@@ -9,7 +9,7 @@ class Ledger(
     val items: List<Transaction>,
     val primaryFiatCoin: String? = null
 ) {
-    private val cacheByGroupStrategy = mutableMapOf<GroupStrategy, Map<Long, List<Transaction>>>()
+    private val cacheByGroupStrategy = mutableMapOf<DateGrouping, Map<Long, List<Transaction>>>()
     private val cacheByItemAndAsset = mutableMapOf<KeyAssetGroupingKey, List<Transaction>>()
     private val cacheByAssets = mutableMapOf<KeyAssetTrades, List<Transaction>>()
     val coins by lazy { items.setOf { it.assets }.flatten().distinct().sorted() }
@@ -27,17 +27,17 @@ class Ledger(
         (allCombinations + allTradedAssets)
     }
 
-    fun getGroupedData(by: GroupStrategy = GroupStrategy.Day): Map<Long, List<Transaction>> {
+    fun getGroupedData(by: DateGrouping = DateGrouping.Day): Map<Long, List<Transaction>> {
         return cacheByGroupStrategy.getOrPut(by) {
-            items.groupBy { by.groupingKey(it.dateTime) }
+            items.groupBy { by.toLongGroup(it.dateTime) }
         }
     }
 
-    fun getTransactionsMap(priceItem: PriceItem, filter: Filter<Transaction>, grouping: GroupStrategy = GroupStrategy.Day): List<Transaction> {
-        val key = KeyAssetGroupingKey(priceItem.asset, grouping.groupingKey(priceItem.dateTime), filter)
+    fun getTransactionsMap(priceItem: PriceItem, filter: Filter<Transaction>, grouping: DateGrouping = DateGrouping.Day): List<Transaction> {
+        val key = KeyAssetGroupingKey(priceItem.asset, grouping.toLongGroup(priceItem.dateTime), filter)
         return cacheByItemAndAsset.getOrPut(key) {
             val groupedData = getGroupedData()
-            groupedData[grouping.groupingKey(priceItem.dateTime)]
+            groupedData[grouping.toLongGroup(priceItem.dateTime)]
                 ?.asSequence()
                 ?.filter(filter)
                 ?.filter { it.hasAsset(priceItem.asset) }
@@ -56,12 +56,12 @@ class Ledger(
         }
     }
 
-    fun firstIndexOf(it: PriceItem, grouping: GroupStrategy = GroupStrategy.Day): Int {
-        val key = grouping.groupingKey(it.dateTime)
-        return items.indexOfFirst { grouping.groupingKey(it.dateTime) == key }
+    fun firstIndexOf(it: PriceItem, grouping: DateGrouping = DateGrouping.Day): Int {
+        val key = grouping.toLongGroup(it.dateTime)
+        return items.indexOfFirst { grouping.toLongGroup(it.dateTime) == key }
     }
 
-    fun fillPriceItems(priceItems: List<PriceItem>, groupStrategy: GroupStrategy) {
+    fun fillPriceItems(priceItems: List<PriceItem>, groupStrategy: DateGrouping) {
         val groupKeyPriceItems = priceItems.associateBy { it.groupValue(groupStrategy) }
         require(groupKeyPriceItems.size == priceItems.size) {
             "Invalid priceItems vs groupStrategy:${groupStrategy.name}, groupValue must generate unique values for each priceItem, priceItems:${priceItems.size}, groupedItems:${groupKeyPriceItems.size}"

@@ -203,7 +203,7 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState, eventDelega
         }
         Box {
             val priceItem = priceBoardState.pointedPriceItem
-            val grouping = priceBoardState.grouping.groupingKey
+            val grouping = priceBoardState.grouping::toLongGroup
             LazyColumn(modifier = Modifier.fillMaxWidth(), state = state) {
                 itemsIndexed(priceBoardState.visibleTransactions, key = { _, v -> v.uuid }) { index, transaction ->
                     val isSelected = priceItem != null && grouping(priceItem.dateTime) == grouping(transaction.dateTime)
