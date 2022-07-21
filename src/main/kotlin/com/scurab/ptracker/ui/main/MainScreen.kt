@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Looks3
 import androidx.compose.material.icons.filled.LooksOne
 import androidx.compose.material.icons.filled.LooksTwo
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.WaterfallChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -110,6 +111,7 @@ private fun ColumnScope.Menu(navToken: NavToken<*>, uiState: MainUiState, eventH
         listOf(
             LeftMenuButton(Icons.Default.WaterfallChart, AppNavTokens.PriceDashboard, eventHandler::onOpenPriceDashboardClicked),
             LeftMenuButton(Icons.Default.DataUsage, AppNavTokens.Stats, eventHandler::onOpenStatsClicked),
+            LeftMenuButton(Icons.Default.TableChart, AppNavTokens.LedgerDateStats, eventHandler::onOpenLedgerDateStatsClicked),
             LeftMenuButton(Icons.Default.Settings, AppNavTokens.Settings, eventHandler::onOpenSettingsClicked),
         )
     }

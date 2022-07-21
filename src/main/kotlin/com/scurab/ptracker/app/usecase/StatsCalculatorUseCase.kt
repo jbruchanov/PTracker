@@ -64,13 +64,13 @@ class StatsCalculatorUseCase(
             })
 
         //currently, what I have on exchange/wallet
-        val actualOwnership = tradingAssets.associateWith { asset -> CoinCalculation(asset, data.filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.coin1) }) }
+        val actualOwnership = tradingAssets.associateWith { asset -> CoinCalculation(asset, data.filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) }) }
         //traded amounts => values what I'd have had if without losts/gifts/etc => value used for price per unit
         val tradedAmount = tradingAssets.associateWith { asset ->
-            CoinCalculation(asset, data.filterIsInstance<Transaction.Trade>().filter { it.hasAsset(asset) }.sumOf { it.getAmount(asset.coin1) })
+            CoinCalculation(asset, data.filterIsInstance<Transaction.Trade>().filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) })
         }
         val spentFiatByCrypto = tradingAssets.associateWith { asset ->
-            CoinCalculation(CryptoCoin(asset.coin1), data.filter { it.hasAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })
+            CoinCalculation(CryptoCoin(asset.coin1), data.filter { it.hasOrIsRelatedAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })
         }
         val cryptoHoldings = tradingAssets.filter { it.hasCryptoCoin }.associateWith { asset ->
             CryptoHoldings(
@@ -91,7 +91,7 @@ class StatsCalculatorUseCase(
         val transactionsPerAssetPerType = transactionTypes.map { type -> type to data.filter { it.type == type } }
             .map { (type, transactions) -> Triple(type, transactions.map { it.asset }.toSet(), transactions) }.map { (type, assets, transactions) ->
                 type to assets.map { asset ->
-                    asset to transactions.filter { it.hasAsset(asset) }.let { ts -> ts.sumOf { it.getAmount(asset.coin2) } to ts.sumOf { it.getAmount(asset.coin1) } }
+                    asset to transactions.filter { it.hasOrIsRelatedAsset(asset) }.let { ts -> ts.sumOf { it.getAmount(asset.coin2) } to ts.sumOf { it.getAmount(asset.coin1) } }
                 }
             }
 

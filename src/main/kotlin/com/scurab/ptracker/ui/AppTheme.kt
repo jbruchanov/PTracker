@@ -179,6 +179,9 @@ object AppTheme {
         val fontAxis = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
         val fontLabels = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL))
         val paint = Paint().apply { this.color = DashboardColors.OnBackground.toArgb(); this.isAntiAlias = true }
+        val fontTableText = Font(Typeface.makeFromName("verdana", FontStyle.NORMAL)).apply {
+            this.size = 12f
+        }
 
         @Composable
         fun init() {

@@ -34,7 +34,7 @@ fun ToggleButton(
     val textColor = AppColors.current.Content.get(isSelected = isSelected)
     ToggleButton(isSelected, onClick = onClick) {
         Text(
-            text = text, fontSize = AppTheme.TextRendering.small, color = textColor, modifier = Modifier
+            text = text, fontSize = AppTheme.TextRendering.small, color = textColor, maxLines = 1, modifier = Modifier
                 .padding(horizontal = AppSizes.current.Space4)
                 .align(Alignment.Center)
         )

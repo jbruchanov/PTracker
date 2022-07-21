@@ -40,7 +40,7 @@ class Ledger(
             groupedData[grouping.toLongGroup(priceItem.dateTime)]
                 ?.asSequence()
                 ?.filter(filter)
-                ?.filter { it.hasAsset(priceItem.asset) }
+                ?.filter { it.hasOrIsRelatedAsset(priceItem.asset) }
                 ?.toList()
                 ?: emptyList()
         }
@@ -51,7 +51,7 @@ class Ledger(
         return cacheByAssets.getOrPut(key) {
             items.asSequence()
                 .filter(filter)
-                .filter { it.hasAsset(asset) }
+                .filter { it.hasOrIsRelatedAsset(asset) }
                 .toList()
         }
     }

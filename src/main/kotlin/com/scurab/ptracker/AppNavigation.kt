@@ -18,12 +18,16 @@ import com.scurab.ptracker.ui.settings.SettingsScreen
 import com.scurab.ptracker.ui.settings.SettingsViewModel
 import com.scurab.ptracker.ui.stats.StatsScreen
 import com.scurab.ptracker.ui.stats.StatsViewModel
+import com.scurab.ptracker.ui.stats.dates.LedgerDateStatsScreen
+import com.scurab.ptracker.ui.stats.dates.LedgerDateStatsViewModel
 import org.koin.core.qualifier.Qualifier
 import org.koin.core.qualifier.QualifierValue
 
 sealed class AppNavTokens<T : NavArgs> : NavToken<T> {
     object PriceDashboard : AppNavTokens<AppNavArgs>(), StartNavToken
     object Stats : AppNavTokens<EmptyNavArgs>()
+
+    object LedgerDateStats : AppNavTokens<EmptyNavArgs>()
     object Settings : AppNavTokens<EmptyNavArgs>()
     object Main : AppNavTokens<EmptyNavArgs>()
 }
@@ -44,5 +48,6 @@ fun appNavSpecs(appArgs: Array<String>, componentFactory: ComponentFactory) = na
 fun defaultNavSpecs(componentFactory: ComponentFactory) = navigation(componentFactory) {
     screen(AppNavTokens.PriceDashboard) { vm: PriceBoardViewModel -> PriceBoardScreen(vm) }
     screen(AppNavTokens.Stats) { vm: StatsViewModel -> StatsScreen(vm) }
+    screen(AppNavTokens.LedgerDateStats) { vm: LedgerDateStatsViewModel -> LedgerDateStatsScreen(vm) }
     screen(AppNavTokens.Settings) { vm: SettingsViewModel -> SettingsScreen(vm) }
 }

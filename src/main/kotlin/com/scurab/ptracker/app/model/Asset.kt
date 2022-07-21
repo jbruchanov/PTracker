@@ -11,7 +11,13 @@ import java.io.File
 data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
     fun has(value: String) = coin1 == value || coin2 == value
     fun has(value1: String, value2: String) = (value1 == coin1 && value2 == coin2) || (value2 == coin1 && value1 == coin2)
+
     fun contains(value1: String, value2: String) = has(value1) || has(value2)
+
+    fun toList() = buildList {
+        if (coin1.isNotEmpty()) add(coin1)
+        if (coin2.isNotEmpty()) add(coin2)
+    }
 
     @Transient
     val label by lazy {
@@ -37,12 +43,15 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
     val isTradingAsset by lazy { coin1.isNotEmpty() && coin2.isNotEmpty() }
 
     @Transient
+    val isSingleCoinAsset by lazy { !isTradingAsset && (coin1.isNotEmpty() || coin2.isNotEmpty()) }
+
+    @Transient
     val isCryptoTradingAsset by lazy { isTradingAsset && !(FiatCurrencies.contains(coin1) && FiatCurrencies.contains(coin2)) }
 
     @Transient
     val hasCryptoCoin by lazy {
         (coin1.isNotEmpty() && !FiatCurrencies.contains(coin1)) ||
-        (coin2.isNotEmpty() && !FiatCurrencies.contains(coin2))
+                (coin2.isNotEmpty() && !FiatCurrencies.contains(coin2))
     }
 
     @Transient

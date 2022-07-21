@@ -51,6 +51,23 @@ fun BigDecimal.roi() = takeIf { !it.isZero() }
     ?.let { v -> (if (v > 1.bd) v - 1.bd else -(1.bd - v)) * 100.bd }
     ?: ZERO
 
+fun BigDecimal.toTableString(scale: Int = 6, minTrailingZeros: Int = 2) = setScale(scale, RoundingMode.HALF_UP)
+    .toPlainString()
+    .let { str ->
+        //replace ending "0" by " "
+        var addSpaces = true
+        val sb = StringBuilder()
+        sb.setLength(str.length)
+        (str.length - 1 downTo 0).forEach { i ->
+            val c = str[i]
+            val preIsDot = str.getOrNull(i - minTrailingZeros) == '.'
+            addSpaces = addSpaces && !preIsDot
+            sb[i] = if (addSpaces && c == '0') ' ' else c
+            addSpaces = addSpaces && c == '0'
+        }
+        sb.toString()
+    }
+
 object BigDecimalFormats {
     val formats = (0..8).map {
         lazy {

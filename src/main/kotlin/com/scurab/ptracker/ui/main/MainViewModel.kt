@@ -7,7 +7,9 @@ import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.LoadDataUseCase
 import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.component.navigation.EmptyNavArgs
 import com.scurab.ptracker.component.navigation.NavController
+import com.scurab.ptracker.component.picker.FilePicker
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -15,6 +17,7 @@ interface MainEventHandler {
     fun onOpenPriceDashboardClicked()
     fun onOpenSettingsClicked()
     fun onOpenStatsClicked()
+    fun onOpenLedgerDateStatsClicked()
     fun onKeyPressed(key: Key): Boolean
     fun onLedgerClicked(path: String)
     fun onOpenFileClicked()
@@ -25,6 +28,7 @@ class MainViewModel(
     private val appSettings: AppSettings,
     private val pricesRepository: PricesRepository,
     private val loadAllDataUseCase: LoadDataUseCase,
+    private val filePicker: FilePicker,
     private val navController: NavController
 ) : ViewModel(), MainEventHandler {
 
@@ -46,17 +50,9 @@ class MainViewModel(
         uiState.activeLedger = appSettings.latestLedger
     }
 
-    override fun onOpenSettingsClicked() = with(navController) {
-        if (activeScreenNavToken == AppNavTokens.Settings) return@with
-        popToTop()
-        push(AppNavTokens.Settings)
-    }
-
-    override fun onOpenStatsClicked() = with(navController) {
-        if (activeScreenNavToken == AppNavTokens.Stats) return@with
-        popToTop()
-        push(AppNavTokens.Stats)
-    }
+    override fun onOpenSettingsClicked() = replaceMainScreen(AppNavTokens.Settings)
+    override fun onOpenStatsClicked() = replaceMainScreen(AppNavTokens.Stats)
+    override fun onOpenLedgerDateStatsClicked() = replaceMainScreen(AppNavTokens.LedgerDateStats)
 
     override fun onOpenPriceDashboardClicked() {
         navController.popTo(AppNavTokens.PriceDashboard)
@@ -76,6 +72,12 @@ class MainViewModel(
     }
 
     override fun onOpenFileClicked() {
+        //filePicker.openFilePicker()
+    }
 
+    private fun replaceMainScreen(token: AppNavTokens<EmptyNavArgs>) = with(navController) {
+        if (activeScreenNavToken == token) return@with
+        popToTop()
+        push(token)
     }
 }

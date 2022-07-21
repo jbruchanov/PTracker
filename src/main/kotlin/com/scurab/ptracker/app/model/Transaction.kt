@@ -30,6 +30,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     abstract val wallet: String
     abstract val note: String?
 
+    abstract fun hasOrIsRelatedAsset(asset: Asset): Boolean
     abstract fun hasAsset(asset: Asset): Boolean
     abstract val assetsLabel: String
     abstract val assets: Set<String>
@@ -53,6 +54,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val note: String?,
     ) : Transaction(), HasIncome {
         override val assetsLabel: String = buyAsset
+        override fun hasOrIsRelatedAsset(asset: Asset): Boolean = asset.has(buyAsset)
         override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset)
         override val assets: Set<String> = setOf(buyAsset)
     }
@@ -72,6 +74,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val note: String?,
     ) : Transaction(), HasOutcome {
         override val assetsLabel: String = sellAsset
+        override fun hasOrIsRelatedAsset(asset: Asset): Boolean = asset.has(sellAsset)
         override fun hasAsset(asset: Asset): Boolean = asset.has(sellAsset)
         override val assets: Set<String> = setOf(sellAsset)
     }
@@ -93,7 +96,8 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val wallet: String,
         override val note: String?,
     ) : Transaction(), HasIncome, HasOutcome {
-        override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset, sellAsset) || isRelatedAsset(asset)
+        override fun hasOrIsRelatedAsset(asset: Asset): Boolean = hasAsset(asset) || isRelatedAsset(asset)
+        override fun hasAsset(asset: Asset): Boolean = asset.has(buyAsset, sellAsset)
         private fun isRelatedAsset(asset: Asset) = (sellAsset.isEmpty() && asset.has(buyAsset)) || (buyAsset.isEmpty() && asset.has(sellAsset))
 
         override val assetsLabel: String = asset.label
@@ -101,7 +105,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val assets: Set<String> = setOf(buyAsset, sellAsset)
     }
 
-    fun isTransactionWithAsset(asset: Asset) = this is Trade && hasAsset(asset)
+    fun isTransactionWithAsset(asset: Asset) = this is Trade && hasOrIsRelatedAsset(asset)
     fun isTransactionWithCoin(coin: String) = this is Trade && hasCoin(coin)
 
     fun hasCoin(coin: String) = (this is HasIncome && this.buyAsset == coin) || (this is HasOutcome && this.sellAsset == coin)

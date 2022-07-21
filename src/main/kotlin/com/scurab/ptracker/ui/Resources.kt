@@ -10,6 +10,9 @@ object DateTimeFormats {
     val year = DateTimeFormatter.ofPattern("yyyy")
     val monthMid = DateTimeFormatter.ofPattern("MMM")
     val monthYear = DateTimeFormatter.ofPattern("MM/yyyy")
+    val yearWeek = DateTimeFormatter.ofPattern("yyyy/ww")
+    val yearMonthMid = DateTimeFormatter.ofPattern("yyyy/MMM")
+    val yearMonthFull = DateTimeFormatter.ofPattern("yyyy MMMM")
     val dayNumber = DateTimeFormatter.ofPattern("d")
 
     val fullTime = DateTimeFormatter.ofPattern("HH:mm:ss")

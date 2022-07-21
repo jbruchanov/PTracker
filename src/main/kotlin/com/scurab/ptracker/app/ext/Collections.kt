@@ -1,5 +1,7 @@
 package com.scurab.ptracker.app.ext
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.HasDateTime
 import kotlinx.coroutines.Dispatchers
@@ -94,4 +96,20 @@ inline fun <T, S : Any> Collection<T>.reduceOf(value: (T) -> S, operation: (S, T
         accumulator = operation(accumulator, iterator.next())
     }
     return accumulator
+}
+
+inline fun <T> Iterable<T>.sumOfDps(selector: (T) -> Dp): Dp {
+    var sum: Dp = 0.dp
+    for (element in this) {
+        sum += selector(element)
+    }
+    return sum
+}
+
+inline fun <T> Array<T>.sumOfDps(selector: (T) -> Dp): Dp {
+    var sum: Dp = 0.dp
+    for (element in this) {
+        sum += selector(element)
+    }
+    return sum
 }
