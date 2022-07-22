@@ -1,4 +1,4 @@
-package com.scurab.ptracker.ui.stats.dates
+package com.scurab.ptracker.ui.stats.trading
 
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.ScrollbarAdapter
@@ -39,19 +39,19 @@ import com.scurab.ptracker.ui.common.VerticalDivider
 import com.scurab.ptracker.ui.model.TableState
 
 @Composable
-fun LedgerDateStatsScreen(vm: LedgerDateStatsViewModel) {
+fun TradingStatsScreen(vm: TradingStatsViewModel) {
     Column {
         Text(
             text = LocalTexts.current.TradingStats,
             style = AppTheme.TextStyles.Header,
             modifier = Modifier.padding(AppSizes.current.Space2)
         )
-        LedgerDateStats(vm.uiState, vm)
+        TradingStatsStats(vm.uiState, vm)
     }
 }
 
 @Composable
-private fun LedgerDateStats(uiState: LedgerDateStatsUiState, eventHandler: LedgerDateStatsEventHandler) {
+private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: TradingStatsEventHandler) {
     Column {
         Column(
             modifier = Modifier

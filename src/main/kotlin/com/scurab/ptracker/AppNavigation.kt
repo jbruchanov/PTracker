@@ -16,10 +16,10 @@ import com.scurab.ptracker.ui.priceboard.PriceBoardScreen
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsScreen
 import com.scurab.ptracker.ui.settings.SettingsViewModel
-import com.scurab.ptracker.ui.stats.StatsScreen
-import com.scurab.ptracker.ui.stats.StatsViewModel
-import com.scurab.ptracker.ui.stats.dates.LedgerDateStatsScreen
-import com.scurab.ptracker.ui.stats.dates.LedgerDateStatsViewModel
+import com.scurab.ptracker.ui.stats.portfolio.PortfolioStatsScreen
+import com.scurab.ptracker.ui.stats.portfolio.PortfolioStatsViewModel
+import com.scurab.ptracker.ui.stats.trading.TradingStatsScreen
+import com.scurab.ptracker.ui.stats.trading.TradingStatsViewModel
 import org.koin.core.qualifier.Qualifier
 import org.koin.core.qualifier.QualifierValue
 
@@ -47,7 +47,7 @@ fun appNavSpecs(appArgs: Array<String>, componentFactory: ComponentFactory) = na
 
 fun defaultNavSpecs(componentFactory: ComponentFactory) = navigation(componentFactory) {
     screen(AppNavTokens.PriceDashboard) { vm: PriceBoardViewModel -> PriceBoardScreen(vm) }
-    screen(AppNavTokens.Stats) { vm: StatsViewModel -> StatsScreen(vm) }
-    screen(AppNavTokens.LedgerDateStats) { vm: LedgerDateStatsViewModel -> LedgerDateStatsScreen(vm) }
+    screen(AppNavTokens.Stats) { vm: PortfolioStatsViewModel -> PortfolioStatsScreen(vm) }
+    screen(AppNavTokens.LedgerDateStats) { vm: TradingStatsViewModel -> TradingStatsScreen(vm) }
     screen(AppNavTokens.Settings) { vm: SettingsViewModel -> SettingsScreen(vm) }
 }

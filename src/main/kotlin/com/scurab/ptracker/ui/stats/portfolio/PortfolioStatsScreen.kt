@@ -1,4 +1,4 @@
-package com.scurab.ptracker.ui.stats
+package com.scurab.ptracker.ui.stats.portfolio
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
@@ -76,11 +76,11 @@ import com.scurab.ptracker.ui.common.PieChart
 import com.scurab.ptracker.ui.common.PieChartSegment
 import com.scurab.ptracker.ui.common.WSpacer2
 import com.scurab.ptracker.ui.common.WSpacer4
-import com.scurab.ptracker.ui.stats.StatsUiState.Companion.MarketPercentageGroupingThreshold
+import com.scurab.ptracker.ui.stats.portfolio.PortfolioStatsUiState.Companion.MarketPercentageGroupingThreshold
 import stub.StubData
 import java.math.BigDecimal
 
-class StatsUiState() {
+class PortfolioStatsUiState() {
     var isLoading by mutableStateOf(false)
     var cryptoHoldings = mutableStateListOf<OnlineHoldingStats>()
     var marketPercentage by mutableStateOf<List<MarketPercentage>>(emptyList())
@@ -114,20 +114,20 @@ fun Modifier.statsContentBackground(shape: Shape = AppTheme.Shapes.RoundedCorner
 }
 
 @Composable
-fun StatsScreen(vm: StatsViewModel) {
+fun PortfolioStatsScreen(vm: PortfolioStatsViewModel) {
     Column {
         val state = vm.uiState
         Text(text = LocalTexts.current.Stats + (state.primaryCoin?.let { " - $it" } ?: ""),
             style = AppTheme.TextStyles.Header,
             modifier = Modifier.padding(AppSizes.current.Space2))
         Box(modifier = Modifier.padding(AppSizes.current.Space2)) {
-            StatsScreen(vm.uiState, vm)
+            PortfolioStatsScreen(vm.uiState, vm)
         }
     }
 }
 
 @Composable
-private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
+private fun PortfolioStatsScreen(state: PortfolioStatsUiState, event: StatsEventHandler) {
     val vScrollState = rememberScrollState()
     val hScrollState = rememberScrollState()
     BoxWithConstraints(modifier = Modifier) {
@@ -135,7 +135,7 @@ private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
             this@BoxWithConstraints.PortfolioChartContent(state, event)
             WSpacer4()
             Row(modifier = Modifier) {
-                Holdings(state, event)
+                PortfolioStatsHoldings(state, event)
                 WSpacer4()
                 FSpacer()
                 StatsPieChart(state)
@@ -147,7 +147,7 @@ private fun StatsScreen(state: StatsUiState, event: StatsEventHandler) {
 }
 
 @Composable
-private fun BoxWithConstraintsScope.PortfolioChartContent(state: StatsUiState, event: StatsEventHandler) {
+private fun BoxWithConstraintsScope.PortfolioChartContent(state: PortfolioStatsUiState, event: StatsEventHandler) {
     val scrollBarSize = LocalScrollbarStyle.current.thickness
     Box(
         modifier = Modifier
@@ -245,7 +245,7 @@ fun PortfolioChart(chartState: PortfolioChartUiState.Data) {
 }
 
 @Composable
-private fun RowScope.StatsPieChart(state: StatsUiState) {
+private fun RowScope.StatsPieChart(state: PortfolioStatsUiState) {
     Box(modifier = Modifier.size(300.dp).padding(AppSizes.current.Space8)) {
         PieChart(state.pieChartData)
         Column(
@@ -292,13 +292,13 @@ private fun RowScope.StatsPieChart(state: StatsUiState) {
 @Composable
 private fun PreviewStatsScreen() {
     AppTheme {
-        val uiState = StatsUiState().apply {
+        val uiState = PortfolioStatsUiState().apply {
             this.cryptoHoldings.addAll(StubData.onlineStubHoldings())
             this.marketPercentage = StubData.onlineStubHoldings().coloredMarketPercentage(0f)
             this.pieChartData = this.marketPercentage.pieChartData(0f)
         }
         BoxWithConstraints {
-            StatsScreen(uiState, StatsEventHandler::class.mock())
+            PortfolioStatsScreen(uiState, StatsEventHandler::class.mock())
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.scurab.ptracker.ui.stats
+package com.scurab.ptracker.ui.stats.portfolio
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -99,7 +99,7 @@ private object ColumnWidths {
 private fun Modifier.defaultTableRow() = padding(horizontal = AppSizes.current.Space4, vertical = AppSizes.current.Space2)
 
 @Composable
-fun Holdings(state: StatsUiState, event: StatsEventHandler, modifier: Modifier = Modifier) {
+fun PortfolioStatsHoldings(state: PortfolioStatsUiState, event: StatsEventHandler, modifier: Modifier = Modifier) {
     val fiatCoins = remember(state.cryptoHoldings.size) { state.cryptoHoldings.fiatCoins() }
     val hasFiatCoins = fiatCoins.size > 1
     Row(modifier = Modifier.statsContentBackground()) {
@@ -164,7 +164,7 @@ private fun RowFooter(
     onClick: () -> Unit,
     fiatCoin: FiatCoin,
     hasMultipleFiats: Boolean,
-    state: StatsUiState,
+    state: PortfolioStatsUiState,
     exchangeCoverage: List<CoinExchangeStats>,
     selected: Boolean
 ) {
@@ -226,7 +226,7 @@ private fun RowItem(onClick: () -> Unit, index: Int, holdings: OnlineHoldingStat
     }
 
     LaunchedEffect(index, holdings.asset, isColored) {
-        delay(StatsUiState.IconToGrayscaleDelay)
+        delay(PortfolioStatsUiState.IconToGrayscaleDelay)
         isColored = false
     }
 
@@ -411,7 +411,7 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
 }
 
 @Composable
-private fun ColumnScope.DetailFiat(fiatCoin: FiatCoin, state: StatsUiState, exchangeCoverage: List<CoinExchangeStats>) {
+private fun ColumnScope.DetailFiat(fiatCoin: FiatCoin, state: PortfolioStatsUiState, exchangeCoverage: List<CoinExchangeStats>) {
     val texts = LocalTexts.current
     val hasContent = DetailExchangeCoinStats(exchangeCoverage)
     if (hasContent) {
@@ -470,7 +470,7 @@ private fun DetailExchangeCoinStats(exchangeCoverage: List<CoinExchangeStats>): 
 @Composable
 private fun PreviewHoldings() {
     AppTheme {
-        val uiState = StatsUiState().apply {
+        val uiState = PortfolioStatsUiState().apply {
             this.cryptoHoldings.addAll(StubData.onlineStubHoldings())
             this.pieChartData = StubData.pieChartData()
             this.selectedHoldingsAsset = StubData.AssetBTCGBP
@@ -479,7 +479,7 @@ private fun PreviewHoldings() {
             LocalDensity provides Density(1.25f, 1f)
         ) {
             Box {
-                Holdings(uiState, StatsEventHandler::class.mock())
+                PortfolioStatsHoldings(uiState, StatsEventHandler::class.mock())
             }
         }
     }

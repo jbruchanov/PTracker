@@ -32,7 +32,6 @@ import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
 import org.koin.java.KoinJavaComponent
 
-
 @Composable
 fun TransactionRow(
     onClick: (Boolean) -> Unit,

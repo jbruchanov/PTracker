@@ -34,8 +34,8 @@ import com.scurab.ptracker.ui.app.AppViewModel
 import com.scurab.ptracker.ui.main.MainViewModel
 import com.scurab.ptracker.ui.priceboard.PriceBoardViewModel
 import com.scurab.ptracker.ui.settings.SettingsViewModel
-import com.scurab.ptracker.ui.stats.StatsViewModel
-import com.scurab.ptracker.ui.stats.dates.LedgerDateStatsViewModel
+import com.scurab.ptracker.ui.stats.portfolio.PortfolioStatsViewModel
+import com.scurab.ptracker.ui.stats.trading.TradingStatsViewModel
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
 
@@ -83,6 +83,6 @@ fun createKoinModule(appArgs: Array<String>) = module {
     factory { MainViewModel(get(), get(), get(), get(), get(), getMainNavController()) }
     factory { PriceBoardViewModel(get(), get(), get(), get()) }
     factory { SettingsViewModel(get(), get(), get(), get(), getMainNavController()) }
-    factory { StatsViewModel(get(), get(), get(), get()) }
-    factory { LedgerDateStatsViewModel(get(), get(), get()) }
+    factory { PortfolioStatsViewModel(get(), get(), get(), get()) }
+    factory { TradingStatsViewModel(get(), get(), get()) }
 }

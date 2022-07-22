@@ -1,4 +1,4 @@
-package com.scurab.ptracker.ui.stats.dates
+package com.scurab.ptracker.ui.stats.trading
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 
-class LedgerDateStatsUiState {
+class TradingStatsStatsUiState {
     var selectedGroupingKey by mutableStateOf(DateGrouping.Month)
     var selectedAsset by mutableStateOf<Asset?>(null)
     var assets by mutableStateOf(emptyList<Asset>())
@@ -26,18 +26,18 @@ class LedgerDateStatsUiState {
     var tableData by mutableStateOf(ITableData.Empty)
 }
 
-interface LedgerDateStatsEventHandler {
+interface TradingStatsEventHandler {
     fun onSelectedGrouping(grouping: DateGrouping)
     fun onSelectedAsset(asset: Asset)
     fun onSelectedCoin(coin: String)
 }
 
-class LedgerDateStatsViewModel(
+class TradingStatsViewModel(
     private val appStateRepository: AppStateRepository,
     private val statsUseCase: StatsDatesUseCase,
     private val dataTransformers: IDataTransformers
-) : ViewModel(), LedgerDateStatsEventHandler {
-    val uiState = LedgerDateStatsUiState()
+) : ViewModel(), TradingStatsEventHandler {
+    val uiState = TradingStatsStatsUiState()
 
     private val flowGrouping = MutableStateFlow(uiState.selectedGroupingKey)
     private val flowAsset = MutableStateFlow(uiState.selectedAsset)

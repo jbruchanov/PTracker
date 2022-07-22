@@ -1,4 +1,4 @@
-package com.scurab.ptracker.ui.stats
+package com.scurab.ptracker.ui.stats.portfolio
 
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
@@ -16,7 +16,7 @@ import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.StatsChartCalcUseCase
 import com.scurab.ptracker.component.ViewModel
-import com.scurab.ptracker.ui.stats.StatsUiState.Companion.MarketPercentageGroupingThreshold
+import com.scurab.ptracker.ui.stats.portfolio.PortfolioStatsUiState.Companion.MarketPercentageGroupingThreshold
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -29,7 +29,7 @@ sealed class PortfolioChartUiState {
     class Error(val msg: String) : PortfolioChartUiState()
 }
 
-class StatsViewModel(
+class PortfolioStatsViewModel(
     private val appSettings: AppSettings,
     private val appStateRepository: AppStateRepository,
     private val pricesRepository: PricesRepository,
@@ -38,7 +38,7 @@ class StatsViewModel(
 
     private var latestData = AppData.Empty
     private var prices = mutableMapOf<Asset, MarketPrice>()
-    val uiState = StatsUiState().also {
+    val uiState = PortfolioStatsUiState().also {
         it.primaryCoin = appSettings.primaryCoin
     }
 
