@@ -46,9 +46,4 @@ class PriceItemTransactions(
         .map { it.iconColor() }
         .distinct()
         .sortedBy { it.priority }
-
-    val iconPricesX by lazy {
-        transactions.map { it.iconColor() to it }?.distinct()
-        /*?.sortedBy { if (state.pointingTransaction == it.second) Int.MAX_VALUE else it.first.priority }*/
-    }
 }
