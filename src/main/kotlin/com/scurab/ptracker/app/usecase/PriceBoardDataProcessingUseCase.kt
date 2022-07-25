@@ -9,6 +9,7 @@ import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.ui.model.AssetIcon
+import kotlinx.datetime.LocalDateTime
 
 class PriceBoardDataProcessingUseCase {
 
@@ -22,7 +23,7 @@ class PriceBoardDataProcessingUseCase {
         val assets: List<Asset>,
         val assetsIcons: List<AssetIcon>,
         val transactions: List<Transaction>,
-        val transactionsPerPriceItem: Map<PriceItem, PriceItemTransactions>
+        val transactionsPerDateTime: Map<LocalDateTime, PriceItemTransactions>
     )
 
     fun prepareData(data: RawData, filter: Filter<Transaction>, grouping: DateGrouping): Result = with(data) {
@@ -31,7 +32,7 @@ class PriceBoardDataProcessingUseCase {
             ledger.assetsTradings,
             ledger.assetsTradings.map { AssetIcon(it, kotlin.runCatching { loadImageBitmap(it.iconCoin1().inputStream()) }.getOrNull()) },
             ledger.getTransactions(asset, filter),
-            prices.associateBy(keySelector = { it }, valueTransform = { PriceItemTransactions(it, ledger.getTransactionsMap(it, filter)) })
+            prices.associateBy(keySelector = { it.item.dateTime }, valueTransform = { PriceItemTransactions(it, ledger.getTransactionsMap(it, filter)) })
         )
     }
 }

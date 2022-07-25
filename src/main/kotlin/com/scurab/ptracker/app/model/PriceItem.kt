@@ -24,9 +24,29 @@ interface IPriceItem : HasDateTime {
     val close: BigDecimal
     val high: BigDecimal
     val low: BigDecimal
+
+    fun withCurrentMarketPrice(marketPrice: MarketPrice): IPriceItem {
+        return object : IPriceItem {
+            override val dateTime: LocalDateTime = this@IPriceItem.dateTime
+            override val open: BigDecimal = this@IPriceItem.open
+            override val close: BigDecimal = marketPrice.price
+            override val high: BigDecimal = this@IPriceItem.high.max(marketPrice.price)
+            override val low: BigDecimal = this@IPriceItem.low.min(marketPrice.price)
+        }
+    }
+
+    companion object {
+        fun MarketPrice.asPriceItem(dateTime: LocalDateTime) = object : IPriceItem {
+            override val dateTime: LocalDateTime = dateTime
+            override val open: BigDecimal = price
+            override val close: BigDecimal = price
+            override val high: BigDecimal = price
+            override val low: BigDecimal = price
+        }
+    }
 }
 
-class PriceItem(
+data class PriceItem(
     val index: Int, override val asset: Asset, val item: IPriceItem
 ) : IPriceItem by item, WithCache by MapCache(), MarketPrice {
     private val rectHeight = (open - close).abs().toFloat()
@@ -43,11 +63,19 @@ class PriceItem(
     override fun toString(): String {
         return "PriceItem(index=$index, date='$formattedFullDate', centerY:${centerY} asset=$asset)"
     }
+
+    override fun withCurrentMarketPrice(marketPrice: MarketPrice): PriceItem = PriceItem(
+        index, asset, item.withCurrentMarketPrice(marketPrice)
+    )
 }
 
 data class TestPriceItem(
     override val dateTime: LocalDateTime, override val open: BigDecimal, override val close: BigDecimal, override val high: BigDecimal, override val low: BigDecimal
-) : IPriceItem, WithCache by MapCache()
+) : IPriceItem, WithCache by MapCache() {
+    override fun withCurrentMarketPrice(marketPrice: MarketPrice): IPriceItem {
+        TODO("Not yet implemented")
+    }
+}
 
 fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: Duration): List<PriceItem> {
     var date: Instant = startDate.toInstant(TimeZone.UTC)

@@ -280,7 +280,7 @@ private fun PriceSelectedDayDetail(state: PriceBoardState) {
 private fun BoxScope.PriceSelectedDayTransactionTypes(state: PriceBoardState) {
     val item = state.pointedPriceItem
     if (item != null) {
-        val iconsPrices = state.visibleTransactionsPerPriceItem[item]?.distinctIcons ?: return
+        val iconsPrices = state.visibleTransactionsPerPriceItem[item.dateTime]?.distinctIcons ?: return
 
         val offsetX = AppSizes.current.Space + Dp(state.verticalPriceBarWidth() / LocalDensity.current.density)
         if (iconsPrices.size > 1) {
@@ -333,7 +333,7 @@ private fun CandleTransactions(state: PriceBoardState) {
     val filterVisible = remember(actualViewPort) { state.priceItems.filterVisible(actualViewPort, endOffset = 1) }
 
     filterVisible.forEach { priceItem ->
-        val iconsPrices = state.visibleTransactionsPerPriceItem[priceItem]?.iconPrices
+        val iconsPrices = state.visibleTransactionsPerPriceItem[priceItem.dateTime]?.iconPrices
         //draw candle transaction
         var pointedIconPrice: Pair<IconColor, Transaction>? = null
         iconsPrices?.forEach iconPrices@{ iconPrice ->

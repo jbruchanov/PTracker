@@ -34,7 +34,7 @@ class PriceBoardUiState(
     grouping: DateGrouping,
     isDebugVisible: Boolean
 ) {
-    var priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping, isDebugVisible))
+    val priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping, isDebugVisible))
     var assets by mutableStateOf(emptyList<AssetIcon>())
     var hasTradeOnlyFilter by mutableStateOf(true)
     val prices = mutableStateMapOf<Asset, MarketPrice>()
@@ -88,8 +88,9 @@ class PriceBoardViewModel(
         launch(Dispatchers.Main) {
             uiState.prices.putAll(pricesRepository.latestPrices)
             pricesRepository.wsMarketPrice
-                .collect {
-                    uiState.prices[it.asset] = it
+                .collect { marketPrice ->
+                    uiState.prices[marketPrice.asset] = marketPrice
+                    uiState.priceBoardState.updateMarketPrice(marketPrice)
                 }
         }
     }
@@ -114,7 +115,7 @@ class PriceBoardViewModel(
                     resetData()
                 } else {
                     visibleTransactions = result.transactions
-                    visibleTransactionsPerPriceItem = result.transactionsPerPriceItem
+                    visibleTransactionsPerPriceItem = result.transactionsPerDateTime
                     setItems(data.asset, data.prices, resetViewport)
                 }
             }

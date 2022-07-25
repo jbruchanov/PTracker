@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -16,12 +17,15 @@ import com.scurab.ptracker.app.ext.maxValue
 import com.scurab.ptracker.app.ext.nHeight
 import com.scurab.ptracker.app.ext.nWidth
 import com.scurab.ptracker.app.ext.normalize
+import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.scale
 import com.scurab.ptracker.app.ext.takeAround
 import com.scurab.ptracker.app.ext.toPx
 import com.scurab.ptracker.app.ext.transformNormToViewPort
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.DateGrouping
+import com.scurab.ptracker.app.model.IPriceItem.Companion.asPriceItem
+import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.usecase.PriceItemTransactions
@@ -31,6 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDateTime
 import org.jetbrains.skia.FontMetrics
 import org.jetbrains.skia.Point
 import java.awt.Cursor
@@ -50,9 +55,9 @@ class PriceBoardState(
 
     var pointedPriceItem by mutableStateOf<PriceItem?>(null)
     var clickedTransaction by mutableStateOf<Pair<Long, Transaction>?>(null)
-    var priceItems by mutableStateOf(items)
+    var priceItems = SnapshotStateList<PriceItem>().also { it.addAll(items) }
     var visibleTransactions by mutableStateOf(emptyList<Transaction>())
-    var visibleTransactionsPerPriceItem by mutableStateOf(emptyMap<PriceItem, PriceItemTransactions>())
+    var visibleTransactionsPerPriceItem by mutableStateOf(emptyMap<LocalDateTime, PriceItemTransactions>())
 
     //var ledger by mutableStateOf(Ledger.Empty)
     var selectedAsset by mutableStateOf<Asset?>(null)
@@ -78,7 +83,7 @@ class PriceBoardState(
 
     fun resetData() {
         selectedAsset = null
-        priceItems = emptyList()
+        priceItems.clear()
         clickedTransaction = null
         pointedPriceItem = null
         visibleTransactions = emptyList()
@@ -172,9 +177,23 @@ class PriceBoardState(
 
     fun setItems(asset: Asset, items: List<PriceItem>, initViewport: Boolean) {
         selectedAsset = asset
-        priceItems = items
+        priceItems.clear()
+        priceItems.addAll(items)
         if (initViewport) {
             animateInitViewPort = System.currentTimeMillis()
+        }
+    }
+
+    fun updateMarketPrice(marketPrice: MarketPrice) {
+        if (selectedAsset == marketPrice.asset) {
+            val now = now()
+            val today = now.date
+            val index = priceItems.indexOfLast { it.item.dateTime.date == today }
+            if (index == -1) {
+                priceItems.add(PriceItem(priceItems.last().index + 1, marketPrice.asset, marketPrice.asPriceItem(now)))
+            } else {
+                priceItems[index] = priceItems[index].withCurrentMarketPrice(marketPrice)
+            }
         }
     }
 
