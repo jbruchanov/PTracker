@@ -6,6 +6,9 @@ import androidx.compose.runtime.structuralEqualityPolicy
 val LocalTexts = compositionLocalOf(structuralEqualityPolicy()) { English }
 
 interface Texts {
+    val Fee: String
+    val Sell: String
+    val Buy: String
     val AppTitle: String
     val Settings: String
     val FontScaling: String
@@ -36,6 +39,9 @@ interface Texts {
     val SelectBittyTaxFile: String
     val FullPath: String
     val Open: String
+    val Date: String
+    val Coin: String
+    val Quantity: String
 
     val ErrUnableToOpenXlsFile: String
 }
@@ -71,5 +77,11 @@ object English : Texts {
     override val SelectBittyTaxFile: String = "Select BittyTax Excel file"
     override val FullPath: String = "Full path to xls file"
     override val Open: String = "Open"
+    override val Date: String = "Date"
+    override val Coin: String = "Coin"
+    override val Quantity: String = "Quantity"
+    override val Fee: String = "Fee"
+    override val Sell: String = "Sell"
+    override val Buy: String = "Buy"
     override val ErrUnableToOpenXlsFile = "Unable to open XLS(x) file"
 }

@@ -10,6 +10,7 @@ import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.IDataTransformers
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.ui.LocalTexts
 import com.scurab.ptracker.ui.model.ITableData
 import com.scurab.ptracker.ui.model.ITableItem
 import com.scurab.ptracker.ui.model.ITableMetaData
@@ -38,9 +39,9 @@ class StatsDatesUseCase {
 
             @Composable
             override fun getHeaderTitle(index: Int): String = when (index) {
-                0 -> "Date"
-                1 -> "Coin"
-                2 -> "Quantity"
+                0 -> LocalTexts.current.Date
+                1 -> LocalTexts.current.Coin
+                2 -> LocalTexts.current.Quantity
                 else -> throw IllegalArgumentException("Invalid column index:$index")
             }
 

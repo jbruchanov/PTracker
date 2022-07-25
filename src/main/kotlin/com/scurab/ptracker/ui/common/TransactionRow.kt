@@ -30,6 +30,7 @@ import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
+import com.scurab.ptracker.ui.LocalTexts
 import org.koin.java.KoinJavaComponent
 
 @Composable
@@ -74,28 +75,29 @@ fun TransactionRow(
                     modifier = Modifier.size(size)
                 )
             }
+            val texts = LocalTexts.current
             if (prices.buy != null) {
                 Row {
                     Text(text = prices.buy, style = AppTheme.TextStyles.TransactionPrimary)
-                    AnnotatedText(text = item.typeIfNotTradeElseText("Buy"))
+                    AnnotatedText(text = item.typeIfNotTradeElseText(texts.Buy))
                 }
             }
             if (prices.sell != null) {
                 Row {
                     Text(text = prices.sell, style = AppTheme.TextStyles.TransactionPrimary)
-                    AnnotatedText(text = item.typeIfNotTradeElseText("Sell"))
+                    AnnotatedText(text = item.typeIfNotTradeElseText(texts.Sell))
                 }
             }
             if (prices.fee != null) {
                 Row {
                     Text(text = prices.fee, style = AppTheme.TextStyles.TransactionPrimary)
-                    AnnotatedText(text = "Fee")
+                    AnnotatedText(text = texts.Fee)
                 }
             }
             if (prices.unitPrice != null) {
                 Row {
                     Text(text = prices.unitPrice, style = AppTheme.TextStyles.TransactionPrimaryVariant)
-                    AnnotatedText(text = "Price")
+                    AnnotatedText(text = texts.Price)
                 }
             }
             HSpacer()
