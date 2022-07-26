@@ -49,7 +49,7 @@ interface IPriceItem : HasDateTime {
 data class PriceItem(
     val index: Int, override val asset: Asset, val item: IPriceItem
 ) : IPriceItem by item, WithCache by MapCache(), MarketPrice {
-    private val rectHeight = (open - close).abs().toFloat()
+    private val rectHeight = (open - close).abs().toFloat()/*have at least something renderable*/.coerceAtLeast(1f)
     val rectOffsetY = open.min(close).toFloat()
     val color = DashboardColors.Candle.default2If(open < close)
     val rectSize = Size(AppTheme.DashboardSizes.PriceItemWidth, rectHeight)
