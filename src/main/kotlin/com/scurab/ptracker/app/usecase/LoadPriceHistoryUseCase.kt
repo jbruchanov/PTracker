@@ -2,6 +2,7 @@ package com.scurab.ptracker.app.usecase
 
 import com.scurab.ptracker.app.ext.existsAndHasSize
 import com.scurab.ptracker.app.ext.now
+import com.scurab.ptracker.app.ext.toLong
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.model.PriceItem
@@ -26,6 +27,7 @@ class LoadPriceHistoryUseCase(
     private val maxReqPerSecondDelay = 1000L / maxReqPerSecond
     private var lastRequestMark = LoadMark(0, 0)
     private val location = File(Locations.Daily)
+    private val hourInMs = 60 * 60 * 1000L
 
     suspend fun loadAll(assets: Collection<Asset>): Map<Asset, Result<List<PriceItem>>> = assets
         .associateWith { asset ->
@@ -38,48 +40,60 @@ class LoadPriceHistoryUseCase(
     suspend fun load(asset: Asset): List<PriceItem> {
         location.mkdirs()
         val f = File(location, "${asset.label}.json")
-
-        var result: List<PriceItem>? = null
+        var localData: List<CryptoComparePriceItem>? = null
+        val now = now()
         if (f.existsAndHasSize()) {
-            result =
-                jsonBridge.deserialize<List<CryptoComparePriceItem>>(f.readText()).mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, asset, cryptoComparePriceItem) }
+            localData = jsonBridge.deserialize<List<CryptoComparePriceItem>>(f.readText())
+                .run {
+                    //don't download data which are downloaded in last [hourInMs] only
+                    val timeDiffSinceNow = lastOrNull()?.timeMs?.let { now.toLong() - it } ?: 0
+                    if (timeDiffSinceNow > hourInMs) dropLast(1)
+                    else this
+                }
 
             //in case of some data mess, just delete it and redownload it fully
-            val anyDataGap = result.zipWithNext().any { (x, y) -> x.dateTime.date.daysUntil(y.dateTime.date) > 1 }
+            val anyDataGap = localData.zipWithNext().any { (x, y) -> x.dateTime.date.daysUntil(y.dateTime.date) > 1 }
             if (anyDataGap) {
-                result = null
                 f.delete()
+                localData = null
             }
         }
 
-        val lastLoadedDate = result?.lastOrNull()?.dateTime?.date
-        val toLoad = lastLoadedDate?.daysUntil(now().date) ?: 1000
-        if (toLoad > 0) {
+        val lastLoadedDate = localData?.lastOrNull()?.dateTime?.date
+        val toLoad = lastLoadedDate?.daysUntil(now.date) ?: 1000
+        val loadedData: List<CryptoComparePriceItem> = if (toLoad > 0) {
             slowDownIfNecessary()
-            val startIndex = result?.size ?: 0
-            val update = cryptoCompareClient.getHistoryData(asset.coin1, asset.coin2, limit = toLoad).data.items
+            cryptoCompareClient.getHistoryData(asset.coin1, asset.coin2, limit = toLoad).data.items
                 .run {
-                    if (result != null) drop(1) else this
+                    if (localData != null) drop(1) else this
                 }
-                .also { f.writeText(jsonBridge.serialize(it)) }
-                .mapIndexed { index, cryptoComparePriceItem -> PriceItem(startIndex + index, asset, cryptoComparePriceItem) }
-            result = (result ?: emptyList()) + update
-        }
+                .toMutableList()
+                .also {
+                    //overwrite the timestamp of the data to the time actually downloaded so we know if we need to refresh it
+                    if (it.isNotEmpty()) {
+                        it[it.size - 1] = it.last().copy(time = now().toLong() / 1000)
+                    }
+                }
+        } else emptyList()
 
-        return requireNotNull(result) {
-            "Nothing has been loaded for asset:${asset}"
-        }
+        return ((localData ?: emptyList()) + loadedData)
+            .also {
+                if (toLoad > 0) {
+                    f.writeText(jsonBridge.serialize(it))
+                }
+            }
+            .mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, asset, cryptoComparePriceItem) }
     }
 
     private suspend fun slowDownIfNecessary() {
         val now = System.currentTimeMillis()
         val sinceLastLoadDiff = now - lastRequestMark.timeStamp
-        if (sinceLastLoadDiff < 1000) {
+        if (sinceLastLoadDiff < 2000) {
             lastRequestMark.counter++
             val delay = when {
-                lastRequestMark.counter < 3 -> 0L
-                lastRequestMark.counter < maxReqPerSecond / 2 -> maxReqPerSecondDelay / 2
-                else -> (maxReqPerSecondDelay * 1.5).toLong()
+                lastRequestMark.counter < 5 -> 0L
+                lastRequestMark.counter < maxReqPerSecond / 2 -> maxReqPerSecondDelay
+                else -> (maxReqPerSecondDelay * 2L)
             }
             println("LoadPricesDelay:$delay")
             delay(delay)

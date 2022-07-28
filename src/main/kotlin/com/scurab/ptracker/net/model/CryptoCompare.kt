@@ -51,7 +51,10 @@ data class CryptoComparePriceItem(
     @SerialName("conversionType") val conversionType: String?,
     @SerialName("conversionSymbol") val conversionSymbol: String?
 ) : IPriceItem, WithCache by MapCache() {
-    val localDateTime by lazy(LazyThreadSafetyMode.NONE) { Instant.fromEpochMilliseconds(time * 1000).toLocalDateTime(TimeZone.currentSystemDefault()) }
+    @kotlinx.serialization.Transient
+    val timeMs = time * 1000L
+
+    val localDateTime by lazy(LazyThreadSafetyMode.NONE) { Instant.fromEpochMilliseconds(timeMs).toLocalDateTime(TimeZone.currentSystemDefault()) }
     val localDate by lazy(LazyThreadSafetyMode.NONE) { localDateTime.date }
     override val dateTime: LocalDateTime = localDateTime
 }
