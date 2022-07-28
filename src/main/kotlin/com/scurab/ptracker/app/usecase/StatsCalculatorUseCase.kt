@@ -55,13 +55,16 @@ class StatsCalculatorUseCase(
         val transactionTypes = data.setOf { it.type }
         val transactionsByExchange = data.groupBy { it.exchange }
         val sumOfCoins = allCoins.associateWith { coin ->
-            data.filter { it.asset.has(coin) }.map { it.getAmount(coin) }.sumOf { it }
+            val src = if (FiatCurrencies.contains(coin)) ledger.items else data
+            src.filter { it.asset.has(coin) }.map { it.getAmount(coin) }.sumOf { it }
         }
         val feesPerCoin = allCoins.associateWith { coin -> data.sumOf { transaction -> transaction.getFees(coin) } }
         val assetsByExchange = exchanges.map { exchange -> exchange to exchange.normalizedExchange() }
-            .associateBy(keySelector = { ExchangeWallet(it.second) }, valueTransform = { (exchange, normalized) ->
-                data.asSequence().filterIsInstance<Transaction.Trade>().filter { it.exchange == exchange }.filter { it.asset.isTradingAsset }.map { it.asset }.toSet().sorted()
-            })
+            .associateBy(
+                keySelector = { ExchangeWallet(it.second) },
+                valueTransform = { (exchange, normalized) ->
+                    data.asSequence().filterIsInstance<Transaction.Trade>().filter { it.exchange == exchange }.filter { it.asset.isTradingAsset }.map { it.asset }.toSet().sorted()
+                })
 
         //currently, what I have on exchange/wallet
         val actualOwnership = tradingAssets.associateWith { asset -> CoinCalculation(asset, data.filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) }) }
@@ -97,7 +100,10 @@ class StatsCalculatorUseCase(
 
         val coinSumPerExchange = allCoins.associateWith { coin ->
             //!!Original items must be used!!!, otherwise converted values would screw the real amounts
-            ledger.items.filter { it.asset.has(coin) }.groupBy { it.exchange }.mapValues { (_, transactions) -> transactions.sumOf { transaction -> transaction.getAmount(coin) } }
+            ledger.items
+                .filter { it.asset.has(coin) }
+                .groupBy { it.exchange }
+                .mapValues { (_, transactions) -> transactions.sumOf { transaction -> transaction.getAmount(coin) } }
                 .filter { it.value.isNotZero() }
                 .map { (exchange, sum) -> CoinExchangeStats(AnyCoin(coin), ExchangeWallet(exchange.normalizedExchange()), sum, sum.safeDiv(sumOfCoins.getValue(coin))) }
         }

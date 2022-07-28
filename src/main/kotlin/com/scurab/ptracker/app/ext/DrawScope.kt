@@ -40,12 +40,39 @@ inline fun DrawScope.withTranslateAndScale(state: PriceBoardState, block: DrawSc
  * translate and scale to have [0,0] at bottom left corner and [+x, +y] with top/right corner
  */
 inline fun DrawScope.withTranslateAndScale(state: PriceBoardState, block: DrawScope.() -> Unit) {
+    withTranslateAndScaleDefaults(state, block = block)
+}
+
+inline fun DrawScope.withTranslateAndScaleY(state: PriceBoardState, block: DrawScope.() -> Unit) {
+    withTranslateAndScale(1f, state.offset.y + state.canvasSize.height, 1f, state.scale.y, state.chartScalePivot(), flip = true, block)
+}
+
+inline fun DrawScope.withTranslateAndScaleDefaults(
+    state: PriceBoardState,
+    translateLeft: Float = -state.offset.x,
+    translateTop: Float = state.offset.y + state.canvasSize.height,
+    scaleX: Float = state.scale.x,
+    scaleY: Float = state.scale.y,
+    scalePivot: Offset = state.chartScalePivot(),
+    flipY: Boolean = true,
+    block: DrawScope.() -> Unit
+) = withTranslateAndScale(translateLeft, translateTop, scaleX, scaleY, scalePivot, flipY, block)
+
+inline fun DrawScope.withTranslateAndScale(
+    translateLeft: Float,
+    translateTop: Float,
+    scaleX: Float,
+    scaleY: Float,
+    scalePivot: Offset,
+    flip: Boolean,
+    block: DrawScope.() -> Unit
+) {
     //move the origin to bottomLeft corner
-    translate(-state.offset.x, state.offset.y + state.canvasSize.height) {
+    translate(translateLeft, translateTop) {
         //scale with pivot at the right, height/2
-        scale(state.scale.x, state.scale.y, pivot = state.chartScalePivot()) {
+        scale(scaleX, scaleY, scalePivot) {
             //flip y to grow up
-            scale(1f, -1f, pivot = Offset.Zero) {
+            scale(1f, (!flip).sign(), pivot = Offset.Zero) {
                 block()
             }
         }

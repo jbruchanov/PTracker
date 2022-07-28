@@ -28,8 +28,8 @@ data class GroupStatsSum(
             else -> -(1 - it)
         })
         when {
-            v >= 0f -> "+${v.f2}%".colored(AppTheme.Colors.Green)
-            else -> "${v.f2}%".colored(AppTheme.Colors.Red)
+            v >= 0f -> "+${v.f2}%".colored(AppTheme.Colors.CandleGreen)
+            else -> "${v.f2}%".colored(AppTheme.Colors.CandleRed)
         }
     }
 

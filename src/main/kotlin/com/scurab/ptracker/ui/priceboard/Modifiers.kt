@@ -119,7 +119,7 @@ internal fun Modifier.onDoubleTap(state: PriceBoardState): Modifier {
     return pointerInput(state) {
         detectTapGestures(onDoubleTap = {
             state.pointedPriceItem?.let {
-                val index = state.visibleTransactions.firstIndexOf(it, state.grouping)
+                val index = state.transactions.firstIndexOf(it, state.grouping)
                 if (index >= 0) {
                     state.scrollToTransactionIndex = index
                 }

@@ -3,6 +3,7 @@ package com.scurab.ptracker.ui.priceboard
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,16 +14,21 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.app.ext.FloatRange
+import com.scurab.ptracker.app.ext.align
+import com.scurab.ptracker.app.ext.bd
+import com.scurab.ptracker.app.ext.filterVisible
 import com.scurab.ptracker.app.ext.maxValue
 import com.scurab.ptracker.app.ext.nHeight
 import com.scurab.ptracker.app.ext.nWidth
 import com.scurab.ptracker.app.ext.normalize
 import com.scurab.ptracker.app.ext.now
+import com.scurab.ptracker.app.ext.safeDiv
 import com.scurab.ptracker.app.ext.scale
 import com.scurab.ptracker.app.ext.takeAround
 import com.scurab.ptracker.app.ext.toPx
 import com.scurab.ptracker.app.ext.transformNormToViewPort
 import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.CacheRef
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.IPriceItem.Companion.asPriceItem
 import com.scurab.ptracker.app.model.MarketPrice
@@ -31,6 +37,7 @@ import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.usecase.PriceItemTransactions
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
+import com.scurab.ptracker.ui.model.PriceBoardAveragePrices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -56,8 +63,8 @@ class PriceBoardState(
     var pointedPriceItem by mutableStateOf<PriceItem?>(null)
     var clickedTransaction by mutableStateOf<Pair<Long, Transaction>?>(null)
     var priceItems = SnapshotStateList<PriceItem>().also { it.addAll(items) }
-    var visibleTransactions by mutableStateOf(emptyList<Transaction>())
-    var visibleTransactionsPerPriceItem by mutableStateOf(emptyMap<LocalDateTime, PriceItemTransactions>())
+    var transactions by mutableStateOf(emptyList<Transaction>())
+    var transactionsPerPriceItem by mutableStateOf(emptyMap<LocalDateTime, PriceItemTransactions>())
 
     //var ledger by mutableStateOf(Ledger.Empty)
     var selectedAsset by mutableStateOf<Asset?>(null)
@@ -70,6 +77,9 @@ class PriceBoardState(
     var scrollToTransactionIndex by mutableStateOf(0)
     var highlightTransaction by mutableStateOf<Transaction?>(null)
     var pointingTransaction by mutableStateOf<Transaction?>(null)
+
+    private val cachingVisiblePriceItems = CacheRef<Rect, List<PriceItem>>()
+    private val cachingAveragePrices = CacheRef<Rect, PriceBoardAveragePrices>()
 
     private lateinit var composeCoroutineScope: CoroutineScope
 
@@ -86,8 +96,8 @@ class PriceBoardState(
         priceItems.clear()
         clickedTransaction = null
         pointedPriceItem = null
-        visibleTransactions = emptyList()
-        visibleTransactionsPerPriceItem = emptyMap()
+        transactions = emptyList()
+        transactionsPerPriceItem = emptyMap()
     }
 
     suspend fun reset(animate: Boolean = true) = coroutineScope {
@@ -197,7 +207,39 @@ class PriceBoardState(
         }
     }
 
+    @Composable
+    fun getVisiblePriceItems(viewPort: Rect = viewport()): List<PriceItem> {
+        return cachingVisiblePriceItems.getOrCreate(viewPort) {
+            priceItems.filterVisible(viewPort, endOffset = 1)
+        }
+    }
+
+    @Composable
+    fun getAveragePrices(viewPort: Rect = viewport()): PriceBoardAveragePrices {
+        return cachingAveragePrices.coGetOrCreate(viewPort) {
+            val visiblePriceItems = getVisiblePriceItems(viewPort)
+            val avgMarketPrice = visiblePriceItems
+                .map { it.price }
+                .sumOf { it }
+                .safeDiv(visiblePriceItems.size.bd)
+
+            val avgTradePrice = visiblePriceItems
+                .asSequence()
+                .mapNotNull {
+                    transactionsPerPriceItem[it.dateTime]?.transactions?.filterIsInstance<Transaction.Trade>()?.filter { t -> t.isCryptoBuy }
+                }
+                .flatten()
+                .toList()
+                .let { transactions ->
+                    transactions.sumOf { it.price() }.safeDiv(transactions.size.bd)
+                }
+
+            PriceBoardAveragePrices(avgMarketPrice.align, avgTradePrice.align)
+        }
+    }
+
     companion object {
         private val ONE = Offset(1f, 1f)
     }
 }
+

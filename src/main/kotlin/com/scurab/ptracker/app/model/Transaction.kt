@@ -1,6 +1,7 @@
 package com.scurab.ptracker.app.model
 
 import com.scurab.ptracker.app.ext.align
+import com.scurab.ptracker.app.ext.getAmount
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.round
 import com.scurab.ptracker.app.ext.sameElseSwap
@@ -103,6 +104,12 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val assetsLabel: String = asset.label
 
         override val assets: Set<String> = setOf(buyAsset, sellAsset)
+        fun price(numeratorCoin: String = asset.coin2, denominatorCoin: String = asset.coin1): BigDecimal {
+            require(hasCoin(numeratorCoin) && hasCoin(denominatorCoin)) {
+                "Invalid coins numerator:$numeratorCoin, denominator:${denominatorCoin}, this transaction has:$asset"
+            }
+            return (getAmount(numeratorCoin) / getAmount(denominatorCoin)).abs().align
+        }
     }
 
     fun isTransactionWithAsset(asset: Asset) = this is Trade && hasOrIsRelatedAsset(asset)

@@ -381,8 +381,8 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.FreeIncome, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                TextCell(onlineHoldingStats.freeIncome.hrs(), color = AppColors.current.Green)
-                TextCell(onlineHoldingStats.freeIncomeMarketPrice.hrs(), color = AppColors.current.Green)
+                TextCell(onlineHoldingStats.freeIncome.hrs(), color = AppColors.current.CandleGreen)
+                TextCell(onlineHoldingStats.freeIncomeMarketPrice.hrs(), color = AppColors.current.CandleGreen)
             }
             WSpacer4()
         }
@@ -390,7 +390,7 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.NoProfitableOutcome, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                TextCell(onlineHoldingStats.nonProfitableOutcome.hrs(), color = AppColors.current.Red)
+                TextCell(onlineHoldingStats.nonProfitableOutcome.hrs(), color = AppColors.current.CandleRed)
                 val nonProfitableOutcomeMarketPrice = onlineHoldingStats.nonProfitableOutcomeMarketPrice.s2
                 TextCell(
                     nonProfitableOutcomeMarketPrice.hrs(),
@@ -402,7 +402,7 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
                 TextCell(texts.Fees, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
-                TextCell(onlineHoldingStats.feesCrypto.hrs(), color = AppColors.current.Red)
+                TextCell(onlineHoldingStats.feesCrypto.hrs(), color = AppColors.current.CandleRed)
                 val feesCryptoMarketValue = onlineHoldingStats.feesCryptoMarketValue.s2
                 TextCell(feesCryptoMarketValue.hrs(), color = AppColors.current.RedGreenWhite.get(isEnabled = feesCryptoMarketValue.abs().isNotZero(), isEven = true))
             }
@@ -422,7 +422,7 @@ private fun ColumnScope.DetailFiat(fiatCoin: FiatCoin, state: PortfolioStatsUiSt
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
             TextCell(texts.Fees, isMonoSpace = false, textAlign = TextAlign.Start)
             HSpacer()
-            TextCell(fees.hrs(), color = if (fees.isNotZero()) AppColors.current.Red else AppColors.current.OnBackground)
+            TextCell(fees.hrs(), color = if (fees.isNotZero()) AppColors.current.CandleRed else AppColors.current.OnBackground)
         }
     }
 }

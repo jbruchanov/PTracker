@@ -114,8 +114,8 @@ class PriceBoardViewModel(
                 if (isSelectedAssetMissing) {
                     resetData()
                 } else {
-                    visibleTransactions = result.transactions
-                    visibleTransactionsPerPriceItem = result.transactionsPerDateTime
+                    transactions = result.transactions
+                    transactionsPerPriceItem = result.transactionsPerDateTime
                     setItems(data.asset, data.prices, resetViewport)
                 }
             }
@@ -146,7 +146,7 @@ class PriceBoardViewModel(
     override fun onSpacePressed() {
         val boardState = uiState.priceBoardState
         boardState.pointedPriceItem?.let { priceItem ->
-            val index = boardState.visibleTransactions.firstIndexOf(priceItem, boardState.grouping)
+            val index = boardState.transactions.firstIndexOf(priceItem, boardState.grouping)
             if (index >= 0) {
                 boardState.scrollToTransactionIndex = index
             }

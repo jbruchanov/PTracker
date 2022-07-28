@@ -177,8 +177,8 @@ fun PortfolioChart(chartState: PortfolioChartUiState.Data) {
     BoxWithConstraints {
         val radius = remember { 5.dp.toPx(density) }
         var selectedIndex by remember { mutableStateOf(-1) }
-        val colorGreen = AppColors.current.Green
-        val colorRed = AppColors.current.Red
+        val colorGreen = AppColors.current.CandleGreen
+        val colorRed = AppColors.current.CandleRed
         val colorOnBackground = AppColors.current.OnBackground
         Box(modifier = Modifier
             .onMouseMove(data.marketPrice.size) { m, index -> selectedIndex = index }

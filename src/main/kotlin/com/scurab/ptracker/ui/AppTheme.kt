@@ -108,10 +108,11 @@ object AppTheme {
             selected = Secondary.copy(alpha = .15f).compositeOver(Primary.copy(alpha = 0.1f))
         )
         val FooterBackground = RowBackground.copy(default = Color.Transparent, default2 = Color.Transparent)
-        val Red = Color(0xFFEF5350)
-        val Green = Color(0xFF26A69A)
-        val RedGreen = StateContainer(Red, default2 = Green)
-        val RedGreenWhite = StateContainer(default = Red, default2 = Green, disabled = OnBackground)
+        val CandleRed = Color(0xFFEF5350)
+        val CandleGreen = Color(0xFF26A69A)
+        val Green = Color(0xFF00FF00)
+        val RedGreen = StateContainer(CandleRed, default2 = CandleGreen)
+        val RedGreenWhite = StateContainer(default = CandleRed, default2 = CandleGreen, disabled = OnBackground)
 
         val DarkMaterial = darkColors(
             primary = Primary,
@@ -228,7 +229,7 @@ object AppTheme {
     }
 
     object TransactionIcons {
-        private val ColorGreen = Color(0xFF00FF00)
+        private val ColorGreen = Colors.Green
         private val ColorRed = Color(0xFFFF0000)
         private val ColorWhite = Color(0xFFFFFFFFF)
         private val ColorGray = Color.LightGray

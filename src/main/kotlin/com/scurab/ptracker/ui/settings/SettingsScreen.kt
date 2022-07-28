@@ -144,8 +144,8 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
             placeholder = { Text("USD") },
             trailingIcon = {
                 val icon = when (state.primaryCoinValidity) {
-                    Validity.Valid -> IconColor(imageVector = Icons.Default.Check, color = AppColors.current.Green)
-                    Validity.Invalid -> IconColor(imageVector = Icons.Default.Clear, color = AppColors.current.Red)
+                    Validity.Valid -> IconColor(imageVector = Icons.Default.Check, color = AppColors.current.CandleGreen)
+                    Validity.Invalid -> IconColor(imageVector = Icons.Default.Clear, color = AppColors.current.CandleRed)
                     else -> null
                 }
                 if (icon != null) {

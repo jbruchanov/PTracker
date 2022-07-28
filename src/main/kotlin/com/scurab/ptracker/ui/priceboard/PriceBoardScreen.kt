@@ -62,7 +62,6 @@ import com.scurab.ptracker.app.ext.clipRectSafe
 import com.scurab.ptracker.app.ext.draw
 import com.scurab.ptracker.app.ext.f
 import com.scurab.ptracker.app.ext.f3
-import com.scurab.ptracker.app.ext.filterVisible
 import com.scurab.ptracker.app.ext.getHorizontalAxisText
 import com.scurab.ptracker.app.ext.getLabelPriceDecimals
 import com.scurab.ptracker.app.ext.maxValue
@@ -78,6 +77,8 @@ import com.scurab.ptracker.app.ext.toPx
 import com.scurab.ptracker.app.ext.transformNormToReal
 import com.scurab.ptracker.app.ext.transformNormToViewPort
 import com.scurab.ptracker.app.ext.withTranslateAndScale
+import com.scurab.ptracker.app.ext.withTranslateAndScaleDefaults
+import com.scurab.ptracker.app.ext.withTranslateAndScaleY
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
@@ -91,6 +92,7 @@ import com.scurab.ptracker.ui.AppTheme.TextRendering
 import com.scurab.ptracker.ui.common.AssetToggleButton
 import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.FlatButton
+import com.scurab.ptracker.ui.common.HSpacer
 import com.scurab.ptracker.ui.common.ToggleButton
 import com.scurab.ptracker.ui.common.TransactionRow
 import com.scurab.ptracker.ui.common.VerticalDivider
@@ -205,7 +207,7 @@ private fun PriceBoardTransactions(priceBoardState: PriceBoardState, eventDelega
             val priceItem = priceBoardState.pointedPriceItem
             val grouping = priceBoardState.grouping::toLongGroup
             LazyColumn(modifier = Modifier.fillMaxWidth(), state = state) {
-                itemsIndexed(priceBoardState.visibleTransactions, key = { _, v -> v.uuid }) { index, transaction ->
+                itemsIndexed(priceBoardState.transactions, key = { _, v -> v.uuid }) { index, transaction ->
                     val isSelected = priceItem != null && grouping(priceItem.dateTime) == grouping(transaction.dateTime)
                     TransactionRow(
                         onClick = {
@@ -242,13 +244,14 @@ private fun PriceBoardScreen(state: PriceBoardState, eventDelegate: PriceBoardEv
         CandleTransactions(state)
         AxisBackground(state)
         AxisContent(state)
+        AvgVisiblePrices(state)
         Mouse(state)
         AxisEdgeLines(state)
         if (state.isDebugVisible) {
             PriceBoardDebug(state)
         }
 
-        PriceSelectedDayDetail(state)
+        PriceDetail(state)
         PriceSelectedDayTransactionTypes(state)
         if (state.animateInitViewPort != -1L) {
             LaunchedEffect(state.animateInitViewPort) {
@@ -259,20 +262,38 @@ private fun PriceBoardScreen(state: PriceBoardState, eventDelegate: PriceBoardEv
 }
 
 @Composable
-private fun PriceSelectedDayDetail(state: PriceBoardState) {
+private fun PriceDetail(state: PriceBoardState) {
     val item = state.pointedPriceItem
-    if (item != null) {
-        val text = remember(item) { item.priceDetails() }
-        val sizes = AppSizes.current
-        Text(
-            text, modifier = Modifier
-                .offset(sizes.Space2, sizes.Space)
-                .background(DashboardColors.BackgroundAxis, shape = RoundedCornerShape(2.dp))
-                .padding(sizes.Space05),
-            color = DashboardColors.OnBackground,
-            fontSize = DashboardSizes.PriceSelectedDayDetail,
-            fontFamily = FontFamily.Monospace
-        )
+    val avgPrices = state.getAveragePrices()
+    val sizes = AppSizes.current
+    Column(
+        modifier = Modifier
+            .offset(sizes.Space2, sizes.Space)
+            .background(DashboardColors.BackgroundAxis, shape = RoundedCornerShape(2.dp))
+            .padding(sizes.Space05)
+    ) {
+        if (item != null) {
+            val text = remember(item) { item.priceDetails() }
+            Text(
+                text,
+                color = DashboardColors.OnBackground,
+                fontSize = DashboardSizes.PriceSelectedDayDetail,
+                fontFamily = FontFamily.Monospace
+            )
+            HSpacer()
+        }
+
+        if (!avgPrices.isEmpty) {
+            val marketColor = AppColors.current.Secondary
+            val tradeColor = AppColors.current.Green
+            val label = remember(avgPrices) { avgPrices.label(market = marketColor, trade = tradeColor, DashboardColors.Candle) }
+            Text(
+                label,
+                color = DashboardColors.OnBackground,
+                fontSize = DashboardSizes.PriceSelectedDayDetail,
+                fontFamily = FontFamily.Monospace
+            )
+        }
     }
 }
 
@@ -280,7 +301,7 @@ private fun PriceSelectedDayDetail(state: PriceBoardState) {
 private fun BoxScope.PriceSelectedDayTransactionTypes(state: PriceBoardState) {
     val item = state.pointedPriceItem
     if (item != null) {
-        val iconsPrices = state.visibleTransactionsPerPriceItem[item.dateTime]?.distinctIcons ?: return
+        val iconsPrices = state.transactionsPerPriceItem[item.dateTime]?.distinctIcons ?: return
 
         val offsetX = AppSizes.current.Space + Dp(state.verticalPriceBarWidth() / LocalDensity.current.density)
         if (iconsPrices.size > 1) {
@@ -302,10 +323,10 @@ private fun BoxScope.PriceSelectedDayTransactionTypes(state: PriceBoardState) {
 @Composable
 private fun Candles(state: PriceBoardState) {
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
+    val visiblePriceItems = state.getVisiblePriceItems()
     Canvas {
         withTranslateAndScale(state) {
-            val filterVisible = state.priceItems.filterVisible(state, endOffset = 1)
-            filterVisible.forEach { priceItem ->
+            visiblePriceItems.forEach { priceItem ->
                 val x = priceItem.index * DashboardSizes.PriceItemWidth
                 //scaleY flipped as we want to have origin at left/Bottom
                 translate(x, 0f) {
@@ -329,11 +350,8 @@ private fun CandleTransactions(state: PriceBoardState) {
     val densityScale = LocalDensity.current.maxValue()
     val priceItemWidthHalf = DashboardSizes.PriceItemWidth / 2f
 
-    val actualViewPort = state.viewport()
-    val filterVisible = remember(actualViewPort) { state.priceItems.filterVisible(actualViewPort, endOffset = 1) }
-
-    filterVisible.forEach { priceItem ->
-        val iconsPrices = state.visibleTransactionsPerPriceItem[priceItem.dateTime]?.iconPrices
+    state.getVisiblePriceItems().forEach { priceItem ->
+        val iconsPrices = state.transactionsPerPriceItem[priceItem.dateTime]?.iconPrices
         //draw candle transaction
         var pointedIconPrice: Pair<IconColor, Transaction>? = null
         iconsPrices?.forEach iconPrices@{ iconPrice ->
@@ -373,6 +391,37 @@ private fun CandleTransactions(state: PriceBoardState) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AvgVisiblePrices(state: PriceBoardState) {
+    state.selectedAsset ?: return
+    val averagePrices = state.getAveragePrices()
+        .takeIf { !it.isEmpty }
+        ?: return
+
+    val (avgMarketPrice, avgBuyPrice) = averagePrices
+
+    val density = LocalDensity.current.density
+    val lineWidth = state.verticalPriceBarLeft()
+    val effect = remember { PathEffect.dashPathEffect(floatArrayOf(3f * density, 3f * density)) }
+    val marketPriceColor = AppColors.current.Secondary
+    val tradeColor = AppColors.current.Green
+    Canvas {
+        withTranslateAndScaleY(state) {
+            drawLine(
+                marketPriceColor,
+                Offset(0f, avgMarketPrice.toFloat()), end = Offset(lineWidth, avgMarketPrice.toFloat()),
+                pathEffect = effect
+            )
+
+            drawLine(
+                tradeColor,
+                Offset(0f, avgBuyPrice.toFloat()), end = Offset(lineWidth, avgBuyPrice.toFloat()),
+                pathEffect = effect
+            )
         }
     }
 }
@@ -508,19 +557,17 @@ private fun PriceAxisContentTemplate(
     Canvas {
         //Axis X
         clipRectSafe(right = state.verticalPriceBarLeft()) {
-            translate(-state.offset.x, size.height) {
-                scale(state.scale.x, 1f, pivot = state.chartScalePivot()) {
-                    val step = ceil(PriceDashboardConfig.AxisXStep * state.maxDensity() / state.scale.x).toInt()
-                    //offset for long text to be visible even if line the "column" is outside visible range
-                    val viewportIndexes = state.viewportIndexes(startOffset = -step)
-                    viewportIndexes.forEach { i ->
-                        //can't use step on range as it's causing scroll "jitter"
-                        if (i % step != 0) return@forEach
-                        val x = (i + 0.5f) * DashboardSizes.PriceItemWidth
-                        translate(x, 0f) {
-                            scale(scaleX = 1f / state.scale.x, scaleY = 1f, pivot = Offset.Zero) {
-                                horizontalContent(items.getOrNull(i), step)
-                            }
+            withTranslateAndScaleDefaults(state, translateTop = size.height, scaleY = 1f, flipY = false) {
+                val step = ceil(PriceDashboardConfig.AxisXStep * state.maxDensity() / state.scale.x).toInt()
+                //offset for long text to be visible even if line the "column" is outside visible range
+                val viewportIndexes = state.viewportIndexes(startOffset = -step)
+                viewportIndexes.forEach { i ->
+                    //can't use step on range as it's causing scroll "jitter"
+                    if (i % step != 0) return@forEach
+                    val x = (i + 0.5f) * DashboardSizes.PriceItemWidth
+                    translate(x, 0f) {
+                        scale(scaleX = 1f / state.scale.x, scaleY = 1f, pivot = Offset.Zero) {
+                            horizontalContent(items.getOrNull(i), step)
                         }
                     }
                 }
