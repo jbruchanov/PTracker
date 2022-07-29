@@ -16,7 +16,9 @@ import androidx.compose.ui.unit.Density
 import com.scurab.ptracker.app.ext.FloatRange
 import com.scurab.ptracker.app.ext.align
 import com.scurab.ptracker.app.ext.bd
+import com.scurab.ptracker.app.ext.coinSum
 import com.scurab.ptracker.app.ext.filterVisible
+import com.scurab.ptracker.app.ext.getAmount
 import com.scurab.ptracker.app.ext.maxValue
 import com.scurab.ptracker.app.ext.nHeight
 import com.scurab.ptracker.app.ext.nWidth
@@ -37,7 +39,8 @@ import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.usecase.PriceItemTransactions
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
-import com.scurab.ptracker.ui.model.PriceBoardAveragePrices
+import com.scurab.ptracker.ui.model.PriceBoardVisibleStats
+import com.scurab.ptracker.ui.model.PriceItemVolumes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -50,10 +53,7 @@ import kotlin.math.ceil
 import kotlin.math.max
 
 class PriceBoardState(
-    items: List<PriceItem>,
-    private val localDensity: Density,
-    grouping: DateGrouping = DateGrouping.Day,
-    val isDebugVisible: Boolean = false
+    items: List<PriceItem>, private val localDensity: Density, grouping: DateGrouping = DateGrouping.Day, val isDebugVisible: Boolean = false
 ) {
     var scale by mutableStateOf(Offset(1f, 1f))
     var offset by mutableStateOf(Offset.Zero)
@@ -79,7 +79,7 @@ class PriceBoardState(
     var pointingTransaction by mutableStateOf<Transaction?>(null)
 
     private val cachingVisiblePriceItems = CacheRef<Rect, List<PriceItem>>()
-    private val cachingAveragePrices = CacheRef<Rect, PriceBoardAveragePrices>()
+    private val cachingVisibleStats = CacheRef<Rect, PriceBoardVisibleStats>()
 
     private lateinit var composeCoroutineScope: CoroutineScope
 
@@ -98,6 +98,13 @@ class PriceBoardState(
         pointedPriceItem = null
         transactions = emptyList()
         transactionsPerPriceItem = emptyMap()
+
+        resetCache()
+    }
+
+    private fun resetCache() {
+        cachingVisiblePriceItems.clear()
+        cachingVisibleStats.clear()
     }
 
     suspend fun reset(animate: Boolean = true) = coroutineScope {
@@ -115,23 +122,22 @@ class PriceBoardState(
         var offsetX = ((priceItemIndex + 1/*1 piece offset to workaround tiny difference*/) * DashboardSizes.PriceItemWidth)
         //take last n visible items on the screen
         val sample = priceItems.takeAround(
-            priceItemIndex.coerceIn(0, priceItems.size - 1),
-            PriceDashboardConfig.DefaultMinColumns.coerceAtLeast(10)
+            priceItemIndex.coerceIn(0, priceItems.size - 1), PriceDashboardConfig.DefaultMinColumns.coerceAtLeast(10)
         )
         val priceRange = sample.minOf { it.low }.toFloat().rangeTo(sample.maxOf { it.high }.toFloat())
         val y = focusItem.centerY
-        val scaleX = (size.width / PriceDashboardConfig.DefaultMinColumns / DashboardSizes.PriceItemWidth)
-            .coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1])
+        val scaleX =
+            (size.width / PriceDashboardConfig.DefaultMinColumns / DashboardSizes.PriceItemWidth).coerceIn(PriceDashboardConfig.ScaleRangeX[0], PriceDashboardConfig.ScaleRangeX[1])
 
         val maxMinDiff = sample.maxOf { it.high } - sample.minOf { it.low }
-        val scaleY = size.height / (2.25f /*vertical coef to shrink space to see more*/ * maxMinDiff.toFloat())
-            .coerceIn(PriceDashboardConfig.ScaleRangeY[0], PriceDashboardConfig.ScaleRangeY[1])
+        val scaleY = size.height / (2.25f /*vertical coef to shrink space to see more*/ * maxMinDiff.toFloat()).coerceIn(
+            PriceDashboardConfig.ScaleRangeY[0],
+            PriceDashboardConfig.ScaleRangeY[1]
+        )
         if (alignCenter) {
             offsetX += (size.width - verticalPriceBarWidth() - DashboardSizes.PriceItemWidth) / 2 / scaleX
         }
-        return Rect(0f, size.height, size.width, 0f)
-            .scale(scaleX, scaleY)
-            .translate(offsetX - verticalPriceBarLeft(priceRange), y - size.height / 2)
+        return Rect(0f, size.height, size.width, 0f).scale(scaleX, scaleY).translate(offsetX - verticalPriceBarLeft(priceRange), y - size.height / 2)
     }
 
     fun setViewport(viewport: Rect, size: Size = this.canvasSize, animate: Boolean = false) = composeCoroutineScope.launch {
@@ -160,13 +166,14 @@ class PriceBoardState(
     suspend fun animateToOffsetScale(offset: Offset = this.offset, scale: Offset = this.scale) {
         withContext(composeCoroutineScope.coroutineContext) {
             launch {
-                Animatable(this@PriceBoardState.offset, Offset.VectorConverter).animateTo(offset, animationSpec = tween(PriceDashboardConfig.ViewportAnimationDuration))
-                { this@PriceBoardState.offset = value }
+                Animatable(this@PriceBoardState.offset, Offset.VectorConverter).animateTo(
+                    offset,
+                    animationSpec = tween(PriceDashboardConfig.ViewportAnimationDuration)
+                ) { this@PriceBoardState.offset = value }
             }
             launch {
                 Animatable(this@PriceBoardState.scale, Offset.VectorConverter).animateTo(
-                    scale,
-                    animationSpec = tween(PriceDashboardConfig.ViewportAnimationDuration)
+                    scale, animationSpec = tween(PriceDashboardConfig.ViewportAnimationDuration)
                 ) { this@PriceBoardState.scale = value }
             }
         }
@@ -180,10 +187,8 @@ class PriceBoardState(
         //scale in same way as we do for preview
         .scale(1f / scale.x, 1f / scale.y, pivot = chartScalePivot().let { it.copy(-it.x) })
 
-    fun visiblePriceRange() = Rect(left = 0f, top = canvasSize.height, right = canvasSize.width, bottom = 0f)
-        .translate(0f, offset.y)
-        .scale(1f, 1f / scale.y, pivot = Offset(0f, -offset.y - canvasSize.height / 2))
-        .let { it.bottom.rangeTo(it.top) }
+    fun visiblePriceRange() = Rect(left = 0f, top = canvasSize.height, right = canvasSize.width, bottom = 0f).translate(0f, offset.y)
+        .scale(1f, 1f / scale.y, pivot = Offset(0f, -offset.y - canvasSize.height / 2)).let { it.bottom.rangeTo(it.top) }
 
     fun setItems(asset: Asset, items: List<PriceItem>, initViewport: Boolean) {
         selectedAsset = asset
@@ -196,6 +201,7 @@ class PriceBoardState(
 
     fun updateMarketPrice(marketPrice: MarketPrice) {
         if (selectedAsset == marketPrice.asset) {
+            cachingVisiblePriceItems.clear()
             val now = now()
             val today = now.date
             val index = priceItems.indexOfLast { it.item.dateTime.date == today }
@@ -215,26 +221,45 @@ class PriceBoardState(
     }
 
     @Composable
-    fun getAveragePrices(viewPort: Rect = viewport()): PriceBoardAveragePrices {
-        return cachingAveragePrices.coGetOrCreate(viewPort) {
+    fun getVisibleStats(viewPort: Rect = viewport()): PriceBoardVisibleStats {
+        return cachingVisibleStats.coGetOrCreate(viewPort) {
             val visiblePriceItems = getVisiblePriceItems(viewPort)
-            val avgMarketPrice = visiblePriceItems
-                .map { it.price }
-                .sumOf { it }
-                .safeDiv(visiblePriceItems.size.bd)
+            val avgMarketPrice = visiblePriceItems.map { it.price }.sumOf { it }.safeDiv(visiblePriceItems.size.bd).align
 
-            val avgTradePrice = visiblePriceItems
-                .asSequence()
+            val trades = visiblePriceItems.asSequence()
                 .mapNotNull {
-                    transactionsPerPriceItem[it.dateTime]?.transactions?.filterIsInstance<Transaction.Trade>()?.filter { t -> t.isCryptoBuy }
+                    transactionsPerPriceItem[it.dateTime]?.transactions?.filterIsInstance<Transaction.Trade>()
                 }
                 .flatten()
                 .toList()
-                .let { transactions ->
-                    transactions.sumOf { it.price() }.safeDiv(transactions.size.bd)
-                }
 
-            PriceBoardAveragePrices(avgMarketPrice.align, avgTradePrice.align)
+            val asset = requireNotNull(selectedAsset) { "No asset selected" }
+
+            val (coin1SumBuy, coin1SumSell) = trades.coinSum(asset.coin1)
+            val (coin2SumBuy, coin2SumSell) = trades.coinSum(asset.coin2)
+
+            val volumes = visiblePriceItems.associateWith { priceItem ->
+                transactionsPerPriceItem[priceItem.dateTime]?.transactions
+                    ?.filterIsInstance<Transaction.Trade>()
+                    ?.let { trades ->
+                        PriceItemVolumes(
+                            priceItem,
+                            coin1Volume = trades.sumOf { it.getAmount(asset.coin1) },
+                            coin2Volume = trades.sumOf { it.getAmount(asset.coin2) },
+                        )
+                    }
+            }
+
+            PriceBoardVisibleStats(
+                asset = trades.firstOrNull()?.asset ?: Asset.Empty,
+                avgMarketPrice = avgMarketPrice,
+                coin1SumBuy = coin1SumBuy,
+                coin1SumSell = coin1SumSell,
+                coin2SumBuy = coin2SumBuy,
+                coin2SumSell = coin2SumSell,
+                volumes = volumes,
+                transactions = transactions.size
+            )
         }
     }
 
@@ -242,4 +267,3 @@ class PriceBoardState(
         private val ONE = Offset(1f, 1f)
     }
 }
-

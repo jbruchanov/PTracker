@@ -111,9 +111,8 @@ class PriceBoardViewModel(
                 }
             }
             with(uiState.priceBoardState) {
-                if (isSelectedAssetMissing) {
-                    resetData()
-                } else {
+                resetData()
+                if (!isSelectedAssetMissing) {
                     transactions = result.transactions
                     transactionsPerPriceItem = result.transactionsPerDateTime
                     setItems(data.asset, data.prices, resetViewport)

@@ -4,6 +4,8 @@ import com.scurab.ptracker.app.model.FiatCurrencies
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 import kotlin.math.ceil
 import kotlin.math.log10
 
@@ -11,6 +13,13 @@ val ZERO = "0".bd
 
 fun BigDecimal.isZero() = compareTo(ZERO) == 0
 fun BigDecimal.isNotZero() = !isZero()
+@OptIn(ExperimentalContracts::class)
+fun BigDecimal?.isNotNullAndNotZero(): Boolean {
+    contract {
+        returns() implies (this@isNotNullAndNotZero != null)
+    }
+    return this != null && !isZero()
+}
 fun BigDecimal.base() = ceil(log10(toDouble())).toInt()
 fun BigDecimal.inverse() = (1.bd / this).align
 fun BigDecimal.round(asset: String?, scaleFiat: Int = 4, scaleCrypto: Int = 8): BigDecimal =
@@ -46,7 +55,8 @@ fun BigDecimal.align(scale: Int) = setScale(scale, RoundingMode.HALF_UP)
 
 val BigDecimal.isPositive get() = this > ZERO
 val BigDecimal.isNegative get() = this < ZERO
-fun BigDecimal.safeDiv(divisor: BigDecimal): BigDecimal = if (divisor.isZero()) ZERO else this.align / divisor
+val BigDecimal.isZeroOrPositive get() = this >= ZERO
+fun BigDecimal.safeDiv(divisor: BigDecimal): BigDecimal = (if (divisor.isZero()) ZERO else this.align / divisor).align
 fun BigDecimal.roi() = takeIf { !it.isZero() }
     ?.let { v -> (if (v > 1.bd) v - 1.bd else -(1.bd - v)) * 100.bd }
     ?: ZERO

@@ -71,3 +71,7 @@ fun List<Transaction>.totalMarketValue(prices: Map<Asset, MarketPrice>, primaryC
         MarketData(coinStats.sumOf { it.first }, coinStats.sumOf { it.second })
     }
 }
+
+fun List<Transaction.Trade>.coinSum(coin: String) = map { it.getAmount(coin) }
+    .partition { !it.isNegative }
+    .let { (l, r) -> Pair(l.sumOf { it }, r.sumOf { it }) }

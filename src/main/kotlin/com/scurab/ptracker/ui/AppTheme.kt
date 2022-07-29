@@ -212,11 +212,15 @@ object AppTheme {
         val BackgroundPriceBubble = Color(0xFF404040)
         val MouseCross = Color.White
         val Candle = Colors.RedGreen
+        private val candleVolumeAlpha = 0.3f
+        val CandleVolume = StateContainer(default = Candle.default.copy(alpha = candleVolumeAlpha), default2 = Candle.default2.copy(alpha = candleVolumeAlpha))
     }
 
     object DashboardSizes {
         //no dp, this basically means 10px per a price candle, scale handles proper scaling
         const val PriceItemWidth = 10f
+
+        const val VolumeMaxWindowHeight = 0.2f
 
         val GridLineStrokeWidth = Sizes.Space025
         val SpikeLineStrokeWidth = Sizes.Space025

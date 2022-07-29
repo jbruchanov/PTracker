@@ -24,4 +24,9 @@ class CacheRef<K, V> {
         }
         return requireValue()
     }
+
+    fun clear() {
+        key = null
+        item = null
+    }
 }
