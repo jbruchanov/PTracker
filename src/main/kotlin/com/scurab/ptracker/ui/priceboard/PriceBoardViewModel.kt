@@ -47,6 +47,9 @@ interface PriceBoardEventDelegate {
     fun onSpacePressed()
     fun onResetClicked()
     fun onFilterClicked(filter: Filter<*>)
+    fun onTradingAverageClicked()
+    fun onTradingVolumeClicked()
+    fun onGroupingTransactionsClicked()
 }
 
 class PriceBoardViewModel(
@@ -176,5 +179,17 @@ class PriceBoardViewModel(
     override fun stop() {
         super.stop()
         uiState.priceBoardState.animateInitViewPort = -1L
+    }
+
+    override fun onTradingAverageClicked() {
+        uiState.priceBoardState.isTradingAverageVisible = !uiState.priceBoardState.isTradingAverageVisible
+    }
+
+    override fun onTradingVolumeClicked() {
+        uiState.priceBoardState.isTradingVolumeVisible = !uiState.priceBoardState.isTradingVolumeVisible
+    }
+
+    override fun onGroupingTransactionsClicked() {
+        uiState.priceBoardState.isGroupingTransactionsEnabled = !uiState.priceBoardState.isGroupingTransactionsEnabled
     }
 }

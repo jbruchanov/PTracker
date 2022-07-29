@@ -78,6 +78,10 @@ class PriceBoardState(
     var highlightTransaction by mutableStateOf<Transaction?>(null)
     var pointingTransaction by mutableStateOf<Transaction?>(null)
 
+    var isTradingVolumeVisible by mutableStateOf(true)
+    var isTradingAverageVisible by mutableStateOf(true)
+    var isGroupingTransactionsEnabled by mutableStateOf(false)
+
     private val cachingVisiblePriceItems = CacheRef<Rect, List<PriceItem>>()
     private val cachingVisibleStats = CacheRef<Rect, PriceBoardVisibleStats>()
 

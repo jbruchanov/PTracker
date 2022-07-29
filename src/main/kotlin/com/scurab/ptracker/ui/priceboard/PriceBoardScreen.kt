@@ -28,8 +28,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Adjust
 import androidx.compose.material.icons.filled.BorderOuter
+import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.Hive
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Workspaces
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -90,8 +95,6 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
-import com.scurab.ptracker.app.model.Tuple3
-import com.scurab.ptracker.app.model.Tuple4
 import com.scurab.ptracker.app.model.priceDetails
 import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.ui.AppColors
@@ -170,7 +173,13 @@ fun PriceBoardScreen(vm: PriceBoardViewModel) {
                 ) {
                     FlatButton(Icons.Default.BorderOuter, onClick = { vm.onResetClicked() })
                     VerticalDivider()
-                    ToggleButton(Icons.Default.FilterAlt, isSelected = vm.uiState.hasTradeOnlyFilter, onClick = { vm.onFilterClicked(Filter.ImportantTransactions) })
+                    ToggleButton(Icons.Default.FilterAlt, isSelected = uiState.hasTradeOnlyFilter, onClick = { vm.onFilterClicked(Filter.ImportantTransactions) })
+                    VerticalDivider()
+                    ToggleButton(Icons.Default.Equalizer, isSelected = priceBoardState.isTradingVolumeVisible, onClick = { vm.onTradingVolumeClicked() })
+                    VerticalDivider()
+                    ToggleButton(Icons.Default.Menu, isSelected = priceBoardState.isTradingAverageVisible, onClick = { vm.onTradingAverageClicked() })
+                    VerticalDivider()
+                    ToggleButton(Icons.Default.Hive, isSelected = priceBoardState.isGroupingTransactionsEnabled, onClick = { vm.onGroupingTransactionsClicked() })
                     VerticalDivider()
                     val assets = vm.uiState.assets
                     assets.forEach { assetIcon ->
@@ -278,7 +287,7 @@ private fun PriceDetails(state: PriceBoardState) {
             HSpacer()
         }
 
-        if (!stats.isEmpty) {
+        if (!stats.isEmpty && state.isTradingAverageVisible) {
             val marketColor = AppColors.current.Secondary
             val label = remember(stats) {
                 textTradingAverages(stats.avgMarketPrice, stats.avgCoin1BuyPrice, stats.avgCoin1SellPrice, market = marketColor, DashboardColors.Candle)
@@ -287,7 +296,7 @@ private fun PriceDetails(state: PriceBoardState) {
             HSpacer()
         }
 
-        if (!stats.isEmpty) {
+        if (!stats.isEmpty && state.isTradingVolumeVisible) {
             val text = remember(stats, state.selectedPriceItem()) {
                 val dayVolumes = stats.volumes[state.selectedPriceItem()]
                 textVolumeStats(
@@ -304,7 +313,7 @@ private fun PriceDetails(state: PriceBoardState) {
 }
 
 @Composable
-private fun StatsText(text:AnnotatedString) {
+private fun StatsText(text: AnnotatedString) {
     Text(text, color = DashboardColors.OnBackground, fontSize = DashboardSizes.PriceSelectedDayDetail, fontFamily = FontFamily.Monospace, maxLines = 1)
 }
 
@@ -367,7 +376,14 @@ private fun CandleTransactions(state: PriceBoardState) {
                 pointedIconPrice = iconPrice
                 return@iconPrices
             }
-            drawCandleTransactionIcon(state, priceItem, transaction, priceItemWidthHalf, ic, densityScale, painter)
+            if (!state.isGroupingTransactionsEnabled) {
+                drawCandleTransactionIcon(state, priceItem, transaction, priceItemWidthHalf, ic, densityScale, painter)
+            }
+        }
+        if (iconsPrices?.isNotEmpty() == true && state.isGroupingTransactionsEnabled) {
+            val ic = AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeGrouping)
+            val painter = rememberVectorPainter(image = ic.imageVector.get())
+            drawCandleTransactionIcon(state, priceItem, transaction = null, priceItemWidthHalf, ic, densityScale, painter)
         }
         //draw the pointing one latest to overdraw any other
         pointedIconPrice?.let { (ic, transaction) ->
@@ -403,6 +419,7 @@ private fun CandleTransactions(state: PriceBoardState) {
 
 @Composable
 fun CandleVolumes(state: PriceBoardState) {
+    if (!state.isTradingVolumeVisible) return
     state.selectedAsset ?: return
     val visibleVolumes = state.getVisibleStats()
     Canvas {
@@ -433,6 +450,7 @@ fun CandleVolumes(state: PriceBoardState) {
 
 @Composable
 private fun AvgVisiblePrices(state: PriceBoardState) {
+    if (!state.isTradingAverageVisible) return
     state.selectedAsset ?: return
     val averagePrices = state.getVisibleStats().takeIf { it.avgMarketPrice.isNotZero() } ?: return
 
@@ -459,12 +477,12 @@ private fun AvgVisiblePrices(state: PriceBoardState) {
 
 @Composable
 private fun drawCandleTransactionIcon(
-    state: PriceBoardState, priceItem: PriceItem, transaction: Transaction, priceItemWidthHalf: Float, ic: IconColor, densityScale: Float, painter: VectorPainter
+    state: PriceBoardState, priceItem: PriceItem, transaction: Transaction?, priceItemWidthHalf: Float, ic: IconColor, densityScale: Float, painter: VectorPainter
 ) {
     Canvas {
         withTranslateAndScale(state) {
             val x = priceItem.index * DashboardSizes.PriceItemWidth
-            val y = transaction.unitPrice()?.toFloat() ?: priceItem.centerY
+            val y = transaction?.unitPrice()?.toFloat() ?: priceItem.centerY
             translate(x + priceItemWidthHalf, y) {
                 resetScale(state) {
                     translate(ic.candleOffset.x, ic.candleOffset.y) {

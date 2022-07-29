@@ -23,5 +23,6 @@ class IconColor(
     companion object {
         val CandleScale = StateContainer(Offset(0.6f, 0.6f), selected = Offset(1.2f, 1.2f))
         val CandleScaleTrade = StateContainer(Offset(0.5f, 0.5f), selected = Offset(1f, 1f))
+        val CandleScaleGrouping = StateContainer(Offset(0.5f, 0.5f), selected = Offset(0.5f, 0.5f))
     }
 }

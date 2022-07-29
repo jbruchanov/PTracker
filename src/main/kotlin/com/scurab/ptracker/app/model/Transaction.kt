@@ -189,6 +189,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         val _TypeCryptoWithdrawal = "CryptoWithdrawal"
         val _TypeCryptoExchange = "CryptoExchange"
         val _TypeFiatExchange = "FiatExchange"
+        val _TypeGrouping = "_Grouping"
 
         private val UnImportantType = setOf(
             TypeDeposit, TypeWithdrawal

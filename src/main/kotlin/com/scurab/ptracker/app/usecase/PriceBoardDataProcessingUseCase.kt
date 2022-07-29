@@ -41,7 +41,7 @@ class PriceItemTransactions(
     val priceItem: PriceItem,
     val transactions: List<Transaction>
 ) {
-    val iconPrices = transactions.map { it.iconColor() to it }.distinct()
+    val iconPrices = transactions.map { it.iconColor() to it }
 
     val distinctIcons = transactions
         .map { it.iconColor() }
