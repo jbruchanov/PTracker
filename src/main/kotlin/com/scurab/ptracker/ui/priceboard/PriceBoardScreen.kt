@@ -90,6 +90,8 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.model.Tuple3
+import com.scurab.ptracker.app.model.Tuple4
 import com.scurab.ptracker.app.model.priceDetails
 import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.ui.AppColors
@@ -265,22 +267,23 @@ private fun PriceDetails(state: PriceBoardState) {
     val stats = state.getVisibleStats(viewPort)
     val sizes = AppSizes.current
     Column(
-        modifier = Modifier.offset(sizes.Space2, sizes.Space).background(DashboardColors.BackgroundAxis, shape = RoundedCornerShape(2.dp)).padding(sizes.Space05)
+        modifier = Modifier
+            .offset(sizes.Space, sizes.Space)
+            .background(DashboardColors.BackgroundAxis, shape = RoundedCornerShape(2.dp))
+            .padding(horizontal = sizes.Space2, vertical = sizes.Space)
     ) {
         if (item != null) {
             val text = remember(item) { item.priceDetails() }
-            Text(
-                text, color = DashboardColors.OnBackground, fontSize = DashboardSizes.PriceSelectedDayDetail, fontFamily = FontFamily.Monospace
-            )
+            StatsText(text)
             HSpacer()
         }
 
         if (!stats.isEmpty) {
             val marketColor = AppColors.current.Secondary
-            val label = remember(stats) { textTradingAverages(stats.avgMarketPrice, market = marketColor, DashboardColors.Candle) }
-            Text(
-                label, color = DashboardColors.OnBackground, fontSize = DashboardSizes.PriceSelectedDayDetail, fontFamily = FontFamily.Monospace
-            )
+            val label = remember(stats) {
+                textTradingAverages(stats.avgMarketPrice, stats.avgCoin1BuyPrice, stats.avgCoin1SellPrice, market = marketColor, DashboardColors.Candle)
+            }
+            StatsText(label)
             HSpacer()
         }
 
@@ -294,13 +297,15 @@ private fun PriceDetails(state: PriceBoardState) {
                 )
             }
             if (text.isNotEmpty()) {
-                Text(
-                    text, color = DashboardColors.OnBackground, fontSize = DashboardSizes.PriceSelectedDayDetail, fontFamily = FontFamily.Monospace
-                )
-                HSpacer()
+                StatsText(text)
             }
         }
     }
+}
+
+@Composable
+private fun StatsText(text:AnnotatedString) {
+    Text(text, color = DashboardColors.OnBackground, fontSize = DashboardSizes.PriceSelectedDayDetail, fontFamily = FontFamily.Monospace, maxLines = 1)
 }
 
 @Composable
@@ -676,7 +681,7 @@ private fun PriceBoardDebug(state: PriceBoardState) {
             "Data: Items:${state.priceItems.size}, LastItemPriceCenter:${state.priceItems.lastOrNull()?.centerY?.f3}",
         )
         drawIntoCanvas {
-            translate(left = 2f, top = 60.dp.toPx()) {
+            translate(left = 4f, top = 100.dp.toPx()) {
                 rows.forEachIndexed { index, s ->
                     it.nativeCanvas.drawTextLine(TextLine.make(s, TextRendering.font), 0f, index * TextRendering.font.metrics.height, TextRendering.paint)
                 }
@@ -706,13 +711,14 @@ private fun Canvas(modifier: Modifier = Modifier, content: DrawScope.() -> Unit)
 
 private fun textTradingAverages(
     avgMarketPrice: BigDecimal,
+    avgBuyPrice: BigDecimal,
+    avgSellPrices: BigDecimal,
     market: Color,
     tradingColor: StateContainer<Color>
 ) = AnnotatedString.Builder().apply {
-    if (avgMarketPrice.isNotZero()) {
-        append("M")
-        append(AnnotatedString(avgMarketPrice.hrs(), SpanStyle(color = market)))
-    }
+    append("M", separator = null, avgMarketPrice, market)
+    append("B", separator = null, avgBuyPrice, tradingColor.default2)
+    append("S", separator = null, avgSellPrices, tradingColor.default)
 }.toAnnotatedString()
 
 private fun textVolumeStats(
@@ -723,35 +729,22 @@ private fun textVolumeStats(
     coin2SumDay: BigDecimal?,
     tradingColor: StateContainer<Color>
 ) = AnnotatedString.Builder().apply {
-    if (coin1SumViewPort.isNotNullAndNotZero()) {
-        append(asset.coin1)
-        append(":")
-        append(AnnotatedString(coin1SumViewPort.hrs(), SpanStyle(color = tradingColor.default2If(coin1SumViewPort.isZeroOrPositive))))
-    }
-
-    if (coin2SumViewPort.isNotNullAndNotZero()) {
-        if (length > 0) append(" ")
-        append(asset.coin2)
-        append(":")
-        append(AnnotatedString(coin2SumViewPort.hrs(), SpanStyle(color = tradingColor.default2If(coin2SumViewPort.isZeroOrPositive))))
-    }
-
-    if (coin1SumDay.isNotNullAndNotZero() && coin2SumDay.isNotNullAndNotZero()) {
+    append(asset.coin1, ":", coin1SumViewPort, tradingColor.default2If(coin1SumViewPort?.isZeroOrPositive ?: false))
+    append(asset.coin2, ":", coin2SumViewPort, tradingColor.default2If(coin2SumViewPort?.isZeroOrPositive ?: false))
+    if (coin1SumDay.isNotNullAndNotZero() && coin2SumDay.isNotNullAndNotZero() && length > 0) {
         append(",")
     }
-
-    if (coin1SumDay.isNotNullAndNotZero()) {
-        if (length > 0) append(" ")
-        append(asset.coin1)
-        append(":")
-        append(AnnotatedString(coin1SumDay.hrs(), SpanStyle(color = tradingColor.default2If(coin1SumDay.isZeroOrPositive))))
-    }
-
-    if (coin2SumDay.isNotNullAndNotZero()) {
-        if (length > 0) append(" ")
-        append(" ")
-        append(asset.coin2)
-        append(":")
-        append(AnnotatedString(coin2SumDay.hrs(), SpanStyle(color = tradingColor.default2If(coin2SumDay.isZeroOrPositive))))
-    }
+    append(asset.coin1, ":", coin1SumDay, tradingColor.default2If(coin1SumDay?.isZeroOrPositive ?: false))
+    append(asset.coin2, ":", coin2SumDay, tradingColor.default2If(coin2SumDay?.isZeroOrPositive ?: false))
 }.toAnnotatedString()
+
+private fun AnnotatedString.Builder.append(prefix: String, separator: String?, amount: BigDecimal?, amountColor: Color) {
+    if (amount.isNotNullAndNotZero()) {
+        if (length > 0) append(" ")
+        append(prefix)
+        if (separator != null) {
+            append(separator)
+        }
+        append(AnnotatedString(amount.hrs(), SpanStyle(color = amountColor)))
+    }
+}

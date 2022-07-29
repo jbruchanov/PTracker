@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.IDataTransformers
-import com.scurab.ptracker.app.model.Tuple
+import com.scurab.ptracker.app.model.Tuple4
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.usecase.StatsDatesUseCase
 import com.scurab.ptracker.component.ViewModel
@@ -52,7 +52,7 @@ class TradingStatsViewModel(
                         appData.ledger.assetsTradings.contains(it) ||
                                 (it.isSingleCoinAsset && appData.ledger.coins.contains(it.coin1))
                     }
-                    Tuple(appData, grouping, statsUseCase.getStats(appData.ledger, grouping, asset), asset)
+                    Tuple4(appData, grouping, statsUseCase.getStats(appData.ledger, grouping, asset), asset)
                 }
                 .collectLatest { (appData, grouping, tableData, asset) ->
                     uiState.selectedAsset = asset

@@ -27,4 +27,5 @@ data class PriceBoardVisibleStats(
 
     val isEmpty = avgMarketPrice.isZero() && transactionsBd.isZero()
     val avgCoin1BuyPrice = coin2SumSell.safeDiv(coin1SumBuy).abs().align
+    val avgCoin1SellPrice = coin2SumBuy.safeDiv(coin1SumSell).abs().align
 }
