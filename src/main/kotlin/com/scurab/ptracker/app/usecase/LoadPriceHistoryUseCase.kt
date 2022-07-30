@@ -91,7 +91,6 @@ class LoadPriceHistoryUseCase(
         if (sinceLastLoadDiff < 2000) {
             lastRequestMark.counter++
             val delay = when {
-                lastRequestMark.counter < 5 -> 0L
                 lastRequestMark.counter < maxReqPerSecond / 2 -> maxReqPerSecondDelay
                 else -> (maxReqPerSecondDelay * 2L)
             }
