@@ -107,8 +107,8 @@ fun PriceItem.priceDetails(): AnnotatedString {
         append(" C")
         append(AnnotatedString(close.toScaleString(), spanStyle))
         if (!open.isZero()) {
-            append("  ")
-            append(AnnotatedString((close.setScale(3, RoundingMode.HALF_UP) / open).toScaleString(2) + "%", spanStyle))
+            append(" %")
+            append(AnnotatedString((close.setScale(3, RoundingMode.HALF_UP) / open).toScaleString(2), spanStyle))
         }
     }.toAnnotatedString()
 }

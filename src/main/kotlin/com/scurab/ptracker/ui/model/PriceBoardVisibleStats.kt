@@ -28,4 +28,6 @@ data class PriceBoardVisibleStats(
     val isEmpty = avgMarketPrice.isZero() && transactionsBd.isZero()
     val avgCoin1BuyPrice = coin2SumSell.safeDiv(coin1SumBuy).abs().align
     val avgCoin1SellPrice = coin2SumBuy.safeDiv(coin1SumSell).abs().align
+    val avgCoin1TradeDiff = avgCoin1SellPrice - avgCoin1BuyPrice
+    val avgCoin1TradeDiffPerc = avgCoin1TradeDiff.safeDiv(avgCoin1BuyPrice).toFloat() * 100f
 }

@@ -69,7 +69,9 @@ import com.scurab.ptracker.app.ext.f
 import com.scurab.ptracker.app.ext.f3
 import com.scurab.ptracker.app.ext.getHorizontalAxisText
 import com.scurab.ptracker.app.ext.getLabelPriceDecimals
+import com.scurab.ptracker.app.ext.hr
 import com.scurab.ptracker.app.ext.hrs
+import com.scurab.ptracker.app.ext.isNegative
 import com.scurab.ptracker.app.ext.isNotNullAndNotZero
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.isPositive
@@ -109,6 +111,7 @@ import com.scurab.ptracker.ui.common.ToggleButton
 import com.scurab.ptracker.ui.common.TransactionRow
 import com.scurab.ptracker.ui.common.VerticalDivider
 import com.scurab.ptracker.ui.model.IconColor
+import com.scurab.ptracker.ui.model.PriceBoardVisibleStats
 import org.jetbrains.skia.Point
 import org.jetbrains.skia.TextLine
 import java.lang.Float.min
@@ -288,7 +291,7 @@ private fun PriceDetails(state: PriceBoardState) {
         if (!stats.isEmpty && state.isTradingAverageVisible) {
             val marketColor = AppColors.current.Secondary
             val label = remember(stats) {
-                textTradingAverages(stats.avgMarketPrice, stats.avgCoin1BuyPrice, stats.avgCoin1SellPrice, market = marketColor, DashboardColors.Candle)
+                textTradingAverages(stats, marketColor, DashboardColors.Candle)
             }
             StatsText(label)
             HSpacer()
@@ -456,17 +459,23 @@ private fun AvgVisiblePrices(state: PriceBoardState) {
     val lineWidth = state.verticalPriceBarLeft()
     val effect = remember { PathEffect.dashPathEffect(floatArrayOf(3f * density, 3f * density)) }
     val marketPriceColor = AppColors.current.Secondary
-    val tradeColor = AppColors.current.Green
+    val tradeColor = AppTheme.DashboardColors.Candle
     Canvas {
         withTranslateAndScaleY(state) {
             val avgMarketPrice = averagePrices.avgMarketPrice
             val avgBuyPrice = averagePrices.avgCoin1BuyPrice
+            val avgSellPrice = averagePrices.avgCoin1SellPrice
             drawLine(
                 marketPriceColor, Offset(0f, avgMarketPrice.toFloat()), end = Offset(lineWidth, avgMarketPrice.toFloat()), pathEffect = effect
             )
             if (avgBuyPrice.isNotZero()) {
                 drawLine(
-                    tradeColor, Offset(0f, avgBuyPrice.toFloat()), end = Offset(lineWidth, avgBuyPrice.toFloat()), pathEffect = effect
+                    tradeColor.default2, Offset(0f, avgBuyPrice.toFloat()), end = Offset(lineWidth, avgBuyPrice.toFloat()), pathEffect = effect
+                )
+            }
+            if (avgSellPrice.isNotZero()) {
+                drawLine(
+                    tradeColor.default, Offset(0f, avgSellPrice.toFloat()), end = Offset(lineWidth, avgSellPrice.toFloat()), pathEffect = effect
                 )
             }
         }
@@ -726,15 +735,16 @@ private fun Canvas(modifier: Modifier = Modifier, content: DrawScope.() -> Unit)
 }
 
 private fun textTradingAverages(
-    avgMarketPrice: BigDecimal,
-    avgBuyPrice: BigDecimal,
-    avgSellPrices: BigDecimal,
+    stats: PriceBoardVisibleStats,
     market: Color,
     tradingColor: StateContainer<Color>
 ) = AnnotatedString.Builder().apply {
-    append("M", separator = null, avgMarketPrice, market)
-    append("B", separator = null, avgBuyPrice, tradingColor.default2)
-    append("S", separator = null, avgSellPrices, tradingColor.default)
+    append("P", separator = null, stats.avgMarketPrice, market)
+    append("B", separator = null, stats.avgCoin1BuyPrice, tradingColor.default2)
+    append("S", separator = null, stats.avgCoin1SellPrice, tradingColor.default)
+    val diffColor = tradingColor.default2If(stats.avgCoin1TradeDiff.isZeroOrPositive)
+    append("D", separator = null, stats.avgCoin1TradeDiff, diffColor)
+    append("%", separator = null, stats.avgCoin1TradeDiffPerc.f(2), suffix = null, diffColor)
 }.toAnnotatedString()
 
 private fun textVolumeStats(
@@ -756,11 +766,20 @@ private fun textVolumeStats(
 
 private fun AnnotatedString.Builder.append(prefix: String, separator: String?, amount: BigDecimal?, amountColor: Color) {
     if (amount.isNotNullAndNotZero()) {
+        append(prefix, separator, amount.hrs(), null, amountColor)
+    }
+}
+
+private fun AnnotatedString.Builder.append(prefix: String, separator: String?, text: String?, suffix: String? = null, amountColor: Color) {
+    if (!text.isNullOrEmpty()) {
         if (length > 0) append(" ")
         append(prefix)
         if (separator != null) {
             append(separator)
         }
-        append(AnnotatedString(amount.hrs(), SpanStyle(color = amountColor)))
+        append(AnnotatedString(text, SpanStyle(color = amountColor)))
+        if (suffix != null) {
+            append(suffix)
+        }
     }
 }
