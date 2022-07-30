@@ -9,6 +9,7 @@ object JsonBridge {
 
     val json: Json = Json {
         ignoreUnknownKeys = true
+        encodeDefaults = true
         serializersModule = SerializersModule {
 
         }

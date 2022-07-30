@@ -13,6 +13,9 @@ interface AppSettings {
     var ledgers: List<String>?
     var primaryCoin: String?
     var debug: Boolean
+    var isTradingVolumeVisible: Boolean
+    var isTradingAverageVisible: Boolean
+    var isTradingTransactionsGroupingEnabled: Boolean
 
     companion object {
         const val KeyLedgers = "ledgers"
@@ -29,4 +32,7 @@ class MemoryAppSettings : AppSettings {
     override var ledgers: List<String>? = null
     override var primaryCoin: String? = null
     override var debug: Boolean = false
+    override var isTradingVolumeVisible: Boolean = true
+    override var isTradingAverageVisible: Boolean = true
+    override var isTradingTransactionsGroupingEnabled: Boolean = false
 }

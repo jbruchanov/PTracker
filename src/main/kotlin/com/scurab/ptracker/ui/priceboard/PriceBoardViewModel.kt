@@ -32,9 +32,9 @@ import java.awt.event.KeyEvent
 class PriceBoardUiState(
     localDensity: Density,
     grouping: DateGrouping,
-    isDebugVisible: Boolean
+    appSettings: AppSettings
 ) {
-    val priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping, isDebugVisible))
+    val priceBoardState by mutableStateOf(PriceBoardState(emptyList(), localDensity, grouping, appSettings))
     var assets by mutableStateOf(emptyList<AssetIcon>())
     var hasTradeOnlyFilter by mutableStateOf(true)
     val prices = mutableStateMapOf<Asset, MarketPrice>()
@@ -67,7 +67,7 @@ class PriceBoardViewModel(
     private val appData = appStateRepository.appData
     private var data = PriceBoardDataProcessingUseCase.RawData(Ledger.Empty, Asset.Empty, emptyList())
 
-    val uiState = PriceBoardUiState(appStateRepository.density.value, grouping, appSettings.debug)
+    val uiState = PriceBoardUiState(appStateRepository.density.value, grouping, appSettings)
 
     init {
         launch {
@@ -183,13 +183,16 @@ class PriceBoardViewModel(
 
     override fun onTradingAverageClicked() {
         uiState.priceBoardState.isTradingAverageVisible = !uiState.priceBoardState.isTradingAverageVisible
+        appSettings.isTradingAverageVisible = uiState.priceBoardState.isTradingAverageVisible
     }
 
     override fun onTradingVolumeClicked() {
         uiState.priceBoardState.isTradingVolumeVisible = !uiState.priceBoardState.isTradingVolumeVisible
+        appSettings.isTradingVolumeVisible = uiState.priceBoardState.isTradingVolumeVisible
     }
 
     override fun onGroupingTransactionsClicked() {
-        uiState.priceBoardState.isGroupingTransactionsEnabled = !uiState.priceBoardState.isGroupingTransactionsEnabled
+        uiState.priceBoardState.isTradingTransactionsGroupingEnabled = !uiState.priceBoardState.isTradingTransactionsGroupingEnabled
+        appSettings.isTradingTransactionsGroupingEnabled = uiState.priceBoardState.isTradingTransactionsGroupingEnabled
     }
 }

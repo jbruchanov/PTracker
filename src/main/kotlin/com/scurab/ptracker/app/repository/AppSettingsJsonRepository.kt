@@ -49,6 +49,9 @@ class AppSettingsJsonRepository(
     override var ledgers: List<String>? by data::ledgers.notifying()
     override var primaryCoin by data::primaryCoin.notifying()
     override var debug by data::debug.notifying()
+    override var isTradingVolumeVisible: Boolean by data::isTradingVolumeVisible.notifying()
+    override var isTradingAverageVisible: Boolean by data::isTradingAverageVisible.notifying()
+    override var isTradingTransactionsGroupingEnabled: Boolean by data::isTradingTransactionsGroupingEnabled.notifying()
 
     companion object {
 

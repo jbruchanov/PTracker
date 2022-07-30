@@ -28,13 +28,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Adjust
 import androidx.compose.material.icons.filled.BorderOuter
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Hive
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Workspaces
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -179,7 +177,7 @@ fun PriceBoardScreen(vm: PriceBoardViewModel) {
                     VerticalDivider()
                     ToggleButton(Icons.Default.Menu, isSelected = priceBoardState.isTradingAverageVisible, onClick = { vm.onTradingAverageClicked() })
                     VerticalDivider()
-                    ToggleButton(Icons.Default.Hive, isSelected = priceBoardState.isGroupingTransactionsEnabled, onClick = { vm.onGroupingTransactionsClicked() })
+                    ToggleButton(Icons.Default.Hive, isSelected = priceBoardState.isTradingTransactionsGroupingEnabled, onClick = { vm.onGroupingTransactionsClicked() })
                     VerticalDivider()
                     val assets = vm.uiState.assets
                     assets.forEach { assetIcon ->
@@ -376,11 +374,11 @@ private fun CandleTransactions(state: PriceBoardState) {
                 pointedIconPrice = iconPrice
                 return@iconPrices
             }
-            if (!state.isGroupingTransactionsEnabled) {
+            if (!state.isTradingTransactionsGroupingEnabled) {
                 drawCandleTransactionIcon(state, priceItem, transaction, priceItemWidthHalf, ic, densityScale, painter)
             }
         }
-        if (iconsPrices?.isNotEmpty() == true && state.isGroupingTransactionsEnabled) {
+        if (iconsPrices?.isNotEmpty() == true && state.isTradingTransactionsGroupingEnabled) {
             val ic = AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeGrouping)
             val painter = rememberVectorPainter(image = ic.imageVector.get())
             drawCandleTransactionIcon(state, priceItem, transaction = null, priceItemWidthHalf, ic, densityScale, painter)

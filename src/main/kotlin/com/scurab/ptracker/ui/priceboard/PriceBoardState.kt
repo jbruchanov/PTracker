@@ -36,6 +36,7 @@ import com.scurab.ptracker.app.model.IPriceItem.Companion.asPriceItem
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.usecase.PriceItemTransactions
 import com.scurab.ptracker.ui.AppTheme.DashboardSizes
 import com.scurab.ptracker.ui.AppTheme.TextRendering
@@ -53,7 +54,10 @@ import kotlin.math.ceil
 import kotlin.math.max
 
 class PriceBoardState(
-    items: List<PriceItem>, private val localDensity: Density, grouping: DateGrouping = DateGrouping.Day, val isDebugVisible: Boolean = false
+    items: List<PriceItem>,
+    private val localDensity: Density,
+    grouping: DateGrouping = DateGrouping.Day,
+    appSettings: AppSettings
 ) {
     var scale by mutableStateOf(Offset(1f, 1f))
     var offset by mutableStateOf(Offset.Zero)
@@ -78,9 +82,10 @@ class PriceBoardState(
     var highlightTransaction by mutableStateOf<Transaction?>(null)
     var pointingTransaction by mutableStateOf<Transaction?>(null)
 
-    var isTradingVolumeVisible by mutableStateOf(true)
-    var isTradingAverageVisible by mutableStateOf(true)
-    var isGroupingTransactionsEnabled by mutableStateOf(false)
+    var isTradingVolumeVisible by mutableStateOf(appSettings.isTradingVolumeVisible)
+    var isTradingAverageVisible by mutableStateOf(appSettings.isTradingAverageVisible)
+    var isTradingTransactionsGroupingEnabled by mutableStateOf(appSettings.isTradingTransactionsGroupingEnabled)
+    val isDebugVisible = appSettings.debug
 
     private val cachingVisiblePriceItems = CacheRef<Rect, List<PriceItem>>()
     private val cachingVisibleStats = CacheRef<Rect, PriceBoardVisibleStats>()
