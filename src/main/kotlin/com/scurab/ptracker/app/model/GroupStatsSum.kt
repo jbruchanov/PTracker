@@ -19,7 +19,7 @@ data class GroupStatsSum(
 ) {
     val isEmpty get() = cost.isZero() && marketPrice.isZero()
 
-    val formattedDateTime by lazy { localDateTime.toJavaLocalDateTime().format(DateTimeFormats.fullDate) }
+    val formattedDateTime by lazy { localDateTime.toJavaLocalDateTime().format(DateTimeFormats.dayFullDate) }
 
     val percents = marketPrice.safeDiv(cost).toFloat().let {
         val v = (100f * when {

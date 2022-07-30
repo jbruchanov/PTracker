@@ -105,7 +105,17 @@ class StatsCalculatorUseCase(
                 .groupBy { it.exchange }
                 .mapValues { (_, transactions) -> transactions.sumOf { transaction -> transaction.getAmount(coin) } }
                 .filter { it.value.isNotZero() }
-                .map { (exchange, sum) -> CoinExchangeStats(AnyCoin(coin), ExchangeWallet(exchange.normalizedExchange()), sum, sum.safeDiv(sumOfCoins.getValue(coin))) }
+                .map { (exchange, sum) -> CoinExchangeStats(
+                    coin = AnyCoin(coin),
+                    exchange = ExchangeWallet(exchange.normalizedExchange()),
+                    quantity = sum,
+                    perc = sum.safeDiv(sumOfCoins.getValue(coin)),
+                    price = primaryCurrency
+                        ?.takeIf { coin != it }
+                        ?.let { Asset(coin, it) }
+                        ?.let { asset -> prices[asset] }
+                        ?.let { it.price * sum }
+                ) }
         }
 
         return LedgerStats(tradingAssets.toList(), assetsByExchange, feesPerCoin, cryptoHoldings, coinSumPerExchange, exchangeSumOfCoins, transactionsPerAssetPerType)

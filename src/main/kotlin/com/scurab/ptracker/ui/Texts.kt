@@ -70,7 +70,7 @@ object English : Texts {
     override val FreeIncome: String = "Staking/Gift"
     override val NoProfitableOutcome: String = "Giveaway/Lost"
     override val TotalBoughtOwned: String = "Total bought/owned"
-    override val PerUnit: String = "/unit"
+    override val PerUnit: String = "Per Unit"
     override val Fees: String = "Fees"
     override val NoPrimaryCurrencyChart: String = "Set primary currency in settings to see this chart"
     override val TextSample: String = "TextSample"

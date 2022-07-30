@@ -60,7 +60,9 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.model.MarketPercentage
+import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
+import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.component.compose.onMouseMove
 import com.scurab.ptracker.component.util.mock
 import com.scurab.ptracker.ui.AppColors
@@ -83,6 +85,7 @@ import java.math.BigDecimal
 class PortfolioStatsUiState() {
     var isLoading by mutableStateOf(false)
     var cryptoHoldings = mutableStateListOf<OnlineHoldingStats>()
+    var marketPrices by mutableStateOf<Map<Asset, MarketPrice>>(emptyMap())
     var marketPercentage by mutableStateOf<List<MarketPercentage>>(emptyList())
     var pieChartData by mutableStateOf<List<PieChartSegment>>(emptyList())
     var selectedHoldingsAsset by mutableStateOf<Asset?>(null)

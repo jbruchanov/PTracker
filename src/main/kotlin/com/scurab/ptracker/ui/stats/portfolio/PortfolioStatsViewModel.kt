@@ -111,6 +111,7 @@ class PortfolioStatsViewModel(
                 uiState.cryptoHoldings.clear()
                 uiState.cryptoHoldings.addAll(onlineHoldingStats)
             }
+            uiState.marketPrices = latestPrices
             uiState.marketPercentage = marketPercentage
             uiState.pieChartData = pieChartData
             uiState.coinSumPerExchange = ledger.coinSumPerExchange

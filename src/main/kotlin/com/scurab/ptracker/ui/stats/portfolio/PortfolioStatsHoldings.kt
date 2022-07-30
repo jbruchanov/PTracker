@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.fiatCoins
 import com.scurab.ptracker.app.ext.firstIf
+import com.scurab.ptracker.app.ext.hr
 import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.ext.imageOrNull
 import com.scurab.ptracker.app.ext.isNotLastIndex
@@ -58,8 +59,10 @@ import com.scurab.ptracker.app.ext.totalCost
 import com.scurab.ptracker.app.ext.totalGains
 import com.scurab.ptracker.app.ext.totalMarketValue
 import com.scurab.ptracker.app.ext.totalRoi
+import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.FiatCoin
+import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.component.util.mock
@@ -91,7 +94,7 @@ private object ColumnWidths {
 
     val DetailColumnElementWidthMin = 100.dp
     val DetailContentLabel = 200.dp
-    val DetailContentBalance = 110.dp
+    val DetailContentBalance = 130.dp
     val ExchangePerc = 150.dp
 }
 
@@ -370,7 +373,7 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             }
             WSpacer4()
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
-                TextCell(texts.TotalBoughtOwned, isMonoSpace = false, textAlign = TextAlign.Start)
+                TextCell(texts.PerUnit, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell("1.0", color = AppColors.current.Secondary)
                 TextCell(onlineHoldingStats.costTotalUnit.hrs())
@@ -436,6 +439,10 @@ private fun DetailExchangeCoinStats(exchangeCoverage: List<CoinExchangeStats>): 
             TextCell(texts.ExchangeWallet, isMonoSpace = false, textAlign = TextAlign.Start, modifier = Modifier.width(ColumnWidths.DetailContentLabel))
             WSpacer()
             TextCell(texts.Balance, isMonoSpace = false, modifier = Modifier.width(ColumnWidths.DetailContentBalance))
+            WSpacer()
+            TextCell("%", width = ColumnWidths.ExchangePerc)
+            WSpacer()
+            TextCell(texts.MarketValue, isMonoSpace = false, modifier = Modifier.width(ColumnWidths.DetailContentBalance), textAlign = TextAlign.End)
         }
         Divider(color = AppColors.current.PrimaryVariant, thickness = AppSizes.current.ThickLine)
         exchangeCoverage.forEachIndexed { index, stats ->
@@ -458,6 +465,8 @@ private fun DetailExchangeCoinStats(exchangeCoverage: List<CoinExchangeStats>): 
                 )
                 WSpacer()
                 TextCell(stats.perc.percf2, width = ColumnWidths.ExchangePerc)
+                WSpacer()
+                TextCell(stats.price?.hrs() ?: "", width = ColumnWidths.DetailContentBalance)
             }
         }
         Divider(color = AppColors.current.PrimaryVariant, thickness = AppSizes.current.ThinLine)

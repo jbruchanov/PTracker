@@ -33,10 +33,10 @@ object StubData {
     )
 
     fun coinExchangeStats() = listOf(
-        CoinExchangeStats(AnyCoin("GBP"), ExchangeWallet("Blainance"), 100.bd, 0.5.bd),
-        CoinExchangeStats(AnyCoin("BTC"), ExchangeWallet("Wallet"), 0.000005.bd, 0.001.bd),
-        CoinExchangeStats(AnyCoin("ETH"), ExchangeWallet("Quippo"), 1.0.bd, 0.01.bd),
-        CoinExchangeStats(AnyCoin("ADA"), ExchangeWallet("AdaLite"), 1000.0.bd, 0.5.bd),
+        CoinExchangeStats(AnyCoin("GBP"), ExchangeWallet("Blainance"), 100.bd, 0.5.bd, null),
+        CoinExchangeStats(AnyCoin("BTC"), ExchangeWallet("Wallet"), 0.000005.bd, 0.001.bd, null),
+        CoinExchangeStats(AnyCoin("ETH"), ExchangeWallet("Quippo"), 1.0.bd, 0.01.bd, null),
+        CoinExchangeStats(AnyCoin("ADA"), ExchangeWallet("AdaLite"), 1000.0.bd, 0.5.bd, null),
     )
 
     fun onlineStubHoldings() = stubHoldings().map { it.realtimeStats(cryptoPrices.getValue(it.asset)) }
