@@ -69,9 +69,7 @@ import com.scurab.ptracker.app.ext.f
 import com.scurab.ptracker.app.ext.f3
 import com.scurab.ptracker.app.ext.getHorizontalAxisText
 import com.scurab.ptracker.app.ext.getLabelPriceDecimals
-import com.scurab.ptracker.app.ext.hr
 import com.scurab.ptracker.app.ext.hrs
-import com.scurab.ptracker.app.ext.isNegative
 import com.scurab.ptracker.app.ext.isNotNullAndNotZero
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.isPositive
