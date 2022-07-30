@@ -56,7 +56,7 @@ data class PriceItem(
     val centerY = (open + close).toFloat() / 2f
     val spikeOffsetY1 = high.max(low).toFloat()
     val spikeOffsetY2 = high.min(low).toFloat()
-    val formattedFullDate: String by lazy { DateTimeFormats.fullDate.format(dateTime.toJavaLocalDateTime()) }
+    val formattedFullDate: String by lazy { DateTimeFormats.fullDateWithDay.format(dateTime.toJavaLocalDateTime()) }
 
     override val price: BigDecimal = item.close
 

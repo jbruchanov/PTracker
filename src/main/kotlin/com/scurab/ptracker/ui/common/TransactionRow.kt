@@ -64,7 +64,7 @@ fun TransactionRow(
         val prices = item.formattedPrices()
         Column {
             Row {
-                Text(text = formatter.fullDateTime(item.dateTime), style = AppTheme.TextStyles.TransactionSecondary)
+                Text(text = formatter.fullDateTimeWithDay(item.dateTime), style = AppTheme.TextStyles.TransactionSecondary)
                 FSpacer()
                 val iconColor = item.iconColor()
                 val size = AppSizes.current.IconTransactionType.scaled()
