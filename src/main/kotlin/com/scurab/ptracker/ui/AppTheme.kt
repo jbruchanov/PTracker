@@ -243,7 +243,7 @@ object AppTheme {
         private val ColorOrange = Color(0xFFFFC100)
         private val ColorBlack = Color.Black
         val IconsMap = mapOf(
-            Transaction._TypeGrouping to IconColor(-1, Icons.Default.Hive, ColorOrange, Offset(0f, 4f), candleScale = IconColor.CandleScaleGrouping),
+            Transaction._TypeGrouping to IconColor(-1, Icons.Default.Hive, ColorOrange, candleScale = IconColor.CandleScaleGrouping),
             Transaction.TypeDeposit to IconColor(0, Icons.Default.ArrowDownward, ColorWhite, Offset(0f, 4f)),
             Transaction.TypeWithdrawal to IconColor(1, Icons.Default.ArrowUpward, ColorWhite, Offset(0f, -4f)),
             Transaction.TypeAirdrop to IconColor(2, Icons.Outlined.WbCloudy, ColorGreen),
