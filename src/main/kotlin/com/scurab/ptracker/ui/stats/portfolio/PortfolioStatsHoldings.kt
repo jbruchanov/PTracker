@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.fiatCoins
 import com.scurab.ptracker.app.ext.firstIf
-import com.scurab.ptracker.app.ext.hr
 import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.ext.imageOrNull
 import com.scurab.ptracker.app.ext.isNotLastIndex
@@ -59,10 +58,8 @@ import com.scurab.ptracker.app.ext.totalCost
 import com.scurab.ptracker.app.ext.totalGains
 import com.scurab.ptracker.app.ext.totalMarketValue
 import com.scurab.ptracker.app.ext.totalRoi
-import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.FiatCoin
-import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.component.util.mock

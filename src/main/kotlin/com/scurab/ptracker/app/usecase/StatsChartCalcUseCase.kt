@@ -4,6 +4,7 @@ import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.LineChartData
 import com.scurab.ptracker.app.model.Point
 import com.scurab.ptracker.app.repository.AppStateRepository
+import java.math.BigDecimal
 import kotlin.math.abs
 
 class StatsChartCalcUseCase(
@@ -17,20 +18,27 @@ class StatsChartCalcUseCase(
     ): LineChartData {
         val stats = statsCalculatorUseCase.calculateMarketDailyGains(appData, primaryCurrency)
         if (stats.isEmpty()) return LineChartData.Empty
-        val minY = stats.minOf { it.cost.min(it.marketPrice) }.toFloat()
-        val maxY = stats.maxOf { it.cost.max(it.marketPrice) }.toFloat()
+        val minYItem = stats.minBy { it.minOfCostOrPrice }
+        val minY = minYItem.minOfCostOrPrice.toFloat()
+        val maxYItem = stats.maxBy { it.maxOfCostOrPrice }
+        val maxY = maxYItem.maxOfCostOrPrice.toFloat()
+        val minYSinceMaxItem = stats.asSequence()
+            .filter { it.localDateTime > maxYItem.localDateTime }
+            .minByOrNull { it.minOfCostOrPrice }
+
         val requiredY = abs(maxY - minY)
 
         val marketPrice = mutableListOf<Point>()
         val cost = mutableListOf<Point>()
 
+        fun point(index: Int, value: BigDecimal) = Point(
+            x = (index.toFloat() / (stats.size - 1)),
+            y = 1f - ((value.toFloat() - minY) / requiredY)
+        )
+
         stats.forEachIndexed { index, dayStatsSum ->
-            val x = (index.toFloat() / (stats.size - 1))
-            //reverse y
-            val yMarketPrice = 1f - ((dayStatsSum.marketPrice.toFloat() - minY) / requiredY)
-            val yCost = 1f - ((dayStatsSum.cost.toFloat() - minY) / requiredY)
-            marketPrice.add(Point(x, yMarketPrice))
-            cost.add(Point(x, yCost))
+            marketPrice.add(point(index, dayStatsSum.marketPrice))
+            cost.add(point(index, dayStatsSum.cost))
         }
 
         val latestMarketPriceY = marketPrice.last().y
@@ -39,7 +47,11 @@ class StatsChartCalcUseCase(
             Point(1f, latestMarketPriceY)
         )
 
-        return LineChartData(stats, marketPrice, cost, latestMarketPrice)
+        return LineChartData(
+            stats, marketPrice, cost, latestMarketPrice,
+            maxMarketPrice = point(stats.indexOf(maxYItem), maxYItem.maxOfCostOrPrice),
+            minMarketPriceXSinceMax = minYSinceMaxItem?.let { it -> point(stats.indexOf(it), it.minOfCostOrPrice) }
+        )
     }
 }
 

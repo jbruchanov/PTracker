@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.max
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
 import com.scurab.ptracker.app.ext.hrs
+import com.scurab.ptracker.app.ext.maxValue
 import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.ext.toPx
@@ -62,7 +63,6 @@ import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.model.MarketPercentage
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
-import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.component.compose.onMouseMove
 import com.scurab.ptracker.component.util.mock
 import com.scurab.ptracker.ui.AppColors
@@ -158,7 +158,6 @@ private fun BoxWithConstraintsScope.PortfolioChartContent(state: PortfolioStatsU
             .requiredWidthIn(max = maxWidth - scrollBarSize)
             .fillMaxWidth()
             .statsContentBackground()
-            .padding(top = AppSizes.current.Space6)
     ) {
         when (val chartState = state.portfolioChartUiState) {
             is PortfolioChartUiState.NoPrimaryCurrency -> Text(LocalTexts.current.NoPrimaryCurrencyChart, modifier = Modifier.align(Alignment.Center))
@@ -173,17 +172,18 @@ private fun BoxWithConstraintsScope.PortfolioChartContent(state: PortfolioStatsU
 fun PortfolioChart(chartState: PortfolioChartUiState.Data) {
     val sizes = AppSizes.current
     val data = chartState.chartData
-    val density = LocalDensity.current.density
+    val density = LocalDensity.current.maxValue()
     val pathEffect = remember { PathEffect.dashPathEffect(floatArrayOf(sizes.Space2.toPx(density), sizes.Space2.toPx(density))) }
     val pathEffectLatest = remember { PathEffect.dashPathEffect(floatArrayOf(sizes.Space05.toPx(density), sizes.Space05.toPx(density))) }
     val gradientColor = AppColors.current.RedGreen.default2If(chartState.chartData.hasProfit)
+    val colorGreen = AppColors.current.CandleGreen
+    val colorRed = AppColors.current.CandleRed
     BoxWithConstraints {
         val radius = remember { 5.dp.toPx(density) }
         var selectedIndex by remember { mutableStateOf(-1) }
-        val colorGreen = AppColors.current.CandleGreen
-        val colorRed = AppColors.current.CandleRed
         val colorOnBackground = AppColors.current.OnBackground
         Box(modifier = Modifier
+            .padding(top = AppSizes.current.Space6)
             .onMouseMove(data.marketPrice.size) { m, index -> selectedIndex = index }
         ) {
             LineChart(
@@ -192,6 +192,46 @@ fun PortfolioChart(chartState: PortfolioChartUiState.Data) {
                 strokeColor = colorGreen,
                 listOf(gradientColor, Color.Transparent)
             )
+
+            val styleStroke: DrawStyle = Stroke(AppSizes.current.ThickLine.toPx(density))
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                data.cost.getOrNull(selectedIndex)?.let {
+                    drawCircle(
+                        colorRed,
+                        radius = radius,
+                        style = styleStroke,
+                        center = Offset(it.x * size.width, it.y * size.height)
+                    )
+                }
+
+                data.marketPrice.getOrNull(selectedIndex)?.let {
+                    drawCircle(
+                        colorOnBackground,
+                        radius = radius,
+                        style = styleStroke,
+                        center = Offset(it.x * size.width, it.y * size.height)
+                    )
+                }
+            }
+
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                data.maxMarketPrice.let { p ->
+                    drawLine(
+                        color = colorGreen,
+                        start = Offset(p.x * size.width, p.y * size.height),
+                        end = Offset(data.maxMarketPrice.x * size.width, size.height),
+                        pathEffect = pathEffect
+                    )
+                }
+                data.minMarketPriceXSinceMax?.let { p ->
+                    drawLine(
+                        color = colorRed,
+                        start = Offset(p.x * size.width, p.y * size.height),
+                        end = Offset(p.x * size.width, size.height),
+                        pathEffect = pathEffect
+                    )
+                }
+            }
 
             LineChart(
                 data.latestMarketPrice,
@@ -204,27 +244,6 @@ fun PortfolioChart(chartState: PortfolioChartUiState.Data) {
                 style = Stroke(AppSizes.current.ThickLine.toPx(), pathEffect = pathEffect),
                 strokeColor = colorRed
             )
-
-
-            val styleStroke: DrawStyle = Stroke(AppSizes.current.ThickLine.toPx(density))
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                data.marketPrice.getOrNull(selectedIndex)?.let {
-                    drawCircle(
-                        colorOnBackground,
-                        radius = radius,
-                        style = styleStroke,
-                        center = Offset(it.x * size.width, it.y * size.height)
-                    )
-                }
-                data.cost.getOrNull(selectedIndex)?.let {
-                    drawCircle(
-                        colorRed,
-                        radius = radius,
-                        style = styleStroke,
-                        center = Offset(it.x * size.width, it.y * size.height)
-                    )
-                }
-            }
 
             data.stats.getOrNull(selectedIndex)?.let { stats ->
                 Row(

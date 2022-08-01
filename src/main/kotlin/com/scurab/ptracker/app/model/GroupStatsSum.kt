@@ -21,6 +21,9 @@ data class GroupStatsSum(
 
     val formattedDateTime by lazy { localDateTime.toJavaLocalDateTime().format(DateTimeFormats.dayFullDate) }
 
+    val maxOfCostOrPrice = cost.max(marketPrice)
+    val minOfCostOrPrice = cost.min(marketPrice)
+
     val percents = marketPrice.safeDiv(cost).toFloat().let {
         val v = (100f * when {
             cost.isZero() -> 0f
