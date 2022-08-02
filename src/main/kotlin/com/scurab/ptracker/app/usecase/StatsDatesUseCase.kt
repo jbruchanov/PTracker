@@ -80,17 +80,20 @@ class StatsDatesUseCase {
                     fiatCoins + cryptoCoins
                 }
                 coins
-                    .map { coin -> StatsItem(dateGroup, coin, transactions.filter { it.hasCoin(coin) }.sumOf { it.getAmount(coin) }, grouping, transactions.size) }
+                    .map { coin ->
+                        val relatedTransactions = transactions.filter { it.hasCoin(coin) }
+                        StatsItem(dateGroup, coin, relatedTransactions.sumOf { it.getAmount(coin) }, grouping, relatedTransactions.size)
+                    }
                     .sortedBy { it.coin }
             }
             .flatten()
             .toList()
     }
 
-    private fun Asset.containsAnyOfTransactionCoin(transaction: Transaction) = when {
-        transaction is Transaction.Outcome -> has(transaction.sellAsset)
-        transaction is Transaction.Income -> has(transaction.buyAsset)
-        transaction is Transaction.Trade -> contains(transaction.buyAsset, transaction.sellAsset)
+    private fun Asset.containsAnyOfTransactionCoin(transaction: Transaction) = when (transaction) {
+        is Transaction.Outcome -> has(transaction.sellAsset)
+        is Transaction.Income -> has(transaction.buyAsset)
+        is Transaction.Trade -> contains(transaction.buyAsset, transaction.sellAsset)
         else -> throw IllegalStateException("Unhandled case for:$transaction")
     }
 }
