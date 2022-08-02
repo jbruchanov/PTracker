@@ -59,7 +59,7 @@ class TradingStatsViewModel(
                     uiState.assets = appData.ledger.assetsTradings
                     uiState.coins = appData.ledger.coins
                     uiState.selectedGroupingKey = grouping
-                    uiState.tableData = ListTableData(tableData, StatsDatesUseCase.StatsItem, dataTransformers)
+                    uiState.tableData = ListTableData(tableData, StatsDatesUseCase.StatsItem.tableMetaData(grouping), dataTransformers)
                 }
         }
     }

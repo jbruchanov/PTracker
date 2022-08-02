@@ -36,24 +36,32 @@ class StatsDatesUseCase {
             else -> throw IllegalArgumentException("Invalid column index:$index")
         }
 
-        companion object : ITableMetaData {
-            override val columns: Int = 4
+        companion object {
+            fun tableMetaData(grouping: DateGrouping) = object : ITableMetaData {
+                override val columns: Int = when (grouping) {
+                    DateGrouping.NoGrouping -> 3
+                    else -> 4
+                }
 
-            @Composable
-            override fun getHeaderTitle(index: Int): String = when (index) {
-                0 -> LocalTexts.current.Date
-                1 -> LocalTexts.current.Coin
-                2 -> LocalTexts.current.Quantity
-                3 -> LocalTexts.current.Count
-                else -> throw IllegalArgumentException("Invalid column index:$index")
-            }
+                @Composable
+                override fun getHeaderTitle(index: Int): String = when (index) {
+                    0 -> LocalTexts.current.Date
+                    1 -> LocalTexts.current.Coin
+                    2 -> LocalTexts.current.Quantity
+                    3 -> LocalTexts.current.Count
+                    else -> throw IllegalArgumentException("Invalid column index:$index")
+                }
 
-            override fun getColumnWidth(index: Int, tableData: ITableData): TableCellSize = when (index) {
-                0 -> TableCellSize.Exact(160.dp)
-                1 -> TableCellSize.Exact(48.dp)
-                2 -> TableCellSize.Exact(128.dp)
-                3 -> TableCellSize.Exact(128.dp)
-                else -> throw IllegalArgumentException("Invalid column index:$index")
+                override fun getColumnWidth(index: Int, tableData: ITableData): TableCellSize = when (index) {
+                    0 -> when (grouping) {
+                        DateGrouping.NoGrouping -> TableCellSize.Exact(160.dp)
+                        else -> TableCellSize.Exact(96.dp)
+                    }
+                    1 -> TableCellSize.Exact(48.dp)
+                    2 -> TableCellSize.Exact(128.dp)
+                    3 -> TableCellSize.Exact(128.dp)
+                    else -> throw IllegalArgumentException("Invalid column index:$index")
+                }
             }
         }
     }
