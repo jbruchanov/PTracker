@@ -42,7 +42,7 @@ import com.scurab.ptracker.ui.model.TableState
 fun TradingStatsScreen(vm: TradingStatsViewModel) {
     Column {
         Text(
-            text = LocalTexts.current.TradingStats,
+            text = LocalTexts.current.TradingCoinStats,
             style = AppTheme.TextStyles.Header,
             modifier = Modifier.padding(AppSizes.current.Space2)
         )
@@ -97,7 +97,7 @@ private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: T
                 .fillMaxSize()
                 .zIndex(0f)
         ) {
-            val textAlignment = remember { listOf(Alignment.CenterStart, Alignment.Center, Alignment.CenterEnd) }
+            val textAlignment = remember { listOf(Alignment.CenterStart, Alignment.Center, Alignment.CenterEnd, Alignment.Center) }
             Box(
                 modifier = Modifier
                     .fillMaxSize()

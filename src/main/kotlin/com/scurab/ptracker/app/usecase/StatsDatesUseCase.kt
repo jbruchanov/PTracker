@@ -3,6 +3,7 @@ package com.scurab.ptracker.app.usecase
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.getAmount
+import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.ext.toTableString
 import com.scurab.ptracker.app.model.Asset
@@ -24,24 +25,27 @@ class StatsDatesUseCase {
         val groupDate: LocalDate,
         val coin: String,
         val quantity: BigDecimal,
-        val grouping: DateGrouping
+        val grouping: DateGrouping,
+        val count: Int
     ) : ITableItem {
 
         override fun getValue(index: Int, render: IDataTransformers): String = when (index) {
             0 -> grouping.format(groupDate)
             1 -> coin
             2 -> quantity.toTableString(6)
+            3 -> count.toString()
             else -> throw IllegalArgumentException("Invalid column index:$index")
         }
 
         companion object : ITableMetaData {
-            override val columns: Int = 3
+            override val columns: Int = 4
 
             @Composable
             override fun getHeaderTitle(index: Int): String = when (index) {
                 0 -> LocalTexts.current.Date
                 1 -> LocalTexts.current.Coin
                 2 -> LocalTexts.current.Quantity
+                3 -> "Count"
                 else -> throw IllegalArgumentException("Invalid column index:$index")
             }
 
@@ -49,6 +53,7 @@ class StatsDatesUseCase {
                 0 -> TableCellSize.Exact(80.dp)
                 1 -> TableCellSize.Exact(48.dp)
                 2 -> TableCellSize.Exact(128.dp)
+                3 -> TableCellSize.Exact(128.dp)
                 else -> throw IllegalArgumentException("Invalid column index:$index")
             }
         }
@@ -57,11 +62,14 @@ class StatsDatesUseCase {
     fun getStats(ledger: Ledger, grouping: DateGrouping, asset: Asset? = null): List<StatsItem> {
         return ledger.items
             .asSequence()
-            .filterIsInstance<Transaction.Trade>()
+            .run {
+                if (asset?.isSingleCoinAsset != false) this
+                else filterIsInstance<Transaction.Trade>()
+            }
             .filter { transaction ->
                 asset == null ||
                         (asset.isTradingAsset && transaction.hasAsset(asset)) ||
-                        (asset.isSingleCoinAsset && asset.contains(transaction.buyAsset, transaction.sellAsset))
+                        (asset.isSingleCoinAsset && asset.containsAnyOfTransactionCoin(transaction))
             }
             .groupBy { grouping.toLocalDateGroup(it.dateTime) }
             .map { (dateGroup, transactions) ->
@@ -73,11 +81,18 @@ class StatsDatesUseCase {
                     fiatCoins + cryptoCoins
                 }
                 coins
-                    .map { coin -> StatsItem(dateGroup, coin, transactions.filter { it.hasCoin(coin) }.sumOf { it.getAmount(coin) }, grouping) }
+                    .map { coin -> StatsItem(dateGroup, coin, transactions.filter { it.hasCoin(coin) }.sumOf { it.getAmount(coin) }, grouping, transactions.size) }
                     .sortedBy { it.coin }
             }
             .flatten()
             .toList()
+    }
+
+    private fun Asset.containsAnyOfTransactionCoin(transaction: Transaction) = when {
+        transaction is Transaction.Outcome -> has(transaction.sellAsset)
+        transaction is Transaction.Income -> has(transaction.buyAsset)
+        transaction is Transaction.Trade -> contains(transaction.buyAsset, transaction.sellAsset)
+        else -> throw IllegalStateException("Unhandled case for:$transaction")
     }
 }
 

@@ -27,6 +27,7 @@ interface Texts {
     val Unit: String
     val Stats: String
     val TradingStats: String
+    val TradingCoinStats: String
     val PrimaryCoin: String
     val ExchangeWallet: String
     val NoProfitableOutcome: String
@@ -65,6 +66,7 @@ object English : Texts {
     override val Unit: String = "Unit"
     override val Stats: String = "Stats"
     override val TradingStats: String = "Trading Stats"
+    override val TradingCoinStats: String = "Trading/Coin Stats"
     override val PrimaryCoin: String = "Primary Fiat Currency"
     override val ExchangeWallet: String = "Exchange/Wallet"
     override val FreeIncome: String = "Staking/Gift"
