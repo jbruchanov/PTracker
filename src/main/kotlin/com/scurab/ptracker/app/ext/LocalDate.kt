@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
@@ -23,3 +24,5 @@ fun LocalDateTime.withDayOfWeek(targetDayOfWeek: java.time.DayOfWeek): LocalDate
     val daysDiff = this.dayOfWeek.value - targetDayOfWeek.value
     return this.toJavaLocalDateTime().minusDays(daysDiff.toLong()).with(LocalTime.of(0, 0, 0, 0)).toKotlinLocalDateTime()
 }
+
+fun LocalDateTime.atTimeZero() = this.date.atTime(0, 0, 0, 0)

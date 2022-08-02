@@ -43,6 +43,7 @@ interface Texts {
     val Date: String
     val Coin: String
     val Quantity: String
+    val Count: String
 
     val ErrUnableToOpenXlsFile: String
 }
@@ -85,5 +86,6 @@ object English : Texts {
     override val Fee: String = "Fee"
     override val Sell: String = "Sell"
     override val Buy: String = "Buy"
+    override val Count: String = "Count"
     override val ErrUnableToOpenXlsFile = "Unable to open XLS(x) file"
 }

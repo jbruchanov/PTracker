@@ -3,7 +3,6 @@ package com.scurab.ptracker.app.usecase
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.getAmount
-import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.ext.toTableString
 import com.scurab.ptracker.app.model.Asset
@@ -16,13 +15,13 @@ import com.scurab.ptracker.ui.model.ITableData
 import com.scurab.ptracker.ui.model.ITableItem
 import com.scurab.ptracker.ui.model.ITableMetaData
 import com.scurab.ptracker.ui.model.TableCellSize
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import java.math.BigDecimal
 
 class StatsDatesUseCase {
 
     data class StatsItem(
-        val groupDate: LocalDate,
+        val groupDate: LocalDateTime,
         val coin: String,
         val quantity: BigDecimal,
         val grouping: DateGrouping,
@@ -45,12 +44,12 @@ class StatsDatesUseCase {
                 0 -> LocalTexts.current.Date
                 1 -> LocalTexts.current.Coin
                 2 -> LocalTexts.current.Quantity
-                3 -> "Count"
+                3 -> LocalTexts.current.Count
                 else -> throw IllegalArgumentException("Invalid column index:$index")
             }
 
             override fun getColumnWidth(index: Int, tableData: ITableData): TableCellSize = when (index) {
-                0 -> TableCellSize.Exact(80.dp)
+                0 -> TableCellSize.Exact(160.dp)
                 1 -> TableCellSize.Exact(48.dp)
                 2 -> TableCellSize.Exact(128.dp)
                 3 -> TableCellSize.Exact(128.dp)
