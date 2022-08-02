@@ -63,11 +63,11 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
 
     fun iconCoin1() = File(Locations.Icons, coin1.lowercase() + ".png")
 
-    fun fiatCoin(): FiatCoin = (coin2.takeIf { FiatCurrencies.contains(coin2) } ?: coin1.takeIf { FiatCurrencies.contains(coin1) })
+    fun fiatCoin(): FiatCoin = (coin2.takeIf { it.isNotEmpty() && FiatCurrencies.contains(it) } ?: coin1.takeIf { it.isNotEmpty() && FiatCurrencies.contains(it) })
         ?.let { FiatCoin(it) }
         ?: throw IllegalStateException("No fiat coin in $this")
 
-    fun cryptoCoin(): CryptoCoin = (coin2.takeIf { !FiatCurrencies.contains(coin2) } ?: coin1.takeIf { !FiatCurrencies.contains(coin1) })
+    fun cryptoCoin(): CryptoCoin = (coin2.takeIf { it.isNotEmpty() && !FiatCurrencies.contains(it) } ?: coin1.takeIf { it.isNotEmpty() && !FiatCurrencies.contains(it) })
         ?.let { CryptoCoin(it) }
         ?: throw IllegalStateException("No crypto coin in $this")
 
