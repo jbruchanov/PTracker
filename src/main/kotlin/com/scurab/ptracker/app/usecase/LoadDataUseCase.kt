@@ -23,8 +23,7 @@ class LoadDataUseCase(
 
     suspend fun loadAllData(ledgerUri: String) = coroutineScope {
         //TODO: global uri
-        val ledgerFile = File(ledgerUri)
-        val ledger = loadLedgerUseCase.load(ledgerFile)
+        val ledger = loadLedgerUseCase.load(ledgerUri)
         val assets = ledger.assetsForPrices.withPrimaryCoin(appSettings.primaryCoin)
         val prices = pricesRepository.getPrices(assets).associateBy { it.asset }
         val historyDef = async(Dispatchers.IO) { loadPriceHistoryUseCase.loadAll(assets) }
