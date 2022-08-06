@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Looks3
 import androidx.compose.material.icons.filled.LooksOne
 import androidx.compose.material.icons.filled.LooksTwo
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SsidChart
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.WaterfallChart
 import androidx.compose.runtime.Composable
@@ -109,10 +110,11 @@ private fun ColumnScope.Menu(navToken: NavToken<*>, uiState: MainUiState, eventH
     val ledgers = uiState.ledgers
     val buttons = remember {
         listOf(
-            LeftMenuButton(Icons.Default.WaterfallChart, AppNavTokens.PriceDashboard, eventHandler::onOpenPriceDashboardClicked),
-            LeftMenuButton(Icons.Default.DataUsage, AppNavTokens.Stats, eventHandler::onOpenStatsClicked),
-            LeftMenuButton(Icons.Default.TableChart, AppNavTokens.LedgerDateStats, eventHandler::onOpenLedgerDateStatsClicked),
-            LeftMenuButton(Icons.Default.Settings, AppNavTokens.Settings, eventHandler::onOpenSettingsClicked),
+            LeftMenuButton(Icons.Default.WaterfallChart, AppNavTokens.PriceDashboard, eventHandler::onPriceDashboardClicked),
+            LeftMenuButton(Icons.Default.DataUsage, AppNavTokens.PortfolioStats, eventHandler::onStatsClicked),
+            LeftMenuButton(Icons.Default.SsidChart, AppNavTokens.ChartStats, eventHandler::onChartStatsClicked),
+            LeftMenuButton(Icons.Default.TableChart, AppNavTokens.LedgerDateStats, eventHandler::onLedgerDateStatsClicked),
+            LeftMenuButton(Icons.Default.Settings, AppNavTokens.Settings, eventHandler::onSettingsClicked),
         )
     }
     buttons.forEach { (icon, token, handler) ->

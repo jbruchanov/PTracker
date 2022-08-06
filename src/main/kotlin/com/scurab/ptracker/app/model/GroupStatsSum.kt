@@ -15,6 +15,8 @@ data class GroupStatsSum(
     val groupingKey: Long,
     val localDateTime: LocalDateTime,
     val cost: BigDecimal,
+    //non 0 only if the data was filtered for 1 transaction
+    val sumCrypto: BigDecimal,
     val marketPrice: BigDecimal
 ) {
     val isEmpty get() = cost.isZero() && marketPrice.isZero()
@@ -23,6 +25,8 @@ data class GroupStatsSum(
 
     val maxOfCostOrPrice = cost.max(marketPrice)
     val minOfCostOrPrice = cost.min(marketPrice)
+
+    val avgCryptoPrice = cost.safeDiv(sumCrypto)
 
     val percents = marketPrice.safeDiv(cost).toFloat().let {
         val v = (100f * when {
@@ -37,6 +41,6 @@ data class GroupStatsSum(
     }
 
     companion object {
-        fun empty(groupingKey: Long, localDateTime: LocalDateTime) = GroupStatsSum(groupingKey, localDateTime, 0.bd, 0.bd)
+        fun empty(groupingKey: Long, localDateTime: LocalDateTime) = GroupStatsSum(groupingKey, localDateTime, 0.bd, 0.bd, 0.bd)
     }
 }

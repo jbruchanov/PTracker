@@ -5,6 +5,8 @@ import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.model.MarketData
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.model.Tuple3
+import com.scurab.ptracker.app.model.Tuple4
 
 fun List<Transaction>.tradingAssets(primaryFiatCoin: String? = null): List<Asset> {
     val allAssets = setOf { it.asset }
@@ -22,22 +24,28 @@ fun List<Transaction>.tradingAssets(primaryFiatCoin: String? = null): List<Asset
     return (allTradingAssets + missedAssets).sorted()
 }
 
-fun List<Transaction>.totalMarketValue(prices: Map<Asset, MarketPrice>, primaryCurrency: String): MarketData {
+fun List<Transaction>.totalMarketValue(prices: Map<Asset, MarketPrice>, primaryCurrency: String, doSumCrypto: Boolean): MarketData {
     if (isEmpty()) return MarketData.Empty
     return map { transaction ->
         val coinValues = transaction.coinValues()
         var sumValue = 0.bd
         var sumCost = 0.bd
+        //this makes sense only if the transactions are pre-filtered for 1 crypto (btc+ada => pointless)
+        var sumCrypto = 0.bd
         coinValues.map { (coin, value) ->
             val asset = Asset.fromUnknownPair(coin, primaryCurrency)
+            val isCoinCrypto = !FiatCurrencies.contains(coin)
             val price = when {
                 asset.isIdentity -> 1.bd
                 else -> requireNotNull(prices[asset] ?: prices[asset.flipCoins()]) { "Missing price for asset:$asset" }.price
             }
             val fiatValue = (price * value.abs())
-            coin to fiatValue
-        }.forEach { (originalCoin, fiatValue) ->
-            val isCoinCrypto = !FiatCurrencies.contains(originalCoin)
+            val cryptoAmount = if (isCoinCrypto) transaction.getAmount(coin) else 0.bd
+            Tuple4(isCoinCrypto, coin, fiatValue, cryptoAmount)
+        }.forEach { (isCoinCrypto, originalCoin, fiatValue, cryptoAmount) ->
+            if (isCoinCrypto && doSumCrypto) {
+                sumCrypto += cryptoAmount
+            }
             when {
                 /*
                 Income:
@@ -66,9 +74,9 @@ fun List<Transaction>.totalMarketValue(prices: Map<Asset, MarketPrice>, primaryC
             }
         }
 
-        sumCost to sumValue
+        Tuple3(sumCost, sumValue, sumCrypto)
     }.let { coinStats ->
-        MarketData(coinStats.sumOf { it.first }, coinStats.sumOf { it.second })
+        MarketData(coinStats.sumOf { it.first }, coinStats.sumOf { it.second }, coinStats.sumOf { it.third })
     }
 }
 

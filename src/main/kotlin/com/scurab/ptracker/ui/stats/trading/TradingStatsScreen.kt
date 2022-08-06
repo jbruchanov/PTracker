@@ -35,6 +35,7 @@ import com.scurab.ptracker.ui.LocalTexts
 import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.LazyTable
 import com.scurab.ptracker.ui.common.ToggleButton
+import com.scurab.ptracker.ui.common.ToggleButtons
 import com.scurab.ptracker.ui.common.VerticalDivider
 import com.scurab.ptracker.ui.model.TableState
 
@@ -147,21 +148,3 @@ private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: T
 }
 
 
-@Composable
-private fun ToggleButtons(content: @Composable RowScope.() -> Unit) {
-    Box {
-        val scrollState = rememberScrollState()
-        Row(
-            modifier = Modifier
-                .width(IntrinsicSize.Max)
-                .height(IntrinsicSize.Min)
-                .horizontalScroll(scrollState)
-        ) {
-            content()
-        }
-        HorizontalScrollbar(
-            adapter = rememberScrollbarAdapter(scrollState),
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
-    }
-}

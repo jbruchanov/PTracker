@@ -14,10 +14,11 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 interface MainEventHandler {
-    fun onOpenPriceDashboardClicked()
-    fun onOpenSettingsClicked()
-    fun onOpenStatsClicked()
-    fun onOpenLedgerDateStatsClicked()
+    fun onPriceDashboardClicked()
+    fun onSettingsClicked()
+    fun onStatsClicked()
+    fun onChartStatsClicked()
+    fun onLedgerDateStatsClicked()
     fun onKeyPressed(key: Key): Boolean
     fun onLedgerClicked(path: String)
     fun onOpenFileClicked()
@@ -50,11 +51,12 @@ class MainViewModel(
         uiState.activeLedger = appSettings.latestLedger
     }
 
-    override fun onOpenSettingsClicked() = replaceMainScreen(AppNavTokens.Settings)
-    override fun onOpenStatsClicked() = replaceMainScreen(AppNavTokens.Stats)
-    override fun onOpenLedgerDateStatsClicked() = replaceMainScreen(AppNavTokens.LedgerDateStats)
+    override fun onSettingsClicked() = replaceMainScreen(AppNavTokens.Settings)
+    override fun onStatsClicked() = replaceMainScreen(AppNavTokens.PortfolioStats)
+    override fun onLedgerDateStatsClicked() = replaceMainScreen(AppNavTokens.LedgerDateStats)
+    override fun onChartStatsClicked() = replaceMainScreen(AppNavTokens.ChartStats)
 
-    override fun onOpenPriceDashboardClicked() {
+    override fun onPriceDashboardClicked() {
         navController.popTo(AppNavTokens.PriceDashboard)
     }
 

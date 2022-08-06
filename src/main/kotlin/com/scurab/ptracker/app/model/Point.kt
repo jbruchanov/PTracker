@@ -6,13 +6,15 @@ interface IPoint {
     val x: Float
     val y: Float
 
-    companion object {
-        val Empty = Point(Float.NaN, Float.NaN)
-    }
+
 }
 
 data class Point(override val x: Float, override val y: Float) : IPoint {
     operator fun times(size: Size) = Point(x * size.width, y * size.height)
+
+    companion object {
+        val Empty = Point(Float.MIN_VALUE, Float.MIN_VALUE)
+    }
 }
 
 class MutablePoint() : IPoint {

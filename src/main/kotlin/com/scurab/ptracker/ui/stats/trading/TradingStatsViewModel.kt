@@ -12,9 +12,10 @@ import com.scurab.ptracker.app.usecase.StatsDatesUseCase
 import com.scurab.ptracker.component.ViewModel
 import com.scurab.ptracker.ui.model.ITableData
 import com.scurab.ptracker.ui.model.ListTableData
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.scurab.ptracker.ui.stats.GroupingAssetComponent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 
@@ -36,22 +37,15 @@ class TradingStatsViewModel(
     private val appStateRepository: AppStateRepository,
     private val statsUseCase: StatsDatesUseCase,
     private val dataTransformers: IDataTransformers
-) : ViewModel(), TradingStatsEventHandler {
+) : ViewModel(), TradingStatsEventHandler,
+    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Month, null) {
     val uiState = TradingStatsStatsUiState()
 
-    private val flowGrouping = MutableStateFlow(uiState.selectedGroupingKey)
-    private val flowAsset = MutableStateFlow(uiState.selectedAsset)
-
     init {
-        launch {
+        launch(Dispatchers.IO) {
             appStateRepository.appData
-                .combine(flowGrouping, ::Pair)
-                .combine(flowAsset) { appDataAndGrouping, selectedAsset ->
-                    val (appData, grouping) = appDataAndGrouping
-                    val asset = selectedAsset?.takeIf {
-                        appData.ledger.assetsTradings.contains(it) ||
-                                (it.isSingleCoinAsset && appData.ledger.coins.contains(it.coin1))
-                    }
+                .combineWithGroupingAsset()
+                .map { (appData, grouping, asset) ->
                     Tuple4(appData, grouping, statsUseCase.getStats(appData.ledger, grouping, asset), asset)
                 }
                 .collectLatest { (appData, grouping, tableData, asset) ->
@@ -65,15 +59,15 @@ class TradingStatsViewModel(
     }
 
     override fun onSelectedGrouping(grouping: DateGrouping) {
-        flowGrouping.tryEmit(grouping)
+        tryEmitGrouping(grouping)
     }
 
     override fun onSelectedAsset(asset: Asset) {
-        flowAsset.tryEmit(asset.takeIf { uiState.selectedAsset != asset })
+        tryEmitAsset(asset.takeIf { uiState.selectedAsset != asset })
     }
 
     override fun onSelectedCoin(coin: String) {
         val asset = Asset(coin, "")
-        flowAsset.tryEmit(asset.takeIf { uiState.selectedAsset != asset })
+        tryEmitAsset(asset.takeIf { uiState.selectedAsset != asset })
     }
 }

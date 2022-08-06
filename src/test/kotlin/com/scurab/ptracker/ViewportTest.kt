@@ -4,6 +4,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import com.scurab.ptracker.app.model.DateGrouping
+import com.scurab.ptracker.app.repository.AppSettings
+import com.scurab.ptracker.app.repository.MemoryAppSettings
 import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import org.junit.jupiter.api.Test
 import test.TestDensity
@@ -13,7 +15,7 @@ class ViewportTest {
 
     @Test
     fun test() {
-        val state = PriceBoardState(emptyList(), TestDensity, DateGrouping.Day)
+        val state = PriceBoardState(emptyList(), TestDensity, DateGrouping.Day, MemoryAppSettings())
         state.canvasSize = Size(1000f, 500f)
         val rect = state.viewport()
         assertEquals(0f, rect.left, 1e-6f)
@@ -24,7 +26,7 @@ class ViewportTest {
 
     @Test
     fun test1() {
-        val state = PriceBoardState(emptyList(), TestDensity, DateGrouping.Day)
+        val state = PriceBoardState(emptyList(), TestDensity, DateGrouping.Day, MemoryAppSettings())
         state.canvasSize = Size(1000f, 500f)
         state.offset = Offset(-100f, -100f)
         val rect = state.viewport()
@@ -39,7 +41,7 @@ class ViewportTest {
 
     @Test
     fun test2() {
-        val state = PriceBoardState(emptyList(), TestDensity, DateGrouping.Day)
+        val state = PriceBoardState(emptyList(), TestDensity, DateGrouping.Day, MemoryAppSettings())
         state.canvasSize = Size(1000f, 500f)
         state.scale = Offset(2f, 0.5f)
         val rect = state.viewport()

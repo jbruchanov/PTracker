@@ -23,6 +23,7 @@ class LoadLedgerUseCase(
     private val mapping: (Transaction) -> Transaction?
 ) : BittyTaxParser {
 
+    fun load(file: File): Ledger = load(file.absolutePath)
     fun load(uri: String): Ledger {
         val workbook: Workbook = XSSFWorkbook(fileOrDownload(uri))
         val items = workbook.sheetIterator().asSequence()

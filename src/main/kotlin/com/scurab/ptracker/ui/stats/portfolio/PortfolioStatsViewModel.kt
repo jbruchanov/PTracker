@@ -8,7 +8,6 @@ import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinPrice
 import com.scurab.ptracker.app.model.FiatCoin
-import com.scurab.ptracker.app.model.LineChartData
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.app.repository.AppSettings
@@ -16,18 +15,12 @@ import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.StatsChartCalcUseCase
 import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.ui.stats.LineChartUiState
 import com.scurab.ptracker.ui.stats.portfolio.PortfolioStatsUiState.Companion.MarketPercentageGroupingThreshold
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-sealed class PortfolioChartUiState {
-    object NoPrimaryCurrency : PortfolioChartUiState()
-    object Loading : PortfolioChartUiState()
-    class Data(val chartData: LineChartData) : PortfolioChartUiState()
-    class Error(val msg: String) : PortfolioChartUiState()
-}
 
 class PortfolioStatsViewModel(
     private val appSettings: AppSettings,
@@ -59,13 +52,13 @@ class PortfolioStatsViewModel(
                 try {
                     val primaryCoin = appSettings.primaryCoin
                     if (primaryCoin == null) {
-                        uiState.portfolioChartUiState = PortfolioChartUiState.NoPrimaryCurrency
+                        uiState.portfolioChartUiState = LineChartUiState.NoPrimaryCurrency
                     } else {
-                        uiState.portfolioChartUiState = PortfolioChartUiState.Loading
-                        uiState.portfolioChartUiState = PortfolioChartUiState.Data(statsChartCalcUseCase.getLineChartData(data, primaryCoin))
+                        uiState.portfolioChartUiState = LineChartUiState.Loading
+                        uiState.portfolioChartUiState = LineChartUiState.Data(statsChartCalcUseCase.getLineChartData(data, primaryCoin))
                     }
                 } catch (e: Exception) {
-                    uiState.portfolioChartUiState = PortfolioChartUiState.Error((e.message ?: "Null exception message") + "\n" + e.stackTraceToString())
+                    uiState.portfolioChartUiState = LineChartUiState.Error((e.message ?: "Null exception message") + "\n" + e.stackTraceToString())
                 }
             }
         }

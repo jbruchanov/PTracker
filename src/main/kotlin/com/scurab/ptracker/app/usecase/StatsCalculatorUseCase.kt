@@ -12,7 +12,6 @@ import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.ext.totalMarketValue
 import com.scurab.ptracker.app.ext.tradingAssets
 import com.scurab.ptracker.app.model.AnyCoin
-import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinCalculation
 import com.scurab.ptracker.app.model.CoinExchangeStats
@@ -105,17 +104,19 @@ class StatsCalculatorUseCase(
                 .groupBy { it.exchange }
                 .mapValues { (_, transactions) -> transactions.sumOf { transaction -> transaction.getAmount(coin) } }
                 .filter { it.value.isNotZero() }
-                .map { (exchange, sum) -> CoinExchangeStats(
-                    coin = AnyCoin(coin),
-                    exchange = ExchangeWallet(exchange.normalizedExchange()),
-                    quantity = sum,
-                    perc = sum.safeDiv(sumOfCoins.getValue(coin)),
-                    price = primaryCurrency
-                        ?.takeIf { coin != it }
-                        ?.let { Asset(coin, it) }
-                        ?.let { asset -> prices[asset] }
-                        ?.let { it.price * sum }
-                ) }
+                .map { (exchange, sum) ->
+                    CoinExchangeStats(
+                        coin = AnyCoin(coin),
+                        exchange = ExchangeWallet(exchange.normalizedExchange()),
+                        quantity = sum,
+                        perc = sum.safeDiv(sumOfCoins.getValue(coin)),
+                        price = primaryCurrency
+                            ?.takeIf { coin != it }
+                            ?.let { Asset(coin, it) }
+                            ?.let { asset -> prices[asset] }
+                            ?.let { it.price * sum }
+                    )
+                }
         }
 
         return LedgerStats(tradingAssets.toList(), assetsByExchange, feesPerCoin, cryptoHoldings, coinSumPerExchange, exchangeSumOfCoins, transactionsPerAssetPerType)
@@ -131,25 +132,26 @@ class StatsCalculatorUseCase(
         }
     }
 
-    fun calculateMarketDailyGains(appData: AppData, primaryCurrency: String) = calculateMarketDailyGains(appData.ledger, appData.historyPrices, primaryCurrency)
-
     fun calculateMarketDailyGains(
-        ledger: Ledger, prices: Map<Asset, List<PriceItem>>, primaryCurrency: String
+        transactions: List<Transaction>,
+        prices: Map<Asset, List<PriceItem>>,
+        primaryCurrency: String,
+        doSumCrypto: Boolean = false
     ): List<GroupStatsSum> {
-        if (ledger.items.isEmpty()) return emptyList()
+        if (transactions.isEmpty()) return emptyList()
 
         require(prices.isNotEmpty()) { "Prices are empty" }
         require(FiatCurrencies.contains(primaryCurrency)) { "Invalid primaryCurrency:${primaryCurrency}, not defined as Fiat" }
 
         val latestCommonPriceDate = prices.minOfOrNull { (_, v) -> v.maxOf { it.dateTime } }
         val grouping = DateGrouping.Day
-        val data = ledger.items/*.filter { it.asset.has("SOL") && it.type != "Staking" }*/.sortedBy { it.dateTime }
+        val data = transactions.sortedBy { it.dateTime }
         val groups = data.groupBy { grouping.toLongGroup(it.dateTime) }
         val allPrices = prices.values.flatten()
         val pricesByAssetByGroup = allPrices.groupBy { grouping.toLongGroup(it.dateTime) }.mapValues { it.value.associateBy { transactionsInGroup -> transactionsInGroup.asset } }
 
         val result = mutableMapOf<Long, MutableMap<Long, GroupStats>>()
-        val startDate = grouping.previous(ledger.items.minOf { it.dateTime })
+        val startDate = grouping.previous(transactions.minOf { it.dateTime })
         val endDate = latestCommonPriceDate ?: now()
         val groupKeys = mutableListOf<Long>()
         var date = startDate
@@ -165,8 +167,8 @@ class StatsCalculatorUseCase(
 
         groupKeysCombination.forEach { (targetGroupKey, priceGroupKey) ->
             val priceForGroup = pricesByAssetByGroup[priceGroupKey] ?: emptyMap()
-            val (cost, marketPrice) = groups[targetGroupKey]?.totalMarketValue(priceForGroup, primaryCurrency) ?: MarketData.Empty
-            result.getValue(targetGroupKey)[priceGroupKey] = GroupStats(targetGroupKey, cost, marketPrice)
+            val (cost, marketPrice, sumCrypto) = groups[targetGroupKey]?.totalMarketValue(priceForGroup, primaryCurrency, doSumCrypto) ?: MarketData.Empty
+            result.getValue(targetGroupKey)[priceGroupKey] = GroupStats(targetGroupKey, cost, marketPrice, sumCrypto)
         }
 
         val r = TreeMap<LocalDateTime, GroupStatsSum>()
@@ -193,23 +195,30 @@ class StatsCalculatorUseCase(
 
 private fun Map<Long, MutableMap<Long, GroupStats>>.sumForGroupKey(upperBoundGroupingKey: Long, date: LocalDateTime): GroupStatsSum {
     var sumCost = 0.bd
-    var sumValue = 0.bd
+    var sumMarketValue = 0.bd
+    var sumCrypto = 0.bd
     asSequence()
         .filter { (k, _) -> k <= upperBoundGroupingKey }
         .map { (k, v) -> k to (v[upperBoundGroupingKey] ?: GroupStats.empty(k)) }
-        .forEach { (_, stats) ->
-            sumCost += stats.cost
-            sumValue += stats.value
+        .also {
+            val list = it.toList()
+            list.forEach { (_, stats) ->
+                sumCost += stats.cost
+                sumMarketValue += stats.marketValue
+                sumCrypto += stats.sumCrypto
+            }
         }
-    return GroupStatsSum(upperBoundGroupingKey, date, sumCost, sumValue)
+
+    return GroupStatsSum(upperBoundGroupingKey, date, sumCost, sumCrypto, sumMarketValue)
 }
 
 private data class GroupStats(
     val groupingKey: Long,
     val cost: BigDecimal,
-    val value: BigDecimal
+    val marketValue: BigDecimal,
+    val sumCrypto: BigDecimal
 ) {
     companion object {
-        fun empty(groupingKey: Long) = GroupStats(groupingKey, 0.bd, 0.bd)
+        fun empty(groupingKey: Long) = GroupStats(groupingKey, 0.bd, 0.bd, 0.bd)
     }
 }
