@@ -27,7 +27,7 @@ import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.LedgerStats
 import com.scurab.ptracker.app.model.MarketData
 import com.scurab.ptracker.app.model.MarketPrice
-import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.repository.AppSettings
 import kotlinx.datetime.LocalDateTime
@@ -132,7 +132,7 @@ class StatsCalculatorUseCase(
 
     fun calculateMarketDailyGains(
         transactions: List<Transaction>,
-        dayPricesPerAsset: Map<Asset, List<PriceItem>>,
+        dayPricesPerAsset: Map<Asset, List<PriceItemUI>>,
         primaryCurrency: String,
         dateGrouping: DateGrouping = DateGrouping.Day,
         doSumCrypto: Boolean = false

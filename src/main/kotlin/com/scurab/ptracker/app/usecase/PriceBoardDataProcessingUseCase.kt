@@ -6,7 +6,7 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.Ledger
-import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.ui.model.AssetIcon
 import kotlinx.datetime.LocalDateTime
@@ -16,7 +16,7 @@ class PriceBoardDataProcessingUseCase {
     class RawData(
         val ledger: Ledger,
         val asset: Asset,
-        val prices: List<PriceItem>
+        val prices: List<PriceItemUI>
     )
 
     class Result(
@@ -38,7 +38,7 @@ class PriceBoardDataProcessingUseCase {
 }
 
 class PriceItemTransactions(
-    val priceItem: PriceItem,
+    val priceItem: PriceItemUI,
     val transactions: List<Transaction>
 ) {
     val iconPrices = transactions.map { it.iconColor() to it }

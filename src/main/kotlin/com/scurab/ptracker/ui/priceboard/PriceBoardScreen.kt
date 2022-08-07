@@ -91,7 +91,7 @@ import com.scurab.ptracker.app.ext.withTranslateAndScaleDefaults
 import com.scurab.ptracker.app.ext.withTranslateAndScaleY
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Filter
-import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.model.priceDetails
 import com.scurab.ptracker.component.compose.StateContainer
@@ -132,7 +132,7 @@ object PriceDashboardConfig {
 }
 
 private fun PriceBoardState.columns() = (viewport().nWidth / DashboardSizes.PriceItemWidth).roundToInt()
-private fun PriceBoardState.horizontalLabel(items: List<PriceItem>): String? = items.getOrNull(selectedPriceItemIndex())?.formattedFullDate
+private fun PriceBoardState.horizontalLabel(items: List<PriceItemUI>): String? = items.getOrNull(selectedPriceItemIndex())?.formattedFullDate
 private fun PriceBoardState.mousePrice() = normalizedPointer().transformNormToViewPort(viewport()).y
 private fun PriceBoardState.verticalLabel(): String = mousePrice().f(visiblePriceRange().getLabelPriceDecimals())
 private fun PriceBoardState.verticalSteps() = (floor(canvasSize.height / TextRendering.font.metrics.height).toInt() * PriceDashboardConfig.AxisYContentCoef).toInt()
@@ -145,7 +145,7 @@ private fun PriceBoardState.viewportIndexes(startOffset: Int = 0, endOffset: Int
     return (firstIndex + startOffset) until (lastIndex + endOffset)
 }
 
-fun PriceItem.isVisible(state: PriceBoardState, viewport: Rect = state.viewport()): Boolean {
+fun PriceItemUI.isVisible(state: PriceBoardState, viewport: Rect = state.viewport()): Boolean {
     val colWidth = DashboardSizes.PriceItemWidth
     val firstIndex = (max(0f, viewport.left) / colWidth).toInt()
     val widthToFill = viewport.nWidth + min(viewport.left, 0f)
@@ -482,7 +482,7 @@ private fun AvgVisiblePrices(state: PriceBoardState) {
 
 @Composable
 private fun drawCandleTransactionIcon(
-    state: PriceBoardState, priceItem: PriceItem, transaction: Transaction?, priceItemWidthHalf: Float, ic: IconColor, densityScale: Float, painter: VectorPainter
+    state: PriceBoardState, priceItem: PriceItemUI, transaction: Transaction?, priceItemWidthHalf: Float, ic: IconColor, densityScale: Float, painter: VectorPainter
 ) {
     Canvas {
         withTranslateAndScale(state) {
@@ -590,7 +590,7 @@ private fun Grid(state: PriceBoardState) {
 
 @Composable
 private fun PriceAxisContentTemplate(
-    items: List<PriceItem>, state: PriceBoardState, horizontalContent: DrawScope.(PriceItem?, step: Int) -> Unit, verticalContent: DrawScope.(step: Int, steps: Int) -> Unit
+    items: List<PriceItemUI>, state: PriceBoardState, horizontalContent: DrawScope.(PriceItemUI?, step: Int) -> Unit, verticalContent: DrawScope.(step: Int, steps: Int) -> Unit
 ) {
     Canvas {
         //Axis X

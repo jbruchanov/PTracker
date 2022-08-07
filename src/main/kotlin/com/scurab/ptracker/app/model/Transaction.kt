@@ -37,7 +37,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
     abstract val assets: Set<String>
 
     val uuid = UUID.randomUUID()
-    var priceItem: PriceItem? by cache
+    var priceItem: PriceItemUI? by cache
     var originalTransaction: Transaction? = null
 
     data class Income(

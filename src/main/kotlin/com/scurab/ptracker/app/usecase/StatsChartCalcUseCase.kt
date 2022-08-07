@@ -6,7 +6,7 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.PriceHistoryChartData
 import com.scurab.ptracker.app.model.Point
-import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.Transaction
 import java.math.BigDecimal
 import kotlin.math.abs
@@ -21,7 +21,7 @@ class StatsChartCalcUseCase(
 
     fun getLineChartData(
         transactions: List<Transaction>,
-        prices: Map<Asset, List<PriceItem>>,
+        prices: Map<Asset, List<PriceItemUI>>,
         primaryCurrency: String,
         dateGrouping: DateGrouping = DateGrouping.Day
     ): PriceHistoryChartData {

@@ -33,7 +33,7 @@ class Ledger(
         }
     }
 
-    fun getTransactionsMap(priceItem: PriceItem, filter: Filter<Transaction>, grouping: DateGrouping = DateGrouping.Day): List<Transaction> {
+    fun getTransactionsMap(priceItem: PriceItemUI, filter: Filter<Transaction>, grouping: DateGrouping = DateGrouping.Day): List<Transaction> {
         val key = KeyAssetGroupingKey(priceItem.asset, grouping.toLongGroup(priceItem.dateTime), filter)
         return cacheByItemAndAsset.getOrPut(key) {
             val groupedData = getGroupedData()
@@ -56,12 +56,12 @@ class Ledger(
         }
     }
 
-    fun firstIndexOf(it: PriceItem, grouping: DateGrouping = DateGrouping.Day): Int {
+    fun firstIndexOf(it: PriceItemUI, grouping: DateGrouping = DateGrouping.Day): Int {
         val key = grouping.toLongGroup(it.dateTime)
         return items.indexOfFirst { grouping.toLongGroup(it.dateTime) == key }
     }
 
-    fun fillPriceItems(priceItems: List<PriceItem>, groupStrategy: DateGrouping) {
+    fun fillPriceItems(priceItems: List<PriceItemUI>, groupStrategy: DateGrouping) {
         val groupKeyPriceItems = priceItems.associateBy { it.groupValue(groupStrategy) }
         require(groupKeyPriceItems.size == priceItems.size) {
             "Invalid priceItems vs groupStrategy:${groupStrategy.name}, groupValue must generate unique values for each priceItem, priceItems:${priceItems.size}, groupedItems:${groupKeyPriceItems.size}"

@@ -5,7 +5,7 @@ import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.toLong
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Locations
-import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.net.CryptoCompareClient
 import com.scurab.ptracker.net.model.CryptoComparePriceItem
@@ -29,7 +29,7 @@ class LoadPriceHistoryUseCase(
     private val location = File(Locations.Daily)
     private val hourInMs = 60 * 60 * 1000L
 
-    suspend fun loadAll(assets: Collection<Asset>): Map<Asset, Result<List<PriceItem>>> = assets
+    suspend fun loadAll(assets: Collection<Asset>): Map<Asset, Result<List<PriceItemUI>>> = assets
         .associateWith { asset ->
             kotlin.runCatching { load(asset) }
                 .onFailure {
@@ -37,7 +37,7 @@ class LoadPriceHistoryUseCase(
                 }
         }
 
-    suspend fun load(asset: Asset): List<PriceItem> {
+    suspend fun load(asset: Asset): List<PriceItemUI> {
         location.mkdirs()
         val f = File(location, "${asset.label}.json")
         var localData: List<CryptoComparePriceItem>? = null
@@ -82,7 +82,7 @@ class LoadPriceHistoryUseCase(
                     f.writeText(jsonBridge.serialize(it))
                 }
             }
-            .mapIndexed { index, cryptoComparePriceItem -> PriceItem(index, asset, cryptoComparePriceItem) }
+            .mapIndexed { index, cryptoComparePriceItem -> PriceItemUI(index, asset, cryptoComparePriceItem) }
     }
 
     private suspend fun slowDownIfNecessary() {

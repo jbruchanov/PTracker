@@ -6,7 +6,7 @@ import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.isZero
 import com.scurab.ptracker.app.ext.safeDiv
 import com.scurab.ptracker.app.model.Asset
-import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import java.math.BigDecimal
 
 data class PriceBoardVisibleStats(
@@ -16,7 +16,7 @@ data class PriceBoardVisibleStats(
     val coin1SumSell: BigDecimal,
     val coin2SumBuy: BigDecimal,
     val coin2SumSell: BigDecimal,
-    val volumes: Map<PriceItem, PriceItemVolumes?>,
+    val volumes: Map<PriceItemUI, PriceItemVolumes?>,
     val transactions: Int
 ) {
     private val transactionsBd = transactions.bd

@@ -34,7 +34,7 @@ import com.scurab.ptracker.app.model.CacheRef
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.IPriceItem.Companion.asPriceItem
 import com.scurab.ptracker.app.model.MarketPrice
-import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.usecase.PriceItemTransactions
@@ -54,7 +54,7 @@ import kotlin.math.ceil
 import kotlin.math.max
 
 class PriceBoardState(
-    items: List<PriceItem>,
+    items: List<PriceItemUI>,
     private val localDensity: Density,
     grouping: DateGrouping = DateGrouping.Day,
     appSettings: AppSettings
@@ -64,9 +64,9 @@ class PriceBoardState(
     var pointer by mutableStateOf(Point.ZERO)
     var canvasSize by mutableStateOf(Size.Zero)
 
-    var pointedPriceItem by mutableStateOf<PriceItem?>(null)
+    var pointedPriceItem by mutableStateOf<PriceItemUI?>(null)
     var clickedTransaction by mutableStateOf<Pair<Long, Transaction>?>(null)
-    var priceItems = SnapshotStateList<PriceItem>().also { it.addAll(items) }
+    var priceItems = SnapshotStateList<PriceItemUI>().also { it.addAll(items) }
     var transactions by mutableStateOf(emptyList<Transaction>())
     var transactionsPerPriceItem by mutableStateOf(emptyMap<LocalDateTime, PriceItemTransactions>())
 
@@ -87,7 +87,7 @@ class PriceBoardState(
     var isTradingTransactionsGroupingEnabled by mutableStateOf(appSettings.isTradingTransactionsGroupingEnabled)
     val isDebugVisible = appSettings.debug
 
-    private val cachingVisiblePriceItems = CacheRef<Rect, List<PriceItem>>()
+    private val cachingVisiblePriceItems = CacheRef<Rect, List<PriceItemUI>>()
     private val cachingVisibleStats = CacheRef<Rect, PriceBoardVisibleStats>()
 
     private lateinit var composeCoroutineScope: CoroutineScope
@@ -199,7 +199,7 @@ class PriceBoardState(
     fun visiblePriceRange() = Rect(left = 0f, top = canvasSize.height, right = canvasSize.width, bottom = 0f).translate(0f, offset.y)
         .scale(1f, 1f / scale.y, pivot = Offset(0f, -offset.y - canvasSize.height / 2)).let { it.bottom.rangeTo(it.top) }
 
-    fun setItems(asset: Asset, items: List<PriceItem>, initViewport: Boolean) {
+    fun setItems(asset: Asset, items: List<PriceItemUI>, initViewport: Boolean) {
         selectedAsset = asset
         priceItems.clear()
         priceItems.addAll(items)
@@ -215,7 +215,7 @@ class PriceBoardState(
             val today = now.date
             val index = priceItems.indexOfLast { it.item.dateTime.date == today }
             if (index == -1) {
-                priceItems.add(PriceItem(priceItems.last().index + 1, marketPrice.asset, marketPrice.asPriceItem(now)))
+                priceItems.add(PriceItemUI(priceItems.last().index + 1, marketPrice.asset, marketPrice.asPriceItem(now)))
             } else {
                 priceItems[index] = priceItems[index].withCurrentMarketPrice(marketPrice)
             }
@@ -223,7 +223,7 @@ class PriceBoardState(
     }
 
     @Composable
-    fun getVisiblePriceItems(viewPort: Rect = viewport()): List<PriceItem> {
+    fun getVisiblePriceItems(viewPort: Rect = viewport()): List<PriceItemUI> {
         return cachingVisiblePriceItems.getOrCreate(viewPort) {
             priceItems.filterVisible(viewPort, endOffset = 1)
         }

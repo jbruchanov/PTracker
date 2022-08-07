@@ -3,7 +3,7 @@ package com.scurab.ptracker.app.model
 class AppData(
     val ledger: Ledger,
     val prices: Map<Asset, CoinPrice>,
-    val historyPrices: Map<Asset, List<PriceItem>>,
+    val historyPrices: Map<Asset, List<PriceItemUI>>,
     val ledgerStats: LedgerStats
 ) {
     companion object {

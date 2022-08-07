@@ -13,7 +13,7 @@ import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.Filter
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.MarketPrice
-import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
@@ -61,7 +61,7 @@ class PriceBoardViewModel(
 
     private val filters = Pair(Filter.ImportantTransactions, Filter.AllTransactions)
     private val grouping = DateGrouping.Day
-    private val prices = MutableStateFlow(Asset.Empty to emptyList<PriceItem>())
+    private val prices = MutableStateFlow(Asset.Empty to emptyList<PriceItemUI>())
 
     //state for merging, 2 different datasources for 1 output
     private val appData = appStateRepository.appData
