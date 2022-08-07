@@ -132,24 +132,15 @@ class StatsCalculatorUseCase(
 
     fun calculateMarketDailyGains(
         transactions: List<Transaction>,
-        dayPricesPerAsset: Map<Asset, List<PriceItemUI>>,
+        pricesGrouped: Map<Asset, List<PriceItemUI>>,
         primaryCurrency: String,
-        dateGrouping: DateGrouping = DateGrouping.Day,
+        dateGrouping: DateGrouping,
         doSumCrypto: Boolean = false
     ): List<GroupStatsSum> {
         if (transactions.isEmpty()) return emptyList()
-
-        require(dayPricesPerAsset.isNotEmpty()) { "Prices are empty" }
+        require(pricesGrouped.isNotEmpty()) { "Prices are empty" }
         require(FiatCurrencies.contains(primaryCurrency)) { "Invalid primaryCurrency:${primaryCurrency}, not defined as Fiat" }
-
         require(dateGrouping != DateGrouping.NoGrouping) { "Invalid grouping:$dateGrouping" }
-        val pricesGrouped = if (dateGrouping == DateGrouping.Day) dayPricesPerAsset
-        else dayPricesPerAsset
-            .mapValues { (_, assetPrices) ->
-                assetPrices.groupBy { dateGrouping.toLongGroup(it.dateTime) }
-                    .mapValues { it.value.average(dateGrouping.toLocalDateGroup(it.value.first().dateTime)) }
-                    .values
-            }
 
         val latestCommonPriceDate = pricesGrouped.minOfOrNull { (_, v) -> v.maxOf { it.dateTime } }
 

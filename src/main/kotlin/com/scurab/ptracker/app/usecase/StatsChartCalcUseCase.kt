@@ -1,5 +1,6 @@
 package com.scurab.ptracker.app.usecase
 
+import com.scurab.ptracker.app.ext.average
 import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.Asset
@@ -27,7 +28,17 @@ class StatsChartCalcUseCase(
     ): PriceHistoryChartData {
         val assets = transactions.setOf { it.asset }
         val doSumCrypto = assets.size == 1
-        val stats = statsCalculatorUseCase.calculateMarketDailyGains(transactions, prices, primaryCurrency, dateGrouping, doSumCrypto)
+
+        val pricesGrouped = if (dateGrouping == DateGrouping.Day) prices
+        else prices
+            .mapValues { (_, assetPrices) ->
+                assetPrices.groupBy { dateGrouping.toLongGroup(it.dateTime) }
+                    .mapValues { it.value.average(dateGrouping.toLocalDateGroup(it.value.first().dateTime)) }
+                    .values
+                    .toList()
+            }
+
+        val stats = statsCalculatorUseCase.calculateMarketDailyGains(transactions, pricesGrouped, primaryCurrency, dateGrouping, doSumCrypto)
         if (stats.isEmpty()) return PriceHistoryChartData.Empty
         val minYItem = stats.minBy { it.minOfCostOrPrice }
         val minY = minYItem.minOfCostOrPrice.toFloat()
@@ -40,7 +51,7 @@ class StatsChartCalcUseCase(
         val requiredY = abs(maxY - minY)
         val avgY = if (doSumCrypto) {
             val asset = assets.first()
-            val diff = prices.getValue(asset).maxOf { it.price } - prices.getValue(asset).minOf { it.price }
+            val diff = pricesGrouped.getValue(asset).maxOf { it.price } - pricesGrouped.getValue(asset).minOf { it.price }
             diff.abs().toFloat()
         } else 0f
 
@@ -69,8 +80,8 @@ class StatsChartCalcUseCase(
 
         return PriceHistoryChartData(
             stats, marketPrice, cost, avg, latestMarketPrice,
-            maxMarketPrice = point(stats.indexOf(maxYItem), maxYItem.maxOfCostOrPrice),
-            minMarketPriceXSinceMax = minYSinceMaxItem?.let { it -> point(stats.indexOf(it), it.minOfCostOrPrice) }
+            maxMarketPrice = point(stats.indexOf(maxYItem), maxYItem.marketValue),
+            minMarketPriceXSinceMax = minYSinceMaxItem?.let { point(stats.indexOf(it), it.minOfCostOrPrice) }
         )
     }
 }
