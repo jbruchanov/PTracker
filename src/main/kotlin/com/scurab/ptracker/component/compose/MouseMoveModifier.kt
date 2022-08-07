@@ -6,6 +6,8 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntSize
 import com.scurab.ptracker.app.ext.times
+import com.scurab.ptracker.component.util.lerp
+import kotlin.math.roundToInt
 
 fun Modifier.onMouseMove(block: ((Float, Float, IntSize) -> Unit)? = null): Modifier {
     block ?: return this
@@ -26,12 +28,7 @@ fun Modifier.onMouseMove(block: ((Float, Float, IntSize) -> Unit)? = null): Modi
 fun Modifier.onMouseMove(items: Int, block: (Offset, Int) -> Unit): Modifier {
     return onMouseMove { x, y, size ->
         val isValid = !x.isNaN() && !y.isNaN()
-        val index = if (isValid) {
-            val hStep = (size.width / items) / 2f / size.width
-            ((x + hStep) * items - 1).toInt().coerceAtMost(items - 1)
-        } else {
-            -1
-        }
+        val index = if (isValid) lerp(0f, items - 1f, x).roundToInt() else -1
         block(Offset(x, y) * size, index)
     }
 }
