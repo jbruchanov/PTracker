@@ -17,18 +17,18 @@ data class GroupStatsSum(
     val cost: BigDecimal,
     //non 0 only if the data was filtered for 1 transaction
     val sumCrypto: BigDecimal,
-    val marketPrice: BigDecimal
+    val marketValue: BigDecimal
 ) {
-    val isEmpty get() = cost.isZero() && marketPrice.isZero()
+    val isEmpty get() = cost.isZero() && marketValue.isZero()
 
     val formattedDateTime by lazy { localDateTime.toJavaLocalDateTime().format(DateTimeFormats.dayFullDate) }
 
-    val maxOfCostOrPrice = cost.max(marketPrice)
-    val minOfCostOrPrice = cost.min(marketPrice)
+    val maxOfCostOrPrice = cost.max(marketValue)
+    val minOfCostOrPrice = cost.min(marketValue)
 
     val avgCryptoPrice = cost.safeDiv(sumCrypto)
 
-    val percents = marketPrice.safeDiv(cost).toFloat().let {
+    val percents = marketValue.safeDiv(cost).toFloat().let {
         val v = (100f * when {
             cost.isZero() -> 0f
             it > 1f -> it - 1f

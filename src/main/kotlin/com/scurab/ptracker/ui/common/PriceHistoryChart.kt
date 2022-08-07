@@ -47,7 +47,7 @@ private fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
     ) {
         Text(stats.formattedDateTime, style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
         WSpacer2()
-        Text(stats.marketPrice.hrs(), style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
+        Text(stats.marketValue.hrs(), style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
         WSpacer2()
         Text("-${stats.cost.hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
         WSpacer2()

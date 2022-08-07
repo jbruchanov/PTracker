@@ -24,7 +24,11 @@ fun List<Transaction>.tradingAssets(primaryFiatCoin: String? = null): List<Asset
     return (allTradingAssets + missedAssets).sorted()
 }
 
-fun List<Transaction>.totalMarketValue(prices: Map<Asset, MarketPrice>, primaryCurrency: String, doSumCrypto: Boolean): MarketData {
+fun List<Transaction>.totalMarketValue(
+    prices: Map<Asset, MarketPrice>,
+    primaryCurrency: String,
+    doSumCrypto: Boolean
+): MarketData {
     if (isEmpty()) return MarketData.Empty
     return map { transaction ->
         val coinValues = transaction.coinValues()

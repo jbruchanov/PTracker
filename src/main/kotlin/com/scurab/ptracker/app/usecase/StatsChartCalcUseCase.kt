@@ -7,7 +7,6 @@ import com.scurab.ptracker.app.model.PriceHistoryChartData
 import com.scurab.ptracker.app.model.Point
 import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
-import com.scurab.ptracker.component.util.lerp
 import java.math.BigDecimal
 import kotlin.math.abs
 
@@ -53,7 +52,7 @@ class StatsChartCalcUseCase(
         )
 
         stats.forEachIndexed { index, dayStatsSum ->
-            marketPrice.add(point(index, dayStatsSum.marketPrice))
+            marketPrice.add(point(index, dayStatsSum.marketValue))
             cost.add(point(index, dayStatsSum.cost))
             if (doSumCrypto) {
                 avg.add(point(index, dayStatsSum.avgCryptoPrice, avgY))

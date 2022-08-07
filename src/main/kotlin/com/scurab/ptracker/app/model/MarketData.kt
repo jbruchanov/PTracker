@@ -8,7 +8,7 @@ import java.math.BigDecimal
  */
 data class MarketData(
     val cost: BigDecimal,
-    val marketPrice: BigDecimal,
+    val marketValue: BigDecimal,
     val sumCrypto: BigDecimal
 ) {
     companion object {

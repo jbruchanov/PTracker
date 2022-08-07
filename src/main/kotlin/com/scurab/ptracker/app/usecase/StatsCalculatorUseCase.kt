@@ -30,8 +30,6 @@ import com.scurab.ptracker.app.model.PriceItem
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.repository.AppSettings
 import kotlinx.datetime.LocalDateTime
-import java.math.BigDecimal
-import java.util.TreeMap
 
 class StatsCalculatorUseCase(
     private val appSettings: AppSettings
@@ -122,7 +120,6 @@ class StatsCalculatorUseCase(
         return LedgerStats(tradingAssets.toList(), assetsByExchange, feesPerCoin, cryptoHoldings, coinSumPerExchange, exchangeSumOfCoins, transactionsPerAssetPerType)
     }
 
-
     private fun String.normalizedExchange(): String {
         return when {
             contains("kraken", ignoreCase = true) -> "Kraken"
@@ -143,82 +140,79 @@ class StatsCalculatorUseCase(
         require(prices.isNotEmpty()) { "Prices are empty" }
         require(FiatCurrencies.contains(primaryCurrency)) { "Invalid primaryCurrency:${primaryCurrency}, not defined as Fiat" }
 
-        val latestCommonPriceDate = prices.minOfOrNull { (_, v) -> v.maxOf { it.dateTime } }
         val grouping = DateGrouping.Day
-        val data = transactions.sortedBy { it.dateTime }
-        val groups = data.groupBy { grouping.toLongGroup(it.dateTime) }
-        val allPrices = prices.values.flatten()
-        val pricesByAssetByGroup = allPrices.groupBy { grouping.toLongGroup(it.dateTime) }.mapValues { it.value.associateBy { transactionsInGroup -> transactionsInGroup.asset } }
+        //TODO, calculate average group price
+        val pricesGrouped = prices
+        val latestCommonPriceDate = pricesGrouped.minOfOrNull { (_, v) -> v.maxOf { it.dateTime } }
 
-        val result = mutableMapOf<Long, MutableMap<Long, GroupStats>>()
+        val transactionsPerGroup = transactions
+            .groupBy { grouping.toLongGroup(it.dateTime) }
+
+        val allPrices = pricesGrouped.values.flatten()
+        val pricesByAssetByGroup = allPrices
+            .groupBy { grouping.toLongGroup(it.dateTime) }
+            .mapValues { it.value.associateBy { transactionsInGroup -> transactionsInGroup.asset } }
+
         val startDate = grouping.previous(transactions.minOf { it.dateTime })
         val endDate = latestCommonPriceDate ?: now()
-        val groupKeys = mutableListOf<Long>()
+
+        //groupKeys, aka value for each day we want to calculate stats for
+        val groupKeys = mutableListOf<Pair<LocalDateTime, Long>>()
         var date = startDate
         while (date <= endDate) {
             val key = grouping.toLongGroup(date)
-            groupKeys.add(key)
+            groupKeys.add(date to key)
             date = grouping.next(date)
         }
-        val groupKeysCombination = groupKeys.mapIndexed { index, targetGroupKey ->
-            result[targetGroupKey] = TreeMap<Long, GroupStats>()
-            (index downTo 0).map { i -> groupKeys[i] to targetGroupKey }
-        }.flatten().sortedBy { it.first }
 
-        groupKeysCombination.forEach { (targetGroupKey, priceGroupKey) ->
-            val priceForGroup = pricesByAssetByGroup[priceGroupKey] ?: emptyMap()
-            val (cost, marketPrice, sumCrypto) = groups[targetGroupKey]?.totalMarketValue(priceForGroup, primaryCurrency, doSumCrypto) ?: MarketData.Empty
-            result.getValue(targetGroupKey)[priceGroupKey] = GroupStats(targetGroupKey, cost, marketPrice, sumCrypto)
-        }
+        //region calculate values for each day using of statsDay prices
+        //for each day
+        val marketDataPerStatsGroup = groupKeys.indices
+            .map { endIndex ->
+                //day we calculate stats for
+                val (statsGroupDate, statsGroup) = groupKeys[endIndex]
+                val pricesForStatsGroup = pricesByAssetByGroup.getValue(statsGroup)
+                //calculate from beginning value per each day
+                val marketDataForStatsGroup = (0..endIndex)
+                    .map { startIndex ->
+                        //day of transactions in day before statsGroup
+                        val historyGroup = groupKeys[startIndex].second
+                        val marketData = transactionsPerGroup[historyGroup]
+                            ?.totalMarketValue(pricesForStatsGroup, primaryCurrency, doSumCrypto)
+                            ?: MarketData.Empty
+                        marketData
+                    }
+                statsGroupDate to marketDataForStatsGroup
+            }
 
-        val r = TreeMap<LocalDateTime, GroupStatsSum>()
-        date = startDate
-        while (date <= endDate) {
+        var latestGroupStatsSum: GroupStatsSum? = null
+        val result = marketDataPerStatsGroup.map { (date, marketDataForStatsGroup) ->
             val key = grouping.toLongGroup(date)
-            r[date] = result.sumForGroupKey(key, date)
-            date = grouping.next(date)
-        }
-
-        var latestDayStatsSum = r.firstEntry().value
-        //replace empty values by last with value
-        r.forEach { (dateTime, stats) ->
-            if (stats.isEmpty) {
-                r[dateTime] = latestDayStatsSum.copy(groupingKey = grouping.toLongGroup(dateTime))
+            val statsPerGroup = marketDataForStatsGroup.getGroupStatsSums(key, date)
+            //replace empty values by last with value
+            val latest = latestGroupStatsSum
+            if (latest != null && !latest.isEmpty && statsPerGroup.isEmpty) {
+                latest.copy(groupingKey = grouping.toLongGroup(date))
             } else {
-                latestDayStatsSum = stats
+                latestGroupStatsSum = statsPerGroup
+                statsPerGroup
             }
         }
-        return r.values.toList()
+        return result
     }
 }
 
-
-private fun Map<Long, MutableMap<Long, GroupStats>>.sumForGroupKey(upperBoundGroupingKey: Long, date: LocalDateTime): GroupStatsSum {
+private fun List<MarketData>.getGroupStatsSums(
+    upperBoundGroupingKey: Long,
+    date: LocalDateTime
+): GroupStatsSum {
     var sumCost = 0.bd
-    var sumMarketValue = 0.bd
     var sumCrypto = 0.bd
-    asSequence()
-        .filter { (k, _) -> k <= upperBoundGroupingKey }
-        .map { (k, v) -> k to (v[upperBoundGroupingKey] ?: GroupStats.empty(k)) }
-        .also {
-            val list = it.toList()
-            list.forEach { (_, stats) ->
-                sumCost += stats.cost
-                sumMarketValue += stats.marketValue
-                sumCrypto += stats.sumCrypto
-            }
-        }
-
-    return GroupStatsSum(upperBoundGroupingKey, date, sumCost, sumCrypto, sumMarketValue)
-}
-
-private data class GroupStats(
-    val groupingKey: Long,
-    val cost: BigDecimal,
-    val marketValue: BigDecimal,
-    val sumCrypto: BigDecimal
-) {
-    companion object {
-        fun empty(groupingKey: Long) = GroupStats(groupingKey, 0.bd, 0.bd, 0.bd)
+    var sumMarketValue = 0.bd
+    forEach { data ->
+        sumCost += data.cost
+        sumCrypto += data.sumCrypto
+        sumMarketValue += data.marketValue
     }
+    return GroupStatsSum(upperBoundGroupingKey, date, sumCost, sumCrypto, sumMarketValue)
 }

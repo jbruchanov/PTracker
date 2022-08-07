@@ -1,6 +1,8 @@
 package com.scurab.ptracker.app.model
 
 import com.scurab.ptracker.app.ext.atTimeZero
+import com.scurab.ptracker.app.ext.groupingYD
+import com.scurab.ptracker.app.ext.groupingYM
 import com.scurab.ptracker.app.ext.groupingYMD
 import com.scurab.ptracker.app.ext.toLocalDateTime
 import com.scurab.ptracker.app.ext.toLong
@@ -39,7 +41,7 @@ enum class DateGrouping(
     Week(
         dateTimeFormatter = DateTimeFormats.yearWeek,
         groupToLocalDateTime = { it.withDayOfWeek(DayOfWeek.MONDAY/*todo US*/).atTimeZero() },
-        transformDateToLong = { TODO() }
+        transformDateToLong = {  Week.groupToLocalDateTime(it).groupingYD() }
     ) {
         override fun previous(value: LocalDateTime): LocalDateTime = value.withDayOfWeek(java.time.DayOfWeek.MONDAY).date.minus(DatePeriod(days = 7)).atTime(0, 0, 0)
         override fun next(value: LocalDateTime): LocalDateTime = value.withDayOfWeek(java.time.DayOfWeek.MONDAY).date.plus(DatePeriod(days = 7)).atTime(0, 0, 0)
@@ -47,7 +49,7 @@ enum class DateGrouping(
     Month(
         dateTimeFormatter = DateTimeFormats.yearMonthMid,
         groupToLocalDateTime = { LocalDateTime(it.year, it.monthNumber, 1,0,0,0,0) },
-        transformDateToLong = { (it.year * 1_00L) + (it.monthNumber) }
+        transformDateToLong = { it.groupingYM() }
     ) {
         override fun previous(value: LocalDateTime): LocalDateTime = value.date.minus(DatePeriod(months = 1)).atTime(0, 0, 0)
         override fun next(value: LocalDateTime): LocalDateTime = value.date.plus(DatePeriod(months = 1)).atTime(0, 0, 0)

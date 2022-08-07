@@ -12,6 +12,8 @@ import kotlinx.datetime.toLocalDateTime
 import java.time.LocalTime
 
 fun LocalDateTime.groupingYMD(): Long = (year * 1_00_00L) + (monthNumber * 1_00L) + dayOfMonth
+fun LocalDateTime.groupingYD(): Long = (year * 1000L) + dayOfYear
+fun LocalDateTime.groupingYM(): Long = (year * 1_00L) + monthNumber
 
 fun now(): LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 fun nowInstant(): Instant = Clock.System.now()
