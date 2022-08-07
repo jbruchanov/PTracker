@@ -2,9 +2,11 @@ package com.scurab.ptracker.app.ext
 
 import androidx.compose.ui.geometry.Rect
 import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.SimplePriceItem
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.priceboard.PriceBoardState
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -43,4 +45,20 @@ fun List<PriceItem>.getHorizontalAxisText(index: Int, step: Int): String {
         else -> DateTimeFormats.dayNumber
     }
     return formatter.format(item.dateTime.toJavaLocalDateTime())
+}
+
+fun List<PriceItem>.average(dateTime: LocalDateTime? = null): PriceItem {
+    require(isNotEmpty()) { "Collection is empty" }
+    val assets = this.setOf { it.asset }
+    require(assets.size == 1) { "Invalid data, asset must be unique per collection, has:$assets" }
+
+    val first = first()
+    return PriceItem(0, assets.first(),
+        SimplePriceItem(
+            dateTime = dateTime ?: first.dateTime,
+            open = first.open,
+            close = last().close,
+            high = maxOf { it.high },
+            low = minOf { it.low }
+        ))
 }

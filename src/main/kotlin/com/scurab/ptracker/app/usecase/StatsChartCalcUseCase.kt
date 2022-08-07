@@ -3,6 +3,7 @@ package com.scurab.ptracker.app.usecase
 import com.scurab.ptracker.app.ext.setOf
 import com.scurab.ptracker.app.model.AppData
 import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.PriceHistoryChartData
 import com.scurab.ptracker.app.model.Point
 import com.scurab.ptracker.app.model.PriceItem
@@ -21,11 +22,12 @@ class StatsChartCalcUseCase(
     fun getLineChartData(
         transactions: List<Transaction>,
         prices: Map<Asset, List<PriceItem>>,
-        primaryCurrency: String
+        primaryCurrency: String,
+        dateGrouping: DateGrouping = DateGrouping.Day
     ): PriceHistoryChartData {
         val assets = transactions.setOf { it.asset }
         val doSumCrypto = assets.size == 1
-        val stats = statsCalculatorUseCase.calculateMarketDailyGains(transactions, prices, primaryCurrency, doSumCrypto)
+        val stats = statsCalculatorUseCase.calculateMarketDailyGains(transactions, prices, primaryCurrency, dateGrouping, doSumCrypto)
         if (stats.isEmpty()) return PriceHistoryChartData.Empty
         val minYItem = stats.minBy { it.minOfCostOrPrice }
         val minY = minYItem.minOfCostOrPrice.toFloat()

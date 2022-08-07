@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ChartStatsUiState {
+    var selectedGroupingKey by mutableStateOf(DateGrouping.Day)
     var selectedAsset by mutableStateOf<Asset?>(null)
     var assets by mutableStateOf(emptyList<Asset>())
     var chartUiState by mutableStateOf<LineChartUiState>(LineChartUiState.Loading)
@@ -26,6 +27,7 @@ class ChartStatsUiState {
 
 interface ChartStatsEventHandler {
     fun onSelectedAsset(asset: Asset)
+    fun onSelectedGrouping(grouping: DateGrouping)
 }
 
 class ChartStatsViewModel(
@@ -33,15 +35,16 @@ class ChartStatsViewModel(
     private val statsChartCalcUseCase: StatsChartCalcUseCase,
     private val appSettings: AppSettings
 ) : ViewModel(), ChartStatsEventHandler,
-    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.NoGrouping, null) {
+    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Day, null) {
 
     val uiState = ChartStatsUiState()
 
     init {
         launch(Dispatchers.IO) {
             appStateRepository.appData.combineWithGroupingAsset()
-                .map { (appData, grouping, asset) ->
+                .map { (appData, dateGrouping, asset) ->
                     uiState.assets = appData.ledger.assetsTradings
+                    uiState.selectedGroupingKey = dateGrouping
                     val lineChartState = try {
                         val primaryCoin = appSettings.primaryCoin
                         val selectedFiat = asset?.fiatCoinOrNull()?.item ?: primaryCoin
@@ -53,24 +56,32 @@ class ChartStatsViewModel(
                                 statsChartCalcUseCase.getLineChartData(
                                     appData.ledger.items.filter { asset == null || (it is Transaction.Trade && it.hasAsset(asset)) },
                                     appData.historyPrices,
-                                    selectedFiat
+                                    selectedFiat,
+                                    dateGrouping
                                 )
                             )
                         }
                     } catch (e: Exception) {
                         LineChartUiState.Error((e.message ?: "Null exception message") + "\n" + e.stackTraceToString())
                     }
-                    Tuple4(appData, grouping, asset, lineChartState)
+                    Tuple4(appData, dateGrouping, asset, lineChartState)
                 }
-                .collectLatest { (appData, _, asset, lineChartState) ->
+                .collectLatest { (appData, dateGrouping, asset, lineChartState) ->
                     uiState.selectedAsset = asset
                     uiState.assets = appData.ledger.assetsTradings
                     uiState.chartUiState = lineChartState
+                    uiState.selectedGroupingKey = dateGrouping
                 }
         }
     }
 
-    override fun onSelectedAsset(asset: Asset) : Unit {
+    override fun onSelectedAsset(asset: Asset): Unit {
         tryEmitAsset(asset.takeIf { uiState.selectedAsset != asset })
+    }
+
+    override fun onSelectedGrouping(grouping: DateGrouping) {
+        if (uiState.selectedGroupingKey != grouping) {
+            tryEmitGrouping(grouping)
+        }
     }
 }

@@ -46,6 +46,12 @@ interface IPriceItem : HasDateTime {
     }
 }
 
+//TODO: rename -> PriceItem
+data class SimplePriceItem(
+    override val dateTime: LocalDateTime, override val open: BigDecimal, override val close: BigDecimal, override val high: BigDecimal, override val low: BigDecimal
+) : IPriceItem
+
+//TODO: rename, has UI stuff
 data class PriceItem(
     val index: Int, override val asset: Asset, val item: IPriceItem
 ) : IPriceItem by item, WithCache by MapCache(), MarketPrice {

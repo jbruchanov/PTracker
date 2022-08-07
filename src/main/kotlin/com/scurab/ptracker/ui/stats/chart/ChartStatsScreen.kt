@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.LocalTexts
@@ -47,6 +49,17 @@ private fun ChartStatsScreen(
                     ToggleButton(text = asset.label,
                         isSelected = asset == uiState.selectedAsset,
                         onClick = { eventHandler.onSelectedAsset(asset) }
+                    )
+                    VerticalDivider()
+                }
+            }
+            Divider()
+            ToggleButtons {
+                val values = remember { DateGrouping.values().filter { it != DateGrouping.NoGrouping } }
+                values.forEach { grouping ->
+                    ToggleButton(text = grouping.name/*TODO:translate*/,
+                        isSelected = grouping == uiState.selectedGroupingKey,
+                        onClick = { eventHandler.onSelectedGrouping(grouping) }
                     )
                     VerticalDivider()
                 }

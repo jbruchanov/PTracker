@@ -1,6 +1,7 @@
 package com.scurab.ptracker.app.usecase
 
 import com.scurab.ptracker.app.ext.ZERO
+import com.scurab.ptracker.app.ext.average
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.convertTradePrice
 import com.scurab.ptracker.app.ext.getAmount
@@ -131,38 +132,45 @@ class StatsCalculatorUseCase(
 
     fun calculateMarketDailyGains(
         transactions: List<Transaction>,
-        prices: Map<Asset, List<PriceItem>>,
+        dayPricesPerAsset: Map<Asset, List<PriceItem>>,
         primaryCurrency: String,
+        dateGrouping: DateGrouping = DateGrouping.Day,
         doSumCrypto: Boolean = false
     ): List<GroupStatsSum> {
         if (transactions.isEmpty()) return emptyList()
 
-        require(prices.isNotEmpty()) { "Prices are empty" }
+        require(dayPricesPerAsset.isNotEmpty()) { "Prices are empty" }
         require(FiatCurrencies.contains(primaryCurrency)) { "Invalid primaryCurrency:${primaryCurrency}, not defined as Fiat" }
 
-        val grouping = DateGrouping.Day
-        //TODO, calculate average group price
-        val pricesGrouped = prices
+        require(dateGrouping != DateGrouping.NoGrouping) { "Invalid grouping:$dateGrouping" }
+        val pricesGrouped = if (dateGrouping == DateGrouping.Day) dayPricesPerAsset
+        else dayPricesPerAsset
+            .mapValues { (_, assetPrices) ->
+                assetPrices.groupBy { dateGrouping.toLongGroup(it.dateTime) }
+                    .mapValues { it.value.average(dateGrouping.toLocalDateGroup(it.value.first().dateTime)) }
+                    .values
+            }
+
         val latestCommonPriceDate = pricesGrouped.minOfOrNull { (_, v) -> v.maxOf { it.dateTime } }
 
         val transactionsPerGroup = transactions
-            .groupBy { grouping.toLongGroup(it.dateTime) }
+            .groupBy { dateGrouping.toLongGroup(it.dateTime) }
 
         val allPrices = pricesGrouped.values.flatten()
         val pricesByAssetByGroup = allPrices
-            .groupBy { grouping.toLongGroup(it.dateTime) }
+            .groupBy { dateGrouping.toLongGroup(it.dateTime) }
             .mapValues { it.value.associateBy { transactionsInGroup -> transactionsInGroup.asset } }
 
-        val startDate = grouping.previous(transactions.minOf { it.dateTime })
+        val startDate = dateGrouping.previous(transactions.minOf { it.dateTime })
         val endDate = latestCommonPriceDate ?: now()
 
         //groupKeys, aka value for each day we want to calculate stats for
         val groupKeys = mutableListOf<Pair<LocalDateTime, Long>>()
         var date = startDate
         while (date <= endDate) {
-            val key = grouping.toLongGroup(date)
+            val key = dateGrouping.toLongGroup(date)
             groupKeys.add(date to key)
-            date = grouping.next(date)
+            date = dateGrouping.next(date)
         }
 
         //region calculate values for each day using of statsDay prices
@@ -187,12 +195,12 @@ class StatsCalculatorUseCase(
 
         var latestGroupStatsSum: GroupStatsSum? = null
         val result = marketDataPerStatsGroup.map { (date, marketDataForStatsGroup) ->
-            val key = grouping.toLongGroup(date)
+            val key = dateGrouping.toLongGroup(date)
             val statsPerGroup = marketDataForStatsGroup.getGroupStatsSums(key, date)
             //replace empty values by last with value
             val latest = latestGroupStatsSum
             if (latest != null && !latest.isEmpty && statsPerGroup.isEmpty) {
-                latest.copy(groupingKey = grouping.toLongGroup(date))
+                latest.copy(groupingKey = dateGrouping.toLongGroup(date))
             } else {
                 latestGroupStatsSum = statsPerGroup
                 statsPerGroup
