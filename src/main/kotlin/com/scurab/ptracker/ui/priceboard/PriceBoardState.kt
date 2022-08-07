@@ -84,7 +84,7 @@ class PriceBoardState(
 
     var isTradingVolumeVisible by mutableStateOf(appSettings.isTradingVolumeVisible)
     var isTradingAverageVisible by mutableStateOf(appSettings.isTradingAverageVisible)
-    var isTradingTransactionsGroupingEnabled by mutableStateOf(appSettings.isTradingTransactionsGroupingEnabled)
+    var areTradingTransactionsVisible by mutableStateOf(appSettings.areTradingTransactionsVisible)
     val isDebugVisible = appSettings.debug
 
     private val cachingVisiblePriceItems = CacheRef<Rect, List<PriceItemUI>>()

@@ -192,7 +192,7 @@ class PriceBoardViewModel(
     }
 
     override fun onGroupingTransactionsClicked() {
-        uiState.priceBoardState.isTradingTransactionsGroupingEnabled = !uiState.priceBoardState.isTradingTransactionsGroupingEnabled
-        appSettings.isTradingTransactionsGroupingEnabled = uiState.priceBoardState.isTradingTransactionsGroupingEnabled
+        uiState.priceBoardState.areTradingTransactionsVisible = !uiState.priceBoardState.areTradingTransactionsVisible
+        appSettings.areTradingTransactionsVisible = uiState.priceBoardState.areTradingTransactionsVisible
     }
 }

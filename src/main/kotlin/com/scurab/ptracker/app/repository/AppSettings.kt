@@ -15,7 +15,7 @@ interface AppSettings {
     var debug: Boolean
     var isTradingVolumeVisible: Boolean
     var isTradingAverageVisible: Boolean
-    var isTradingTransactionsGroupingEnabled: Boolean
+    var areTradingTransactionsVisible: Boolean
 
     companion object {
         const val KeyLedgers = "ledgers"
@@ -34,5 +34,5 @@ class MemoryAppSettings : AppSettings {
     override var debug: Boolean = false
     override var isTradingVolumeVisible: Boolean = true
     override var isTradingAverageVisible: Boolean = true
-    override var isTradingTransactionsGroupingEnabled: Boolean = false
+    override var areTradingTransactionsVisible: Boolean = true
 }

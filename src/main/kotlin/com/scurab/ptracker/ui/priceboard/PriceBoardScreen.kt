@@ -178,7 +178,7 @@ fun PriceBoardScreen(vm: PriceBoardViewModel) {
                     VerticalDivider()
                     ToggleButton(Icons.Default.Menu, isSelected = priceBoardState.isTradingAverageVisible, onClick = { vm.onTradingAverageClicked() })
                     VerticalDivider()
-                    ToggleButton(Icons.Default.Hive, isSelected = priceBoardState.isTradingTransactionsGroupingEnabled, onClick = { vm.onGroupingTransactionsClicked() })
+                    ToggleButton(Icons.Default.Hive, isSelected = priceBoardState.areTradingTransactionsVisible, onClick = { vm.onGroupingTransactionsClicked() })
                     VerticalDivider()
                     val assets = vm.uiState.assets
                     assets.forEach { assetIcon ->
@@ -323,7 +323,7 @@ private fun BoxScope.PriceSelectedDayTransactionTypes(state: PriceBoardState) {
         val iconsPrices = state.transactionsPerPriceItem[item.dateTime]?.distinctIcons ?: return
 
         val offsetX = AppSizes.current.Space + Dp(state.verticalPriceBarWidth() / LocalDensity.current.density)
-        if (iconsPrices.size > 1) {
+        if (iconsPrices.size > 1 || (!state.areTradingTransactionsVisible && iconsPrices.isNotEmpty())) {
             Row(
                 modifier = Modifier.align(Alignment.TopEnd).offset(-offsetX, AppSizes.current.Space).background(DashboardColors.BackgroundAxis, AppTheme.Shapes.RoundedCornersSize2)
                     .padding(AppSizes.current.Space2)
@@ -375,11 +375,11 @@ private fun CandleTransactions(state: PriceBoardState) {
                 pointedIconPrice = iconPrice
                 return@iconPrices
             }
-            if (!state.isTradingTransactionsGroupingEnabled) {
+            if (state.areTradingTransactionsVisible) {
                 drawCandleTransactionIcon(state, priceItem, transaction, priceItemWidthHalf, ic, densityScale, painter)
             }
         }
-        if (iconsPrices?.isNotEmpty() == true && state.isTradingTransactionsGroupingEnabled) {
+        if (false/*iconsPrices?.isNotEmpty() == true && state.areTradingTransactionsVisible*/) {
             val ic = AppTheme.TransactionIcons.IconsMap.getValue(Transaction._TypeGrouping)
             val painter = rememberVectorPainter(image = ic.imageVector.get())
             drawCandleTransactionIcon(state, priceItem, transaction = null, priceItemWidthHalf, ic, densityScale, painter)

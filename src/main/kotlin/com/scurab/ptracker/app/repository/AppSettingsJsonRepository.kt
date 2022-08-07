@@ -51,7 +51,7 @@ class AppSettingsJsonRepository(
     override var debug by data::debug.notifying()
     override var isTradingVolumeVisible: Boolean by data::isTradingVolumeVisible.notifying()
     override var isTradingAverageVisible: Boolean by data::isTradingAverageVisible.notifying()
-    override var isTradingTransactionsGroupingEnabled: Boolean by data::isTradingTransactionsGroupingEnabled.notifying()
+    override var areTradingTransactionsVisible: Boolean by data::areTradingTransactionsVisible.notifying()
 
     companion object {
 
