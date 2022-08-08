@@ -1,7 +1,6 @@
 package com.scurab.ptracker.app.usecase
 
 import com.scurab.ptracker.app.ext.ZERO
-import com.scurab.ptracker.app.ext.average
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.convertTradePrice
 import com.scurab.ptracker.app.ext.getAmount

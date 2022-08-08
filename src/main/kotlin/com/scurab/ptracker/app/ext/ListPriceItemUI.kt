@@ -1,8 +1,8 @@
 package com.scurab.ptracker.app.ext
 
 import androidx.compose.ui.geometry.Rect
-import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.PriceItem
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.priceboard.PriceBoardState

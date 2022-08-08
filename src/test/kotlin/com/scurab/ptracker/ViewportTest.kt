@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import com.scurab.ptracker.app.model.DateGrouping
-import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.MemoryAppSettings
 import com.scurab.ptracker.ui.priceboard.PriceBoardState
 import org.junit.jupiter.api.Test

@@ -7,16 +7,9 @@ import com.scurab.ptracker.app.ext.isZero
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
 import com.scurab.ptracker.ui.DateTimeFormats
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toLocalDateTime
 import java.math.BigDecimal
 import java.math.RoundingMode
-import kotlin.random.Random
-import kotlin.time.Duration
 
 data class PriceItemUI(
     val index: Int, override val asset: Asset, val item: IPriceItem

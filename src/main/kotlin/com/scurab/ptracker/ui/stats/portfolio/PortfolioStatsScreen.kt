@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredWidthIn
@@ -49,13 +48,11 @@ import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.FiatCoin
-import com.scurab.ptracker.app.model.PriceHistoryChartData
 import com.scurab.ptracker.app.model.MarketPercentage
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.util.mock
 import com.scurab.ptracker.ui.AppColors
-import com.scurab.ptracker.ui.AppShapes
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.LocalTexts
