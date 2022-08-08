@@ -34,6 +34,7 @@ interface Texts {
     val FreeIncome: String
     val TotalBoughtOwned: String
     val PerUnit: String
+    val PerUnitWithGiveLost: String
     val Fees: String
     val NoPrimaryCurrencyChart: String
     val TextSample: String
@@ -74,6 +75,7 @@ object English : Texts {
     override val NoProfitableOutcome: String = "Giveaway/Lost"
     override val TotalBoughtOwned: String = "Total bought/owned"
     override val PerUnit: String = "Per Unit"
+    override val PerUnitWithGiveLost: String = "Per Unit + Give/Lost"
     override val Fees: String = "Fees"
     override val NoPrimaryCurrencyChart: String = "Set primary currency in settings to see this chart"
     override val TextSample: String = "TextSample"

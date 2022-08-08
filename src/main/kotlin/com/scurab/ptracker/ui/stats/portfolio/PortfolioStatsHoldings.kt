@@ -244,7 +244,7 @@ private fun RowItem(onClick: () -> Unit, index: Int, holdings: OnlineHoldingStat
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.width(ColumnWidths.Cost.scaled())) {
             TextCell(holdings.cost.hrs())
             HSpacer()
-            TextCell(holdings.costUnit.hrs(), color = AppColors.current.SecondaryVariant, style = AppTheme.TextStyles.TinyMonospace)
+            TextCell(holdings.costTotalUnit.hrs(), color = AppColors.current.SecondaryVariant, style = AppTheme.TextStyles.TinyMonospace)
         }
         TextCell(holdings.marketValueUnitPrice.takeIf { it.isNotZero() }?.hrs() ?: "", width = ColumnWidths.Cost.scaled(), color = AppColors.current.Secondary)
         TextCell(holdings.marketValue.takeIf { it.isNotZero() }?.hrs() ?: "", width = ColumnWidths.MarketValue.scaled())
@@ -370,10 +370,10 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
             }
             WSpacer4()
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
-                TextCell(texts.PerUnit, isMonoSpace = false, textAlign = TextAlign.Start)
+                TextCell(texts.PerUnitWithGiveLost, isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell("1.0", color = AppColors.current.Secondary)
-                TextCell(onlineHoldingStats.costTotalUnit.hrs())
+                TextCell(onlineHoldingStats.costUnit.hrs())
             }
             WSpacer4()
         }
