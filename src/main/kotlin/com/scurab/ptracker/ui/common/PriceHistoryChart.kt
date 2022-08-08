@@ -37,7 +37,7 @@ import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.stats.portfolio.statsContentBackground
 
 @Composable
-private fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
+fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
     Row(
         modifier = Modifier
             .offset(x = 0.dp, y = -AppSizes.current.Space)
@@ -62,7 +62,7 @@ private fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
 @Composable
 fun PriceHistoryChart(
     data: PriceHistoryChartData,
-    bottomText: @Composable BoxScope.(Int) -> Unit = { DefaultLabel(data.stats[it]) },
+    bottomContainer: @Composable BoxScope.(Int) -> Unit = { data.stats.getOrNull(it)?.let { stats -> DefaultLabel(stats) } },
     modifier: Modifier = Modifier
 ) {
     val sizes = AppSizes.current
@@ -71,7 +71,7 @@ fun PriceHistoryChart(
     val pathEffect1 = remember { PathEffect.dashPathEffect(floatArrayOf(spacePx, spacePx)) }
     val pathEffect2 = remember { PathEffect.dashPathEffect(floatArrayOf(spacePx, spacePx), spacePx) }
     val pathEffectLatest = remember { PathEffect.dashPathEffect(floatArrayOf(sizes.Space05.toPx(density), sizes.Space05.toPx(density))) }
-    val gradientColor = AppColors.current.RedGreen.default2If(data.hasProfit)
+    val gradientColor = AppColors.current.RedGreen.default2If(data.hasProfit).copy(alpha = 0.5f)
     val colorGreen = AppColors.current.CandleGreen
     val colorRed = AppColors.current.CandleRed
     val colorOrange = AppColors.current.Secondary
@@ -157,9 +157,7 @@ fun PriceHistoryChart(
                 strokeColor = colorOrange
             )
 
-            if (selectedIndex in data.stats.indices) {
-                bottomText(selectedIndex)
-            }
+            bottomContainer(selectedIndex)
         }
     }
 }
