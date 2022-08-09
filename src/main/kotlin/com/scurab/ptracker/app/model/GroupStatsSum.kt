@@ -49,7 +49,7 @@ data class GroupStatsSum(
     fun detail(texts: Texts) = buildAnnotatedString {
         append(AnnotatedString("${texts.MarketValue}: ${marketValue.hrs()}", spanStyle = SpanStyle(color = AppTheme.Colors.CandleGreen)))
         append(" ")
-        append(AnnotatedString("${texts.Cost}: ${cost.hrs()}", spanStyle = SpanStyle(color = AppTheme.Colors.CandleRed)))
+        append(AnnotatedString("${texts.Cost}: -${cost.abs().hrs()}", spanStyle = SpanStyle(color = AppTheme.Colors.CandleRed)))
         append(" ")
         append(percents)
         if (avgCryptoPrice.isNotZero()) {

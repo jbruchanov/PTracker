@@ -49,7 +49,7 @@ fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
         WSpacer2()
         Text(stats.marketValue.hrs(), style = AppTheme.TextStyles.SmallMonospace, maxLines = 1, color = AppColors.current.CandleGreen)
         WSpacer2()
-        Text("-${stats.cost.hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1, color = AppColors.current.CandleRed)
+        Text("-${stats.cost.abs().hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1, color = AppColors.current.CandleRed)
         WSpacer2()
         Text(stats.percents, style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
         if (stats.avgCryptoPrice.isNotZero()) {
