@@ -47,9 +47,9 @@ fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
     ) {
         Text(stats.formattedDateTime, style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
         WSpacer2()
-        Text(stats.marketValue.hrs(), style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
+        Text(stats.marketValue.hrs(), style = AppTheme.TextStyles.SmallMonospace, maxLines = 1, color = AppColors.current.CandleGreen)
         WSpacer2()
-        Text("-${stats.cost.hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
+        Text("-${stats.cost.hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1, color = AppColors.current.CandleRed)
         WSpacer2()
         Text(stats.percents, style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
         if (stats.avgCryptoPrice.isNotZero()) {
@@ -67,10 +67,10 @@ fun PriceHistoryChart(
 ) {
     val sizes = AppSizes.current
     val density = LocalDensity.current.maxValue()
-    val spacePx = remember(density) { sizes.Space.toPx(density) }
+    val spacePx = remember(density) { sizes.Space2.toPx(density) }
     val pathEffect1 = remember { PathEffect.dashPathEffect(floatArrayOf(spacePx, spacePx)) }
     val pathEffect2 = remember { PathEffect.dashPathEffect(floatArrayOf(spacePx, spacePx), spacePx) }
-    val pathEffectLatest = remember { PathEffect.dashPathEffect(floatArrayOf(sizes.Space05.toPx(density), sizes.Space05.toPx(density))) }
+    val pathEffectLatest = remember { PathEffect.dashPathEffect(floatArrayOf(sizes.Space.toPx(density), sizes.Space.toPx(density))) }
     val gradientColor = AppColors.current.RedGreen.default2If(data.hasProfit).copy(alpha = 0.5f)
     val colorGreen = AppColors.current.CandleGreen
     val colorRed = AppColors.current.CandleRed
