@@ -21,6 +21,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 class PortfolioStatsViewModel(
     private val appSettings: AppSettings,

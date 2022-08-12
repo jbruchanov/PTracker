@@ -7,11 +7,11 @@ import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.net.CryptoCompareClient
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
-import io.ktor.util.cio.writeChannel
-import io.ktor.utils.io.copyTo
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.util.cio.*
+import io.ktor.utils.io.*
 import java.io.File
 
 class LoadIconsUseCase(

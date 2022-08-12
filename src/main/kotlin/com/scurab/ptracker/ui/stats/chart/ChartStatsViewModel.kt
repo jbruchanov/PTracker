@@ -23,11 +23,13 @@ class ChartStatsUiState {
     var selectedAsset by mutableStateOf<Asset?>(null)
     var assets by mutableStateOf(emptyList<Asset>())
     var chartUiState by mutableStateOf<LineChartUiState>(LineChartUiState.Loading)
+    var historyDetailsVisible by mutableStateOf(false)
 }
 
 interface ChartStatsEventHandler {
     fun onSelectedAsset(asset: Asset)
     fun onSelectedGrouping(grouping: DateGrouping)
+    fun onExpandCollapseHistoryClick()
 }
 
 class ChartStatsViewModel(
@@ -73,6 +75,10 @@ class ChartStatsViewModel(
                     uiState.selectedGroupingKey = dateGrouping
                 }
         }
+    }
+
+    override fun onExpandCollapseHistoryClick() {
+        uiState.historyDetailsVisible = !uiState.historyDetailsVisible
     }
 
     override fun onSelectedAsset(asset: Asset): Unit {

@@ -46,6 +46,8 @@ interface Texts {
     val Quantity: String
     val Count: String
     val AvgPricePerCoin: String
+    val Today: String
+    val Yesterday: String
 
     val ErrUnableToOpenXlsFile: String
 }
@@ -90,6 +92,8 @@ object English : Texts {
     override val Sell: String = "Sell"
     override val Buy: String = "Buy"
     override val Count: String = "Count"
-    override val AvgPricePerCoin: String = "Average price per coin"
+    override val AvgPricePerCoin: String = "Avg/Coin"
+    override val Today: String = "Today"
+    override val Yesterday: String = "Yesterday"
     override val ErrUnableToOpenXlsFile = "Unable to open XLS(x) file"
 }

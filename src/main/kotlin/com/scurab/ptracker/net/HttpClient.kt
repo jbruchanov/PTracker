@@ -1,15 +1,12 @@
 package com.scurab.ptracker.net
 
 import com.scurab.ptracker.app.serialisation.JsonBridge
-import io.ktor.client.HttpClient
-import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.ProxyBuilder
-import io.ktor.client.engine.http
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logging
-import io.ktor.client.features.websocket.WebSockets
+import io.ktor.client.*
+import io.ktor.client.engine.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
+import io.ktor.client.features.logging.*
+import io.ktor.client.features.websocket.*
 
 fun defaultHttpClient(
     logLevel: LogLevel = LogLevel.ALL,

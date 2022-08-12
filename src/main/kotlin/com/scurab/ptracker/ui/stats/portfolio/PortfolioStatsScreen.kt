@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.coloredMarketPercentage
-import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.ext.pieChartData
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.model.Asset

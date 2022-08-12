@@ -2,6 +2,7 @@ package com.scurab.ptracker.app.ext
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
@@ -28,3 +29,5 @@ fun LocalDateTime.withDayOfWeek(targetDayOfWeek: java.time.DayOfWeek): LocalDate
 }
 
 fun LocalDateTime.atTimeZero() = this.date.atTime(0, 0, 0, 0)
+
+fun LocalDate.atDayOfMonth(dayOfMonth: Int) = LocalDate(year, month, dayOfMonth)

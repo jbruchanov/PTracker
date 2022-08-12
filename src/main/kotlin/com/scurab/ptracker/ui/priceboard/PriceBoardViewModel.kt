@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.event.KeyEvent
+import kotlin.collections.set
 
 class PriceBoardUiState(
     localDensity: Density,

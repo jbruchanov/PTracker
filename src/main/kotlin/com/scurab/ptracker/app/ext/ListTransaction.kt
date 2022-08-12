@@ -1,6 +1,12 @@
 package com.scurab.ptracker.app.ext
 
-import com.scurab.ptracker.app.model.*
+import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.FiatCurrencies
+import com.scurab.ptracker.app.model.MarketData
+import com.scurab.ptracker.app.model.MarketPrice
+import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.model.Tuple3
+import com.scurab.ptracker.app.model.Tuple5
 
 fun List<Transaction>.tradingAssets(primaryFiatCoin: String? = null): List<Asset> {
     val allAssets = setOf { it.asset }
