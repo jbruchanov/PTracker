@@ -1,16 +1,20 @@
 package com.scurab.ptracker.ui.stats.chart
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.DateGrouping
+import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.model.Tuple4
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
+import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.StatsChartCalcUseCase
 import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.ui.component.PriceTickingComponent
 import com.scurab.ptracker.ui.stats.GroupingAssetComponent
 import com.scurab.ptracker.ui.stats.LineChartUiState
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +28,7 @@ class ChartStatsUiState {
     var assets by mutableStateOf(emptyList<Asset>())
     var chartUiState by mutableStateOf<LineChartUiState>(LineChartUiState.Loading)
     var historyDetailsVisible by mutableStateOf(false)
+    val prices = mutableStateMapOf<Asset, MarketPrice>()
 }
 
 interface ChartStatsEventHandler {
@@ -35,9 +40,11 @@ interface ChartStatsEventHandler {
 class ChartStatsViewModel(
     private val appStateRepository: AppStateRepository,
     private val statsChartCalcUseCase: StatsChartCalcUseCase,
-    private val appSettings: AppSettings
+    private val appSettings: AppSettings,
+    pricesRepository: PricesRepository
 ) : ViewModel(), ChartStatsEventHandler,
-    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Day, null) {
+    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Day, null),
+    PriceTickingComponent by PriceTickingComponent.Default(pricesRepository) {
 
     val uiState = ChartStatsUiState()
 
@@ -75,6 +82,8 @@ class ChartStatsViewModel(
                     uiState.selectedGroupingKey = dateGrouping
                 }
         }
+
+        startPriceObserver(uiState.prices)
     }
 
     override fun onExpandCollapseHistoryClick() {

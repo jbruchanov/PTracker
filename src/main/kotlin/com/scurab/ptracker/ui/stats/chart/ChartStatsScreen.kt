@@ -39,6 +39,7 @@ import com.scurab.ptracker.ui.AppShapes
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.LocalTexts
+import com.scurab.ptracker.ui.common.AssetToggleButton
 import com.scurab.ptracker.ui.common.DefaultLabel
 import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.HSpacer05
@@ -77,8 +78,9 @@ private fun ChartStatsScreen(
         ) {
             ToggleButtons {
                 uiState.assets.forEach { asset ->
-                    ToggleButton(
-                        text = asset.label,
+                    AssetToggleButton(
+                        asset,
+                        uiState.prices[asset],
                         isSelected = asset == uiState.selectedAsset,
                         onClick = { eventHandler.onSelectedAsset(asset) })
                     VerticalDivider()

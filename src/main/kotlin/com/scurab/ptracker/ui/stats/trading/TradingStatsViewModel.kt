@@ -1,15 +1,19 @@
 package com.scurab.ptracker.ui.stats.trading
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.IDataTransformers
+import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.Tuple4
 import com.scurab.ptracker.app.repository.AppStateRepository
+import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.StatsDatesUseCase
 import com.scurab.ptracker.component.ViewModel
+import com.scurab.ptracker.ui.component.PriceTickingComponent
 import com.scurab.ptracker.ui.model.ITableData
 import com.scurab.ptracker.ui.model.ListTableData
 import com.scurab.ptracker.ui.stats.GroupingAssetComponent
@@ -25,6 +29,7 @@ class TradingStatsStatsUiState {
     var assets by mutableStateOf(emptyList<Asset>())
     var coins by mutableStateOf(emptyList<String>())
     var tableData by mutableStateOf(ITableData.Empty)
+    val prices = mutableStateMapOf<Asset, MarketPrice>()
 }
 
 interface TradingStatsEventHandler {
@@ -36,9 +41,12 @@ interface TradingStatsEventHandler {
 class TradingStatsViewModel(
     private val appStateRepository: AppStateRepository,
     private val statsUseCase: StatsDatesUseCase,
-    private val dataTransformers: IDataTransformers
+    private val dataTransformers: IDataTransformers,
+    pricesRepository: PricesRepository
 ) : ViewModel(), TradingStatsEventHandler,
-    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Month, null) {
+    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Month, null),
+    PriceTickingComponent by PriceTickingComponent.Default(pricesRepository) {
+
     val uiState = TradingStatsStatsUiState()
 
     init {
@@ -56,6 +64,8 @@ class TradingStatsViewModel(
                     uiState.tableData = ListTableData(tableData, StatsDatesUseCase.StatsItem.tableMetaData(grouping), dataTransformers)
                 }
         }
+
+        startPriceObserver(uiState.prices)
     }
 
     override fun onSelectedGrouping(grouping: DateGrouping) {

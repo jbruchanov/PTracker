@@ -26,6 +26,7 @@ import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.LocalTexts
+import com.scurab.ptracker.ui.common.AssetToggleButton
 import com.scurab.ptracker.ui.common.Divider
 import com.scurab.ptracker.ui.common.LazyTable
 import com.scurab.ptracker.ui.common.ToggleButton
@@ -55,10 +56,11 @@ private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: T
         ) {
             ToggleButtons {
                 uiState.assets.forEach { asset ->
-                    ToggleButton(text = asset.label,
+                    AssetToggleButton(
+                        asset,
+                        uiState.prices[asset],
                         isSelected = asset == uiState.selectedAsset,
-                        onClick = { eventHandler.onSelectedAsset(asset) }
-                    )
+                        onClick = { eventHandler.onSelectedAsset(asset) })
                     VerticalDivider()
                 }
             }
