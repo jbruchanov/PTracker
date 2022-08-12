@@ -68,6 +68,7 @@ import com.scurab.ptracker.ui.stats.LineChartUiState
 import com.scurab.ptracker.ui.stats.portfolio.PortfolioStatsUiState.Companion.MarketPercentageGroupingThreshold
 import stub.StubData
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 class PortfolioStatsUiState() {
     var isLoading by mutableStateOf(false)
@@ -190,7 +191,7 @@ private fun RowScope.StatsPieChart(state: PortfolioStatsUiState) {
                     WSpacer2()
                     Text(asset.cryptoLabelOnlyIf(true), maxLines = 1)
                 }
-                Text((perc.toBigDecimal() * 100.bd).hrs() + "%", textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.width(75.dp))
+                Text((perc.toBigDecimal() * 100.bd).setScale(2, RoundingMode.HALF_UP).toPlainString() + "%", textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.width(85.dp))
             }
             HSpacer()
             acc + perc
