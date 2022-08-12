@@ -1,12 +1,6 @@
 package com.scurab.ptracker.app.ext
 
-import com.scurab.ptracker.app.model.Asset
-import com.scurab.ptracker.app.model.FiatCurrencies
-import com.scurab.ptracker.app.model.MarketData
-import com.scurab.ptracker.app.model.MarketPrice
-import com.scurab.ptracker.app.model.Transaction
-import com.scurab.ptracker.app.model.Tuple3
-import com.scurab.ptracker.app.model.Tuple4
+import com.scurab.ptracker.app.model.*
 
 fun List<Transaction>.tradingAssets(primaryFiatCoin: String? = null): List<Asset> {
     val allAssets = setOf { it.asset }
@@ -43,10 +37,10 @@ fun List<Transaction>.totalMarketValue(
                 asset.isIdentity -> 1.bd
                 else -> requireNotNull(prices[asset] ?: prices[asset.flipCoins()]) { "Missing price for asset:$asset" }.price
             }
-            val fiatValue = (price * value.abs())
+            val fiatValue = (price * value)
             val cryptoAmount = if (isCoinCrypto) transaction.getAmount(coin) else 0.bd
-            Tuple4(isCoinCrypto, coin, fiatValue, cryptoAmount)
-        }.forEach { (isCoinCrypto, originalCoin, fiatValue, cryptoAmount) ->
+            Tuple5(isCoinCrypto, coin, fiatValue, fiatValue.abs(), cryptoAmount)
+        }.forEach { (isCoinCrypto, originalCoin, fiatValueOriginal, fiatValueAbs, cryptoAmount) ->
             if (isCoinCrypto && doSumCrypto) {
                 sumCrypto += cryptoAmount
             }
@@ -56,13 +50,13 @@ fun List<Transaction>.totalMarketValue(
                     +BTC -> value grows, cost 0
                     +GBP -> value 0, cost 0
                  */
-                transaction is Transaction.Income && isCoinCrypto -> sumValue += fiatValue
+                transaction is Transaction.Income && isCoinCrypto -> sumValue += fiatValueAbs
                 /*
                 Outcome:
                     -BTC -> value declines, cost 0
                     -GBP -> value 0, cost 0
                  */
-                transaction is Transaction.Outcome && isCoinCrypto -> sumValue -= fiatValue
+                transaction is Transaction.Outcome && isCoinCrypto -> sumValue -= fiatValueAbs
                 /*
                 Trade Buy ->
                   1) +BTC => value grows
@@ -72,9 +66,10 @@ fun List<Transaction>.totalMarketValue(
                   4) +GBP => cost declines
                  */
                 //1 & 3
-                transaction is Transaction.Trade && isCoinCrypto -> sumValue += (transaction.isCryptoBuy.signBd() * fiatValue)
+                //fiatValueOriginal positive for Buy, negative for sell (BTC/ETH)
+                transaction is Transaction.Trade && isCoinCrypto -> sumValue += fiatValueOriginal
                 //2 & 4
-                transaction is Transaction.Trade && !isCoinCrypto -> sumCost += (transaction.isCryptoBuy.signBd() * fiatValue)
+                transaction is Transaction.Trade && !isCoinCrypto -> sumCost += (transaction.isCryptoBuy.signBd() * fiatValueAbs)
             }
         }
 

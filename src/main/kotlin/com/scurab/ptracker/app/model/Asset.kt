@@ -81,12 +81,13 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
     val isCoin1Fiat by lazy { coin1.isNotBlank() && FiatCurrencies.contains(coin1) }
     val isCoin2Fiat by lazy { coin2.isNotBlank() && FiatCurrencies.contains(coin2) }
 
-    fun exchangeFiatAsset(coin: String): Asset {
+    fun exchangeFiatOrCoin1Asset(coin: String): Asset {
         val isCoin1Fiat = FiatCurrencies.contains(coin1)
         val isCoin2Fiat = FiatCurrencies.contains(coin2)
         return when {
             isCoin1Fiat && !isCoin2Fiat -> Asset(coin1, coin)
             !isCoin1Fiat && isCoin2Fiat -> Asset(coin2, coin)
+            !isCoin1Fiat && !isCoin2Fiat -> Asset(coin2, coin)
             else -> throw IllegalStateException("Invalid asset for replacement:$this, can't replace coin:$coin")
         }
     }

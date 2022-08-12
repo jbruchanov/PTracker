@@ -50,8 +50,8 @@ class CryptoCompareClient(
 
     suspend fun getPrices(assets: Collection<Asset>, primaryFiatCoin: FiatCoin? = null): List<CoinPrice> {
         if (assets.isEmpty()) return emptyList()
-        val fromSyms = assets.mapNotNull { it.fiatCoinOrNull()?.item }.distinct().joinToString(separator = ",")
-        val toCoins = (assets.mapNotNull { it.cryptoCoinOrNull()?.item } + primaryFiatCoin?.item).filterNotNull().distinct()
+        val fromSyms = assets.map { it.coin2 }.distinct().joinToString(separator = ",")
+        val toCoins = (assets.map { it.coin1 } + primaryFiatCoin?.item).filterNotNull().distinct()
         val toSyms = toCoins.joinToString(separator = ",")
         val rawData = httpClient.get<Map<String, Map<String, Double>>>(pricesUrl(toSyms, fromSyms))
         val result = rawData.mapNotNull { (c1, v) -> v.mapNotNull { (c2, price) -> CoinPrice.fromUnknownPairOrNull(c1, c2, price.toBigDecimal()) } }
@@ -83,11 +83,15 @@ class CryptoCompareClient(
                     when (val frame = incoming.receive()) {
                         is Frame.Text -> {
                             val message = frame.data.decodeToString()
-                            val obj = runCatching { jsonBridge.deserialize<CryptoCompareWsResponse>(message) }.getOrNull()
+                            val parse = runCatching { jsonBridge.deserialize<CryptoCompareWsResponse>(message) }
+                            val obj = parse.getOrNull()
                             when (obj) {
                                 is CryptoCompareWsResponse.Error -> throw IllegalStateException(message)
                                 null -> {
-                                    System.err.println("Parsing error?\njson:${message}")
+                                    System.err.println("Parsing error?\n" +
+                                            "json:${message}\n" +
+                                            "${parse.exceptionOrNull()?.message}\n" +
+                                            "${parse.exceptionOrNull()?.stackTraceToString()}")
                                 }
                                 else -> channel.trySend(obj)
                             }

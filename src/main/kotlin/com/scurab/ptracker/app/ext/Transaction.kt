@@ -80,7 +80,7 @@ fun Transaction.convertTradePrice(prices: Map<Asset, MarketPrice>, targetFiatCur
     if (this !is Transaction.Trade) return this
     if (this.asset.has(targetFiatCurrency)) return this
     if (!this.isCryptoTrade) return this
-    val exchangeAsset = asset.exchangeFiatAsset(targetFiatCurrency)
+    val exchangeAsset = asset.exchangeFiatOrCoin1Asset(targetFiatCurrency)
     val price = requireNotNull(prices[exchangeAsset] ?: prices[exchangeAsset.flipCoins()]) {
         "Unable to find exchangeAsset:$exchangeAsset in prices:$prices for trade:$this"
     }.let {

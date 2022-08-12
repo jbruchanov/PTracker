@@ -117,9 +117,9 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
 
     fun hasCoin(coin: String) = (this is HasIncome && this.buyAsset == coin) || (this is HasOutcome && this.sellAsset == coin)
 
-    val isCryptoBuy by lazy { this is Trade && !FiatCurrencies.contains(buyAsset) && FiatCurrencies.contains(sellAsset) }
-    val isCryptoSell by lazy { this is Trade && FiatCurrencies.contains(buyAsset) && !FiatCurrencies.contains(sellAsset) }
-    val isCryptoTrade by lazy { isCryptoBuy || isCryptoSell }
+    val isCryptoBuy by lazy { this is Trade && !FiatCurrencies.contains(buyAsset)/* && FiatCurrencies.contains(sellAsset)*/ }
+    val isCryptoSell by lazy { this is Trade && /*FiatCurrencies.contains(buyAsset) &&*/ !FiatCurrencies.contains(sellAsset) }
+    val isCryptoTrade by lazy { isCryptoBuy || isCryptoSell || isCryptoExchange }
     val isCryptoDeposit by lazy { this is HasIncome && type == TypeDeposit && !FiatCurrencies.contains(buyAsset) }
     val isCryptoWithdrawal by lazy { this is HasOutcome && type == TypeWithdrawal && !FiatCurrencies.contains(sellAsset) }
     val isCryptoExchange by lazy { this is Trade && !FiatCurrencies.contains(buyAsset) && !FiatCurrencies.contains(sellAsset) }

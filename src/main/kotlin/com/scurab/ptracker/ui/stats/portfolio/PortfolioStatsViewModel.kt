@@ -84,16 +84,16 @@ class PortfolioStatsViewModel(
     }
 
     private suspend fun recalcData(data: AppData, latestPrices: Map<Asset, MarketPrice>, tick: MarketPrice?) {
-        val ledger = data.ledgerStats
+        val stats = data.ledgerStats
         val onlineHoldingStats =
-            ledger.cryptoHoldings.map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, latestPrices[asset] ?: CoinPrice(asset, 0.bd)) }.sortedBy { it.asset }
+            stats.cryptoHoldings.map { (asset, holdings) -> OnlineHoldingStats(now(), holdings, latestPrices[asset] ?: CoinPrice(asset, 0.bd)) }.sortedBy { it.asset }
 
         val marketPercentage = onlineHoldingStats.coloredMarketPercentage()
         val pieChartData = marketPercentage.pieChartData2(MarketPercentageGroupingThreshold)
         //synchronization against the market ticker, sometimes it added a value
         withContext(Dispatchers.Main) {
             if (tick != null) {
-                ledger.cryptoHoldings[tick.asset]?.let { holdings ->
+                stats.cryptoHoldings[tick.asset]?.let { holdings ->
                     val indexOfFirst = uiState.cryptoHoldings.indexOfFirst { it.asset == tick.asset }
                     //missing asset might happen in case of changing ledgers
                     if (indexOfFirst != -1) {
@@ -107,8 +107,8 @@ class PortfolioStatsViewModel(
             uiState.marketPrices = latestPrices
             uiState.marketPercentage = marketPercentage
             uiState.pieChartData = pieChartData
-            uiState.coinSumPerExchange = ledger.coinSumPerExchange
-            uiState.feesPerCoin.putAll(ledger.feesPerCoin)
+            uiState.coinSumPerExchange = stats.coinSumPerExchange
+            uiState.feesPerCoin.putAll(stats.feesPerCoin)
         }
     }
 }

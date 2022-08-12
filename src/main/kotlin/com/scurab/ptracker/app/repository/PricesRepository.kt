@@ -61,7 +61,7 @@ class PricesRepository(
     suspend fun getPrices(assets: Collection<Asset>): List<CoinPrice> {
         val primaryCoin = appSettings.primaryCoin?.let { FiatCoin(it) }
         val primaryCoinAssets = primaryCoin?.let { primaryCurrency -> assets.fiatCoins().map { coin -> Asset(coin, primaryCurrency.item) } } ?: emptyList()
-        val request = (assets + primaryCoinAssets).distinct()
+        val request = (assets + primaryCoinAssets).distinct().sorted()
         if (_latestPrices.keys.containsAll(request)) {
             return _latestPrices.values.map { it.asCoinPrice() }
         }

@@ -39,61 +39,46 @@ class StatsCalculatorUseCase(
         ledger: Ledger, filter: Filter<Transaction>, prices: Map<Asset, MarketPrice> = emptyMap(), primaryCurrency: String? = appSettings.primaryCoin
     ): LedgerStats {
         //predata
-        val data = ledger.items.filter(filter).let { data ->
+        val realData = ledger.items
+        val convertedData = realData.filter(filter).let { data ->
             if (primaryCurrency == null) data else data.map { transaction ->
                 transaction.convertTradePrice(prices, primaryCurrency)
             }
         }
-        val allCoins = data.map { it.assets }.flatten().toSet()
+        val allCoins = convertedData.map { it.assets }.flatten().toSet()
         val fiatCoins = allCoins.filter { FiatCurrencies.contains(it) }.toSet()
-        val cryptoCoins = allCoins - fiatCoins
-        val tradingAssets = data.tradingAssets(primaryCurrency)
-        val exchanges = data.setOf { it.exchange }
-        val transactionTypes = data.setOf { it.type }
-        val transactionsByExchange = data.groupBy { it.exchange }
+        val tradingAssets = convertedData.tradingAssets(primaryCurrency)
+        val exchanges = convertedData.setOf { it.exchange }
         val sumOfCoins = allCoins.associateWith { coin ->
-            val src = if (FiatCurrencies.contains(coin)) ledger.items else data
-            src.filter { it.asset.has(coin) }.map { it.getAmount(coin) }.sumOf { it }
+            //must be real items, for example BTC-ETH exchange would be lost
+            realData.filter { it.asset.has(coin) }.map { it.getAmount(coin) }.sumOf { it }
         }
-        val feesPerCoin = allCoins.associateWith { coin -> data.sumOf { transaction -> transaction.getFees(coin) } }
+        val feesPerCoin = allCoins.associateWith { coin -> convertedData.sumOf { transaction -> transaction.getFees(coin) } }
         val assetsByExchange = exchanges.map { exchange -> exchange to exchange.normalizedExchange() }
             .associateBy(
                 keySelector = { ExchangeWallet(it.second) },
                 valueTransform = { (exchange, normalized) ->
-                    data.asSequence().filterIsInstance<Transaction.Trade>().filter { it.exchange == exchange }.filter { it.asset.isTradingAsset }.map { it.asset }.toSet().sorted()
+                    realData.asSequence().filterIsInstance<Transaction.Trade>().filter { it.exchange == exchange }.filter { it.asset.isTradingAsset }.map { it.asset }.toSet().sorted()
                 })
 
         //currently, what I have on exchange/wallet
-        val actualOwnership = tradingAssets.associateWith { asset -> CoinCalculation(asset, data.filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) }) }
+        //val actualOwnership = tradingAssets.associateWith { asset -> CoinCalculation(asset, data.filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) }) }
         //traded amounts => values what I'd have had if without losts/gifts/etc => value used for price per unit
         val tradedAmount = tradingAssets.associateWith { asset ->
-            CoinCalculation(asset, data.filterIsInstance<Transaction.Trade>().filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) })
+            CoinCalculation(asset, convertedData.filterIsInstance<Transaction.Trade>().filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) })
         }
         val spentFiatByCrypto = tradingAssets.associateWith { asset ->
-            CoinCalculation(CryptoCoin(asset.coin1), data.filter { it.hasOrIsRelatedAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })
+            CoinCalculation(CryptoCoin(asset.coin1), convertedData.filter { it.hasOrIsRelatedAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })
         }
         val cryptoHoldings = tradingAssets.filter { it.hasCryptoCoin }.associateWith { asset ->
             CryptoHoldings(
                 asset,
-                actualOwnership.getValue(asset).value,
+                sumOfCoins.getValue(asset.coin1),
                 tradedAmount.getValue(asset).value,
                 spentFiatByCrypto.getValue(asset).value.abs(),
                 feesPerCoin[asset.cryptoCoinOrNull()?.item] ?: ZERO
             )
         }
-
-        val exchangeSumOfCoins = transactionsByExchange.mapNotNull { (exchange, transactions) ->
-            ExchangeWallet(exchange) to allCoins
-                .map { anyCoin -> CoinCalculation(AnyCoin(anyCoin), transactions.sumOf { it.getAmount(anyCoin) }) }
-                .filter { it.value.isNotZero() }
-        }.filter { it.second.isNotEmpty() }.toMap()
-
-        val transactionsPerAssetPerType = transactionTypes.map { type -> type to data.filter { it.type == type } }
-            .map { (type, transactions) -> Triple(type, transactions.map { it.asset }.toSet(), transactions) }.map { (type, assets, transactions) ->
-                type to assets.map { asset ->
-                    asset to transactions.filter { it.hasOrIsRelatedAsset(asset) }.let { ts -> ts.sumOf { it.getAmount(asset.coin2) } to ts.sumOf { it.getAmount(asset.coin1) } }
-                }
-            }
 
         val coinSumPerExchange = allCoins.associateWith { coin ->
             //!!Original items must be used!!!, otherwise converted values would screw the real amounts
@@ -117,7 +102,7 @@ class StatsCalculatorUseCase(
                 }
         }
 
-        return LedgerStats(tradingAssets.toList(), assetsByExchange, feesPerCoin, cryptoHoldings, coinSumPerExchange, exchangeSumOfCoins, transactionsPerAssetPerType)
+        return LedgerStats(tradingAssets.toList(), assetsByExchange, feesPerCoin, cryptoHoldings, coinSumPerExchange)
     }
 
     private fun String.normalizedExchange(): String {

@@ -32,12 +32,10 @@ class LedgerStats(
     val assetsByExchange: Map<ExchangeWallet, List<Asset>>,
     val feesPerCoin: Map<String, BigDecimal>,
     val cryptoHoldings: Map<Asset, CryptoHoldings>,
-    val coinSumPerExchange: Map<String, List<CoinExchangeStats>>,
-    val exchangeSumOfCoins: Map<ExchangeWallet, List<CoinCalculation<AnyCoin>>>,
-    val transactionsPerAssetPerType: List<Pair<String, List<Pair<Asset, Pair<BigDecimal, BigDecimal>>>>>
+    val coinSumPerExchange: Map<String, List<CoinExchangeStats>>
 ) {
     companion object {
-        val Empty = LedgerStats(emptyList(), emptyMap(), emptyMap(), emptyMap(), emptyMap(), emptyMap(), emptyList())
+        val Empty = LedgerStats(emptyList(), emptyMap(), emptyMap(), emptyMap(), emptyMap())
     }
 }
 
