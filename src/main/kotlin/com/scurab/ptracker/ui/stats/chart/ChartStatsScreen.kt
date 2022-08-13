@@ -151,11 +151,11 @@ private fun LineChartContent(uiState: ChartStatsUiState, eventHandler: ChartStat
                                     .padding(AppSizes.current.Space2, AppSizes.current.Space)
                                     .animateContentSize()
                             ) {
-                                if (uiState.historyDetailsVisible) {
-                                    val history = remember { chartState.chartData.historyStats(texts) }
+                                val history = remember { chartState.chartData.historyStats(texts) }
+                                if (uiState.historyDetailsVisible && history.size > 1) {
                                     DetailRowsTable(history)
                                 } else {
-                                    DetailRow(texts.Today, today, staticWidth = uiState.historyDetailsVisible)
+                                    DetailRow(texts.Today, today)
                                 }
                             }
                             //KeyboardArrowUp + horizontal padding to keep it centered
@@ -169,12 +169,11 @@ private fun LineChartContent(uiState: ChartStatsUiState, eventHandler: ChartStat
 }
 
 @Composable
-private fun DetailRow(label: String, groupStatsSum: GroupStatsSum, staticWidth: Boolean = true) {
+private fun DetailRow(label: String, groupStatsSum: GroupStatsSum) {
     Row {
         Text(
             label,
             style = AppTheme.TextStyles.SmallMonospace,
-            modifier = Modifier.run { if (staticWidth) width(120.dp) else this },
             textAlign = TextAlign.End,
             maxLines = 1
         )
