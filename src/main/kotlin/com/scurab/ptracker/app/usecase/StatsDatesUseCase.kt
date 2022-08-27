@@ -69,7 +69,7 @@ class StatsDatesUseCase {
                         else -> TableCellSize.Exact(96.dp)
                     }
 
-                    1 -> TableCellSize.Exact(64.dp)
+                    1 -> TableCellSize.Exact(96.dp)
                     2 -> TableCellSize.Exact(128.dp)
                     3 -> TableCellSize.Exact(128.dp)
                     else -> TableCellSize.Exact(96.dp)
