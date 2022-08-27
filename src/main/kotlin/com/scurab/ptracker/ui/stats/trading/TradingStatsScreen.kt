@@ -94,7 +94,7 @@ private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: T
                 .fillMaxSize()
                 .zIndex(0f)
         ) {
-            val textAlignment = remember { listOf(Alignment.CenterStart, Alignment.Center, Alignment.CenterEnd, Alignment.Center) }
+            val textAlignment = remember { listOf(Alignment.CenterStart, Alignment.Center, Alignment.CenterEnd, Alignment.CenterEnd, Alignment.CenterEnd, Alignment.Center) }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -124,6 +124,7 @@ private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: T
                         modifier = Modifier
                             .fillMaxSize()
                             .wrapContentSize(textAlignment[column])
+                            .padding(horizontal = AppSizes.current.Padding)
                     )
                 }
             }

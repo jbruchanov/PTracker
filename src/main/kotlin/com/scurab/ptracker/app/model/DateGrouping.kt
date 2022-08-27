@@ -31,7 +31,7 @@ enum class DateGrouping(
         override fun next(value: LocalDateTime): LocalDateTime = (value.toLong() + 1L).toLocalDateTime()
     },
     Day(
-        dateTimeFormatter = DateTimeFormats.fullDate,
+        dateTimeFormatter = DateTimeFormats.fullDateWithDay,
         groupToLocalDateTime = { it.atTimeZero() },
         transformDateToLong = { it.groupingYMD() }
     ) {
