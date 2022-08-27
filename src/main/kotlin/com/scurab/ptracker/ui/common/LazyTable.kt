@@ -79,7 +79,7 @@ fun LazyTable(
     cell: @Composable (Int, Int) -> Unit = { rowIndex, columnIndex -> defaultLazyTableCell(data[rowIndex, columnIndex]) },
 ) {
 
-    val columnWidths = remember(data.rows) {
+    val columnWidths = remember(data.rows, data.columns) {
         Array(data.columns) { data.metaData.getColumnWidth(it, data) }
     }
     val requiredMinWidth = remember(columnWidths) {
