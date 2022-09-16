@@ -46,7 +46,7 @@ class StatsDatesUseCase {
 
         companion object {
             private val headers = listOf<Texts.() -> String>({ Date }, { Coin }, { Quantity }, { Count })
-            private val headers2 = listOf<Texts.() -> String>({ Date }, { Coin }, { Coin + "1" }, { Coin + "2" }, { "${Coin}2/${Coin}1" }, { Count })
+            private val headers2 = listOf<Texts.() -> String>({ Date }, { Asset }, { Coin + "1" }, { Coin + "2" }, { "${Coin}2/${Coin}1" }, { Count })
             fun tableMetaData(grouping: DateGrouping, asset: Asset?) = object : ITableMetaData {
                 override val columns: Int = when {
                     asset?.isTradingAsset != true -> headers.size
@@ -70,7 +70,7 @@ class StatsDatesUseCase {
                     }
 
                     1 -> TableCellSize.Exact(96.dp)
-                    2 -> TableCellSize.Exact(128.dp)
+                    2 -> TableCellSize.Exact(96.dp)
                     3 -> TableCellSize.Exact(128.dp)
                     else -> TableCellSize.Exact(96.dp)
                 }
