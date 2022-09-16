@@ -49,6 +49,10 @@ class ChartStatsViewModel(
     val uiState = ChartStatsUiState()
 
     init {
+        appSettings.statsSelectedAsset?.let {
+            uiState.selectedAsset = it
+            tryEmitAsset(it)
+        }
         launch(Dispatchers.IO) {
             appStateRepository.appData.combineWithGroupingAsset()
                 .map { (appData, dateGrouping, asset) ->
@@ -90,8 +94,10 @@ class ChartStatsViewModel(
         uiState.historyDetailsVisible = !uiState.historyDetailsVisible
     }
 
-    override fun onSelectedAsset(asset: Asset): Unit {
-        tryEmitAsset(asset.takeIf { uiState.selectedAsset != asset })
+    override fun onSelectedAsset(asset: Asset) {
+        val newAsset = asset.takeIf { uiState.selectedAsset != asset }
+        tryEmitAsset(newAsset)
+        appSettings.statsSelectedAsset = newAsset
     }
 
     override fun onSelectedGrouping(grouping: DateGrouping) {

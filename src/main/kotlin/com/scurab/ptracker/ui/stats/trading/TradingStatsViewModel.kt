@@ -9,6 +9,7 @@ import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.IDataTransformers
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.Tuple4
+import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
 import com.scurab.ptracker.app.usecase.StatsDatesUseCase
@@ -42,6 +43,7 @@ class TradingStatsViewModel(
     private val appStateRepository: AppStateRepository,
     private val statsUseCase: StatsDatesUseCase,
     private val dataTransformers: IDataTransformers,
+    private val appSettings: AppSettings,
     pricesRepository: PricesRepository
 ) : ViewModel(), TradingStatsEventHandler,
     GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Month, null),
@@ -50,6 +52,10 @@ class TradingStatsViewModel(
     val uiState = TradingStatsStatsUiState()
 
     init {
+        appSettings.statsSelectedAsset?.let {
+            uiState.selectedAsset = it
+            tryEmitAsset(it)
+        }
         launch(Dispatchers.IO) {
             appStateRepository.appData
                 .combineWithGroupingAsset()
@@ -73,7 +79,9 @@ class TradingStatsViewModel(
     }
 
     override fun onSelectedAsset(asset: Asset) {
-        tryEmitAsset(asset.takeIf { uiState.selectedAsset != asset })
+        val newAsset = asset.takeIf { uiState.selectedAsset != asset }
+        tryEmitAsset(newAsset)
+        appSettings.statsSelectedAsset = newAsset
     }
 
     override fun onSelectedCoin(coin: String) {

@@ -45,6 +45,7 @@ class AppSettingsJsonRepository(
     override var cryptoCompareApiKey: String? by data::cryptoCompareApiKey.notifying()
     override var fontScale: Float by data::fontScale.notifying()
     override var lastSelectedAsset: Asset? by data::lastSelectedAsset.notifying()
+    override var statsSelectedAsset: Asset? by data::statsSelectedAsset.notifying()
     override var latestLedger: String? by data::latestLedger.notifying()
     override var ledgers: List<String>? by data::ledgers.notifying()
     override var primaryCoin by data::primaryCoin.notifying()

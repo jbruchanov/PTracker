@@ -9,6 +9,7 @@ interface AppSettings {
     var fontScale: Float
     var cryptoCompareApiKey: String?
     var lastSelectedAsset: Asset?
+    var statsSelectedAsset: Asset?
     var latestLedger: String?
     var ledgers: List<String>?
     var primaryCoin: String?
@@ -28,6 +29,7 @@ class MemoryAppSettings : AppSettings {
     override var cryptoCompareApiKey: String? = null
     override var fontScale: Float = 1f
     override var lastSelectedAsset: Asset? = null
+    override var statsSelectedAsset: Asset? = null
     override var latestLedger: String? = null
     override var ledgers: List<String>? = null
     override var primaryCoin: String? = null
