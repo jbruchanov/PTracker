@@ -8,6 +8,7 @@ import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.net.CryptoCompareClient
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.util.cio.*
@@ -36,7 +37,9 @@ class LoadIconsUseCase(
                 } else {
                     kotlin.runCatching { cryptoCompareClient.getCoinData(c).data[c]?.fullImageUrl }.getOrNull()
                 }
-                fullImageUrl?.let { kotlin.runCatching { httpClient.get<HttpResponse>(it).content.copyTo(f.writeChannel()) }.getOrNull() }
+                fullImageUrl?.let { kotlin.runCatching {
+                    httpClient.prepareGet(urlString = it).execute().body<ByteReadChannel>().copyTo(f.writeChannel()) }.getOrNull()
+                }
                 Triple(c, f, fullImageUrl)
             }
         val downloadsMap = result.associateBy(keySelector = { it.first }, valueTransform = { it.second })

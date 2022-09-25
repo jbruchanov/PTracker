@@ -13,10 +13,11 @@ import com.scurab.ptracker.net.model.CryptoCompareWssSubscription
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.ui.model.Validity
 import io.ktor.client.*
-import io.ktor.client.features.websocket.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.http.cio.websocket.*
+import io.ktor.websocket.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,11 +42,11 @@ class CryptoCompareClient(
     }
 
     suspend fun getHistoryData(cryptoSymbol: String, fiatSymbol: String, limit: Int = 1000, toTs: Long = -1): CryptoCompareResult<CryptoCompareHistoryData> {
-        return httpClient.get(historyUrl(cryptoSymbol, fiatSymbol, limit, toTs))
+        return httpClient.get(historyUrl(cryptoSymbol, fiatSymbol, limit, toTs)).body()
     }
 
     suspend fun getCoinData(cryptoSymbol: String): CryptoCompareResult<Map<String, CryptoCompareCoinDetail>> {
-        return httpClient.get(coinUrl(cryptoSymbol))
+        return httpClient.get(coinUrl(cryptoSymbol)).body()
     }
 
     suspend fun getPrices(assets: Collection<Asset>, primaryFiatCoin: FiatCoin? = null): List<CoinPrice> {
@@ -53,7 +54,7 @@ class CryptoCompareClient(
         val fromSyms = assets.map { it.coin2 }.distinct().joinToString(separator = ",")
         val toCoins = (assets.map { it.coin1 } + primaryFiatCoin?.item).filterNotNull().distinct()
         val toSyms = toCoins.joinToString(separator = ",")
-        val rawData = httpClient.get<Map<String, Map<String, Double>>>(pricesUrl(toSyms, fromSyms))
+        val rawData = httpClient.get(pricesUrl(toSyms, fromSyms)).body<Map<String, Map<String, Double>>>()
         val result = rawData.mapNotNull { (c1, v) -> v.mapNotNull { (c2, price) -> CoinPrice.fromUnknownPairOrNull(c1, c2, price.toBigDecimal()) } }
             .flatten()
         return result

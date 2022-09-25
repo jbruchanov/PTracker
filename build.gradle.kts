@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    val ktorVersion = "1.6.8"
+    val ktorVersion = "2.1.1"
     val logbackVersion = "1.4.1"
     val ktSerialization = "1.4.0"
     val junit = "5.9.0"
@@ -43,8 +43,9 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
-    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-client-websockets:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$ktSerialization")
 
     implementation("io.insert-koin:koin-core:$koinVersion")
