@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.serialization") version "1.7.10"
-    id("org.jetbrains.compose") version "1.2.0-alpha01-dev745"
+    id("org.jetbrains.compose") version "1.2.0-beta01"
 }
 
 group = "com.scurab"
@@ -19,13 +19,13 @@ repositories {
 
 dependencies {
     val ktorVersion = "1.6.8"
-    val logbackVersion = "1.2.11"
-    val ktSerialization = "1.3.2"
-    val junit = "5.8.2"
-    val koinVersion = "3.1.5"
-    val composeVersion = "1.2.0-alpha01-dev683"
-    val mockKVersion = "1.12.3"
-    val coroutines = "1.6.1"
+    val logbackVersion = "1.4.1"
+    val ktSerialization = "1.4.0"
+    val junit = "5.9.0"
+    val koinVersion = "3.2.2"
+    val composeVersion = "1.2.0-beta01"
+    val mockKVersion = "1.12.8"
+    val coroutines = "1.6.4"
 
     implementation(compose.desktop.currentOs)
     runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
@@ -36,7 +36,7 @@ dependencies {
     implementation("org.jetbrains.compose.material:material-icons-core-desktop:$composeVersion")
     implementation("org.jetbrains.compose.material:material-icons-extended-desktop:$composeVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("org.apache.poi:poi-ooxml:5.2.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$ktSerialization")
 
