@@ -36,7 +36,7 @@ sealed class TableCellSize {
 fun Modifier.height(tableCellSize: TableCellSize.Exact): Modifier = height(tableCellSize.size * LocalDensity.current.fontScale)
 
 context(RowScope)
-        @Composable
+@Composable
 fun Modifier.width(tableCellSize: TableCellSize): Modifier = when (tableCellSize) {
     is TableCellSize.Exact -> defaultMinSize(minWidth = tableCellSize.minWidth * LocalDensity.current.fontScale).width(tableCellSize.size * LocalDensity.current.fontScale)
     is TableCellSize.Percents -> this
