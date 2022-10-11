@@ -71,7 +71,10 @@ class ChartStatsViewModel(
                                     appData.historyPrices,
                                     selectedFiat,
                                     dateGrouping
-                                )
+                                ),
+                                appData.historyPrices[asset]
+                                    .takeIf { dateGrouping == DateGrouping.Day }
+                                    ?.associateBy { it.dateTime.date }
                             )
                         }
                     } catch (e: Exception) {

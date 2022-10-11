@@ -58,7 +58,10 @@ class PortfolioStatsViewModel(
                         uiState.portfolioChartUiState = LineChartUiState.NoPrimaryCurrency
                     } else {
                         uiState.portfolioChartUiState = LineChartUiState.Loading
-                        uiState.portfolioChartUiState = LineChartUiState.Data(statsChartCalcUseCase.getLineChartData(data, primaryCoin))
+                        uiState.portfolioChartUiState = LineChartUiState.Data(
+                            statsChartCalcUseCase.getLineChartData(data, primaryCoin),
+                            singleTradingAssetsDailyPrices = null/*global chart, no single asset selection*/
+                        )
                     }
                 } catch (e: Exception) {
                     uiState.portfolioChartUiState = LineChartUiState.Error((e.message ?: "Null exception message") + "\n" + e.stackTraceToString())

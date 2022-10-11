@@ -29,6 +29,7 @@ import com.scurab.ptracker.app.ext.maxValue
 import com.scurab.ptracker.app.ext.toPx
 import com.scurab.ptracker.app.model.GroupStatsSum
 import com.scurab.ptracker.app.model.PriceHistoryChartData
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.component.compose.onMouseMove
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppShapes
@@ -37,7 +38,7 @@ import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.stats.portfolio.statsContentBackground
 
 @Composable
-fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
+fun BoxScope.DefaultLabel(stats: GroupStatsSum, dayPriceItemUI: PriceItemUI?) {
     Row(
         modifier = Modifier
             .offset(x = 0.dp, y = -AppSizes.current.Space)
@@ -47,6 +48,10 @@ fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
     ) {
         Text(stats.formattedDateTime, style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
         WSpacer2()
+        dayPriceItemUI?.let { priceItemUI ->
+            Text(priceItemUI.price.hrs(), style = AppTheme.TextStyles.SmallMonospace, maxLines = 1)
+            WSpacer2()
+        }
         Text(stats.marketValue.hrs(), style = AppTheme.TextStyles.SmallMonospace, maxLines = 1, color = AppColors.current.CandleGreen)
         WSpacer2()
         Text("-${stats.cost.abs().hrs()}", style = AppTheme.TextStyles.SmallMonospace, maxLines = 1, color = AppColors.current.CandleRed)
@@ -62,7 +67,7 @@ fun BoxScope.DefaultLabel(stats: GroupStatsSum) {
 @Composable
 fun PriceHistoryChart(
     data: PriceHistoryChartData,
-    bottomContainer: @Composable BoxScope.(Int) -> Unit = { data.stats.getOrNull(it)?.let { stats -> DefaultLabel(stats) } },
+    bottomContainer: @Composable BoxScope.(Int) -> Unit = { data.stats.getOrNull(it)?.let { stats -> DefaultLabel(stats, null) } },
     modifier: Modifier = Modifier
 ) {
     val sizes = AppSizes.current

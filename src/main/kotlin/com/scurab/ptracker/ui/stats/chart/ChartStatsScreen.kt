@@ -129,8 +129,8 @@ private fun LineChartContent(uiState: ChartStatsUiState, eventHandler: ChartStat
                 ) {
                     val stats = chartState.chartData.stats
 
-                    stats.getOrNull(index)?.let {
-                        this@Box.DefaultLabel(it)
+                    stats.getOrNull(index)?.let { statsItem ->
+                        this@Box.DefaultLabel(statsItem, chartState.singleTradingAssetsDailyPrices?.get(statsItem.localDateTime.date))
                     }
                     val rotation by animateFloatAsState(if (uiState.historyDetailsVisible) 180f else 0f)
                     val today = stats.lastOrNull()
