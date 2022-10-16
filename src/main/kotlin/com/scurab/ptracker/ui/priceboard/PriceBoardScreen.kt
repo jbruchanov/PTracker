@@ -241,8 +241,7 @@ private fun PriceBoardScreen(state: PriceBoardState, eventDelegate: PriceBoardEv
     Box(
         modifier = Modifier.fillMaxSize().pointerHoverIcon(state.mouseIcon).background(AppColors.current.BackgroundContent).onSizeChange(state).onMouseMove(state)
             .onMouseDrag(state)
-            //disabled, doesn't work properly with dragDetection
-            //.onDoubleTap(state)
+            .onDoubleTap(state)
             .onWheelScroll(state)
     ) {
         Grid(state)
