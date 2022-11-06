@@ -58,7 +58,8 @@ class StatsCalculatorUseCase(
             .associateBy(
                 keySelector = { ExchangeWallet(it.second) },
                 valueTransform = { (exchange, normalized) ->
-                    realData.asSequence().filterIsInstance<Transaction.Trade>().filter { it.exchange == exchange }.filter { it.asset.isTradingAsset }.map { it.asset }.toSet().sorted()
+                    realData.asSequence().filterIsInstance<Transaction.Trade>().filter { it.exchange == exchange }.filter { it.asset.isTradingAsset }.map { it.asset }.toSet()
+                        .sorted()
                 })
 
         //currently, what I have on exchange/wallet
@@ -68,7 +69,9 @@ class StatsCalculatorUseCase(
             CoinCalculation(asset, convertedData.filterIsInstance<Transaction.Trade>().filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) })
         }
         val spentFiatByCrypto = tradingAssets.associateWith { asset ->
-            CoinCalculation(CryptoCoin(asset.coin1), convertedData.filter { it.hasOrIsRelatedAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })
+            CoinCalculation(
+                CryptoCoin(asset.coin1),
+                convertedData.filter { it.hasOrIsRelatedAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })
         }
         val cryptoHoldings = tradingAssets.filter { it.hasCryptoCoin }.associateWith { asset ->
             CryptoHoldings(
@@ -126,7 +129,8 @@ class StatsCalculatorUseCase(
         require(FiatCurrencies.contains(primaryCurrency)) { "Invalid primaryCurrency:${primaryCurrency}, not defined as Fiat" }
         require(dateGrouping != DateGrouping.NoGrouping) { "Invalid grouping:$dateGrouping" }
 
-        val latestCommonPriceDate = pricesGrouped.minOfOrNull { (_, v) -> v.maxOf { it.dateTime } }
+        val now = now()
+        val latestCommonPriceDate = pricesGrouped.minOfOrNull { (_, v) -> v.maxOfOrNull { it.dateTime } ?: now }
 
         val transactionsPerGroup = transactions
             .groupBy { dateGrouping.toLongGroup(it.dateTime) }
@@ -160,9 +164,9 @@ class StatsCalculatorUseCase(
                     .map { startIndex ->
                         //day of transactions in day before statsGroup
                         val historyGroup = groupKeys[startIndex].second
-                        val marketData = transactionsPerGroup[historyGroup]
-                            ?.totalMarketValue(pricesForStatsGroup, primaryCurrency, doSumCrypto)
-                            ?: MarketData.Empty
+                        val marketData = kotlin.runCatching {
+                            transactionsPerGroup[historyGroup]?.totalMarketValue(pricesForStatsGroup, primaryCurrency, doSumCrypto)
+                        }.onFailure { println(it.printStackTrace()) }.getOrNull() ?: MarketData.Empty
                         marketData
                     }
                 statsGroupDate to marketDataForStatsGroup
