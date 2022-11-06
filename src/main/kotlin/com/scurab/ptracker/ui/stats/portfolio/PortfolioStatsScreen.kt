@@ -89,7 +89,6 @@ class PortfolioStatsUiState() {
     }
 }
 
-
 interface StatsEventHandler {
     fun onHoldingsRowClicked(index: Int, onlineHoldingStats: OnlineHoldingStats)
     fun onFiatRowClicked(fiatCoin: FiatCoin)
@@ -107,9 +106,11 @@ fun Modifier.statsContentBackground(shape: Shape = AppTheme.Shapes.RoundedCorner
 fun PortfolioStatsScreen(vm: PortfolioStatsViewModel) {
     Column {
         val state = vm.uiState
-        Text(text = LocalTexts.current.Stats + (state.primaryCoin?.let { " - $it" } ?: ""),
+        Text(
+            text = LocalTexts.current.Stats + (state.primaryCoin?.let { " - $it" } ?: ""),
             style = AppTheme.TextStyles.Header,
-            modifier = Modifier.padding(AppSizes.current.Space2))
+            modifier = Modifier.padding(AppSizes.current.Space2)
+        )
         Box(modifier = Modifier.padding(AppSizes.current.Space2)) {
             PortfolioStatsScreen(vm.uiState, vm)
         }
@@ -190,14 +191,18 @@ private fun RowScope.StatsPieChart(state: PortfolioStatsUiState) {
                     WSpacer2()
                     Text(asset.cryptoLabelOnlyIf(true), maxLines = 1)
                 }
-                Text((perc.toBigDecimal() * 100.bd).setScale(2, RoundingMode.HALF_UP).toPlainString() + "%", textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.width(85.dp))
+                Text(
+                    (perc.toBigDecimal() * 100.bd).setScale(2, RoundingMode.HALF_UP).toPlainString() + "%",
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                    modifier = Modifier.width(85.dp)
+                )
             }
             HSpacer()
             acc + perc
         }
     }
 }
-
 
 @Preview
 @Composable

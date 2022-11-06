@@ -34,7 +34,6 @@ sealed class AppNavTokens<T : NavArgs> : NavToken<T> {
     object Main : AppNavTokens<EmptyNavArgs>()
 }
 
-
 sealed class NavigationScope : Qualifier {
     override val value: QualifierValue = this.javaClass.name
     object App : NavigationScope()

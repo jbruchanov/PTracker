@@ -96,7 +96,6 @@ fun AppScreen(uiState: AppUiState, eventHandler: StartEventHandler) {
     }
 }
 
-
 @Composable
 @Preview
 private fun AppScreenPreview() {

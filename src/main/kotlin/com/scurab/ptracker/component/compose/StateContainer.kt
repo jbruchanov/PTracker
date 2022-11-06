@@ -7,7 +7,9 @@ data class StateContainer<T>(
     val default2: T = default
 ) {
     fun get(
-        isEnabled: Boolean = true, isSelected: Boolean = false, isEven: Boolean = false
+        isEnabled: Boolean = true,
+        isSelected: Boolean = false,
+        isEven: Boolean = false
     ) = when {
         isEnabled && !isSelected && isEven -> default
         isEnabled && !isSelected && !isEven -> default2

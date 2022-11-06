@@ -18,7 +18,9 @@ interface NavSpecs {
 }
 
 class DefaultNavSpecs(
-    items: List<NavRecord<*, *>>, private val componentFactory: ComponentFactory, private val appNavArgs: AppNavArgs
+    items: List<NavRecord<*, *>>,
+    private val componentFactory: ComponentFactory,
+    private val appNavArgs: AppNavArgs
 ) : NavSpecs, NavController {
     private val navItems = items.toList()
     private val stack = mutableStateListOf<ActiveNavRecord<*>>()

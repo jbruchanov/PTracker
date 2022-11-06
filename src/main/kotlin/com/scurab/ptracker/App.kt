@@ -64,7 +64,6 @@ object App : KoinComponent {
     }
 
     fun exitApplication() {
-
     }
 }
 

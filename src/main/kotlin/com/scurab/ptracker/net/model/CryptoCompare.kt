@@ -78,7 +78,7 @@ data class CryptoCompareWssSubscription(
     @SerialName("subs") val subs: List<String>,
 ) {
     constructor(args: List<CryptoCompareWssSubscriptionArg>) : this(
-        "SubAdd", args.map { (exchange, asset) -> "2~${exchange}~${asset.coin1}~${asset.coin2}" }
+        "SubAdd", args.map { (exchange, asset) -> "2~$exchange~${asset.coin1}~${asset.coin2}" }
     )
 }
 

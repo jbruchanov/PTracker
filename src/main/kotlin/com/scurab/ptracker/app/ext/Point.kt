@@ -31,6 +31,6 @@ fun Point.transformNormToViewPort(rect: Rect): Point {
 }
 
 fun Point.requireNormalized() {
-    require(x in 0f..1f) { "Invalid x:${x}, should be normalized" }
-    require(y in 0f..1f) { "Invalid y:${y}, should be normalized" }
+    require(x in 0f..1f) { "Invalid x:$x, should be normalized" }
+    require(y in 0f..1f) { "Invalid y:$y, should be normalized" }
 }

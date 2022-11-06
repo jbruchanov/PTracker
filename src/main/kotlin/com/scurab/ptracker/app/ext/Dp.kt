@@ -24,5 +24,4 @@ fun TextUnit.toPx(provider: ProvidableCompositionLocal<Density>): Float {
 @Composable
 fun Dp.scaled(scale: Float = LocalDensity.current.maxValue()) = this * scale
 
-
 fun Int.toDp(density: Float) = Dp(this / density)

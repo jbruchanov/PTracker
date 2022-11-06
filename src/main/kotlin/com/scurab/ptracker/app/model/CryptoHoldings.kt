@@ -23,13 +23,17 @@ data class CryptoHoldings(
     val nonProfitableOutcome = (actualCryptoBalance.align - totalCryptoBalance).min(ZERO).abs()
 
     fun realtimeStats(marketPrice: MarketPrice): OnlineHoldingStats {
-        require(asset == marketPrice.asset) { "Invalid marketPrice:${marketPrice.asset}, expected:${asset}" }
+        require(asset == marketPrice.asset) { "Invalid marketPrice:${marketPrice.asset}, expected:$asset" }
         return OnlineHoldingStats(now(), this, marketPrice)
     }
 
     override fun toString(): String {
-        return "Holdings(asset=$asset, actualCryptoBalance=$actualCryptoBalance, totalCryptoBalance=$totalCryptoBalance, cost=$cost, pricePerUnit=$pricePerUnit, actualPricePerUnit=$actualPricePerUnit, freeIncome=$freeIncome, nonProfitableOutcome=$nonProfitableOutcome)"
+        return "Holdings(asset=$asset, " +
+            "actualCryptoBalance=$actualCryptoBalance, " +
+            "totalCryptoBalance=$totalCryptoBalance, " +
+            "cost=$cost, pricePerUnit=$pricePerUnit, " +
+            "actualPricePerUnit=$actualPricePerUnit, " +
+            "freeIncome=$freeIncome, " +
+            "nonProfitableOutcome=$nonProfitableOutcome)"
     }
 }
-
-

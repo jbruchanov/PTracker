@@ -9,7 +9,6 @@ import com.scurab.ptracker.app.repository.PricesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import java.io.File
 
 class LoadDataUseCase(
     private val loadLedgerUseCase: LoadLedgerUseCase,

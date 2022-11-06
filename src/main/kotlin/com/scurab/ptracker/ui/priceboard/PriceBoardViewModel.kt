@@ -139,7 +139,7 @@ class PriceBoardViewModel(
 
     override fun onTransactionClicked(item: Transaction, doubleClick: Boolean) {
         val state = uiState.priceBoardState
-        val priceItem = requireNotNull(item.priceItem) { "item.priceItem:${item}" }
+        val priceItem = requireNotNull(item.priceItem) { "item.priceItem:$item" }
         if (doubleClick || !priceItem.isVisible(state)) {
             state.setViewport(state.initViewport(priceItemIndex = priceItem.index + 1, alignCenter = true), animate = true)
         }

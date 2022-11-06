@@ -171,7 +171,8 @@ private fun RowFooter(
     val holdings = state.cryptoHoldings
     Column {
         Row(
-            verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
                 .defaultMinSize(minHeight = 40.dp)
                 .clickable(onClick = onClick)
                 .background(AppColors.current.FooterBackground.get(isSelected = selected))
@@ -319,7 +320,6 @@ private fun TextCell(
     )
 }
 
-
 @Composable
 private fun ColumnScope.DetailHoldingsCryptoItem(
     onClick: () -> Unit,
@@ -444,7 +444,8 @@ private fun DetailExchangeCoinStats(exchangeCoverage: List<CoinExchangeStats>): 
         Divider(color = AppColors.current.PrimaryVariant, thickness = AppSizes.current.ThickLine)
         exchangeCoverage.forEachIndexed { index, stats ->
             Row(
-                verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
                     .fillMaxWidth()
                     .background(AppColors.current.RowBackground.get(isEven = index % 2 == 0))
                     .padding(AppSizes.current.Space2)
@@ -471,7 +472,6 @@ private fun DetailExchangeCoinStats(exchangeCoverage: List<CoinExchangeStats>): 
     return hasContent
 }
 
-
 @Preview
 @Composable
 private fun PreviewHoldings() {
@@ -490,4 +490,3 @@ private fun PreviewHoldings() {
         }
     }
 }
-

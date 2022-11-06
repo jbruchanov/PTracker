@@ -39,7 +39,8 @@ context(RowScope)
 @Composable
 fun Modifier.width(tableCellSize: TableCellSize): Modifier = when (tableCellSize) {
     is TableCellSize.Exact -> defaultMinSize(minWidth = tableCellSize.minWidth * LocalDensity.current.fontScale).width(tableCellSize.size * LocalDensity.current.fontScale)
-    is TableCellSize.Percents -> this
-        .weight(tableCellSize.weight, fill = true)
-        .widthIn(tableCellSize.minWidth)
+    is TableCellSize.Percents ->
+        this
+            .weight(tableCellSize.weight, fill = true)
+            .widthIn(tableCellSize.minWidth)
 }

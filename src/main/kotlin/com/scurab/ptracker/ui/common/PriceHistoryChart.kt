@@ -84,9 +84,10 @@ fun PriceHistoryChart(
         val radius = remember { 5.dp.toPx(density) }
         var selectedIndex by remember { mutableStateOf(-1) }
         val colorOnBackground = AppColors.current.OnBackground
-        Box(modifier = Modifier
-            .padding(top = AppSizes.current.Space6)
-            .onMouseMove(data.marketPrice.size) { m, index -> selectedIndex = index }
+        Box(
+            modifier = Modifier
+                .padding(top = AppSizes.current.Space6)
+                .onMouseMove(data.marketPrice.size) { m, index -> selectedIndex = index }
         ) {
             LineChart(
                 data.marketPrice,

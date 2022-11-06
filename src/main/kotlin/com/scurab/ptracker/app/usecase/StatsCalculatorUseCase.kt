@@ -36,7 +36,10 @@ class StatsCalculatorUseCase(
 ) {
 
     fun calculateStats(
-        ledger: Ledger, filter: Filter<Transaction>, prices: Map<Asset, MarketPrice> = emptyMap(), primaryCurrency: String? = appSettings.primaryCoin
+        ledger: Ledger,
+        filter: Filter<Transaction>,
+        prices: Map<Asset, MarketPrice> = emptyMap(),
+        primaryCurrency: String? = appSettings.primaryCoin
     ): LedgerStats {
         //predata
         val realData = ledger.items
@@ -60,7 +63,8 @@ class StatsCalculatorUseCase(
                 valueTransform = { (exchange, normalized) ->
                     realData.asSequence().filterIsInstance<Transaction.Trade>().filter { it.exchange == exchange }.filter { it.asset.isTradingAsset }.map { it.asset }.toSet()
                         .sorted()
-                })
+                }
+            )
 
         //currently, what I have on exchange/wallet
         //val actualOwnership = tradingAssets.associateWith { asset -> CoinCalculation(asset, data.filter { it.hasOrIsRelatedAsset(asset) }.sumOf { it.getAmount(asset.coin1) }) }
@@ -71,7 +75,8 @@ class StatsCalculatorUseCase(
         val spentFiatByCrypto = tradingAssets.associateWith { asset ->
             CoinCalculation(
                 CryptoCoin(asset.coin1),
-                convertedData.filter { it.hasOrIsRelatedAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) })
+                convertedData.filter { it.hasOrIsRelatedAsset(asset) }.filterIsInstance<Transaction.Trade>().sumOf { it.getAmount(asset.coin2) }
+            )
         }
         val cryptoHoldings = tradingAssets.filter { it.hasCryptoCoin }.associateWith { asset ->
             CryptoHoldings(
@@ -126,7 +131,7 @@ class StatsCalculatorUseCase(
     ): List<GroupStatsSum> {
         if (transactions.isEmpty()) return emptyList()
         require(pricesGrouped.isNotEmpty()) { "Prices are empty" }
-        require(FiatCurrencies.contains(primaryCurrency)) { "Invalid primaryCurrency:${primaryCurrency}, not defined as Fiat" }
+        require(FiatCurrencies.contains(primaryCurrency)) { "Invalid primaryCurrency:$primaryCurrency, not defined as Fiat" }
         require(dateGrouping != DateGrouping.NoGrouping) { "Invalid grouping:$dateGrouping" }
 
         val now = now()

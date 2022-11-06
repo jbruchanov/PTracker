@@ -35,11 +35,13 @@ data class GroupStatsSum(
     val avgCryptoPrice = cost.safeDiv(sumCrypto)
 
     val percents = marketValue.safeDiv(cost).toFloat().let {
-        val v = (100f * when {
-            cost.isZero() -> 0f
-            it > 1f -> it - 1f
-            else -> -(1 - it)
-        })
+        val v = (
+            100f * when {
+                cost.isZero() -> 0f
+                it > 1f -> it - 1f
+                else -> -(1 - it)
+            }
+            )
         when {
             v >= 0f -> "+${v.f2}%".colored(AppTheme.Colors.CandleGreen)
             else -> "${v.f2}%".colored(AppTheme.Colors.CandleRed)

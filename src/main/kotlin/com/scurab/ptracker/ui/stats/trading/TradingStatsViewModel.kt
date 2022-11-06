@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-
 class TradingStatsStatsUiState {
     var selectedGroupingKey by mutableStateOf(DateGrouping.Month)
     var selectedAsset by mutableStateOf<Asset?>(null)
@@ -45,7 +44,8 @@ class TradingStatsViewModel(
     private val dataTransformers: IDataTransformers,
     private val appSettings: AppSettings,
     pricesRepository: PricesRepository
-) : ViewModel(), TradingStatsEventHandler,
+) : ViewModel(),
+    TradingStatsEventHandler,
     GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Month, null),
     PriceTickingComponent by PriceTickingComponent.Default(pricesRepository) {
 

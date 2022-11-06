@@ -106,7 +106,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         override val assets: Set<String> = setOf(buyAsset, sellAsset)
         fun price(numeratorCoin: String = asset.coin2, denominatorCoin: String = asset.coin1): BigDecimal {
             require(hasCoin(numeratorCoin) && hasCoin(denominatorCoin)) {
-                "Invalid coins numerator:$numeratorCoin, denominator:${denominatorCoin}, this transaction has:$asset"
+                "Invalid coins numerator:$numeratorCoin, denominator:$denominatorCoin, this transaction has:$asset"
             }
             return (getAmount(numeratorCoin) / getAmount(denominatorCoin)).abs().align
         }

@@ -20,7 +20,6 @@ inline fun DrawScope.withTranslate(state: PriceBoardState, block: DrawScope.() -
     }
 }
 
-
 /*
 inline fun DrawScope.withTranslateAndScale(state: PriceBoardState, block: DrawScope.() -> Unit) {
     //move the origion to bottomLeft corner
@@ -94,7 +93,6 @@ inline fun DrawScope.clipRectSafe(
     clipOp: ClipOp = ClipOp.Intersect,
     block: DrawScope.() -> Unit
 ) = withTransform({ clipRect(left, top, max(0f, right), max(0f, bottom), clipOp) }, block)
-
 
 fun DrawScope.draw(vectorPainter: VectorPainter, scale: Offset, colorFilter: ColorFilter? = null) {
     val size = vectorPainter.intrinsicSize * scale

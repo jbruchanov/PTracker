@@ -64,7 +64,10 @@ class Ledger(
     fun fillPriceItems(priceItems: List<PriceItemUI>, groupStrategy: DateGrouping) {
         val groupKeyPriceItems = priceItems.associateBy { it.groupValue(groupStrategy) }
         require(groupKeyPriceItems.size == priceItems.size) {
-            "Invalid priceItems vs groupStrategy:${groupStrategy.name}, groupValue must generate unique values for each priceItem, priceItems:${priceItems.size}, groupedItems:${groupKeyPriceItems.size}"
+            "Invalid priceItems vs groupStrategy:${groupStrategy.name}, " +
+                "groupValue must generate unique values for each priceItem, " +
+                "priceItems:${priceItems.size}, " +
+                "groupedItems:${groupKeyPriceItems.size}"
         }
         items.forEach {
             it.priceItem = groupKeyPriceItems[it.groupValue(groupStrategy)]

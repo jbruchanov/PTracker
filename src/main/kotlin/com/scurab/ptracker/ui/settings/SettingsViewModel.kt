@@ -76,7 +76,6 @@ class SettingsViewModel(
             appSettings.cryptoCompareApiKey -> Validity.Valid
             "" -> Validity.Unknown
             else -> Validity.NotTested
-
         }
     }
 

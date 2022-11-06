@@ -70,7 +70,8 @@ fun ChartStatsScreen(viewModel: ChartStatsViewModel) {
 
 @Composable
 private fun ChartStatsScreen(
-    uiState: ChartStatsUiState, eventHandler: ChartStatsEventHandler
+    uiState: ChartStatsUiState,
+    eventHandler: ChartStatsEventHandler
 ) {
     Box(modifier = Modifier) {
         Column(
@@ -82,7 +83,8 @@ private fun ChartStatsScreen(
                         asset,
                         uiState.prices[asset],
                         isSelected = asset == uiState.selectedAsset,
-                        onClick = { eventHandler.onSelectedAsset(asset) })
+                        onClick = { eventHandler.onSelectedAsset(asset) }
+                    )
                     VerticalDivider()
                 }
             }
@@ -93,7 +95,8 @@ private fun ChartStatsScreen(
                     ToggleButton(
                         text = grouping.name/*TODO:translate*/,
                         isSelected = grouping == uiState.selectedGroupingKey,
-                        onClick = { eventHandler.onSelectedGrouping(grouping) })
+                        onClick = { eventHandler.onSelectedGrouping(grouping) }
+                    )
                     VerticalDivider()
                 }
             }
@@ -136,7 +139,8 @@ private fun LineChartContent(uiState: ChartStatsUiState, eventHandler: ChartStat
                     val today = stats.lastOrNull()
                     if (today != null) {
                         Row(verticalAlignment = Alignment.Bottom) {
-                            Image(Icons.Default.KeyboardArrowUp,
+                            Image(
+                                Icons.Default.KeyboardArrowUp,
                                 "",
                                 colorFilter = ColorFilter.tint(color = AppColors.current.Primary),
                                 modifier = Modifier
@@ -237,4 +241,3 @@ private fun Cell(text: String, color: Color = AppColors.current.OnBackground, wi
 private fun Cell(text: AnnotatedString, color: Color = AppColors.current.OnBackground, width: Dp) {
     Text(text, color = color, textAlign = TextAlign.Right, style = AppTheme.TextStyles.SmallMonospace, maxLines = 1, modifier = Modifier.width(width))
 }
-

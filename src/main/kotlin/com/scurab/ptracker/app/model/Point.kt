@@ -5,8 +5,6 @@ import androidx.compose.ui.geometry.Size
 interface IPoint {
     val x: Float
     val y: Float
-
-
 }
 
 data class Point(override val x: Float, override val y: Float) : IPoint {

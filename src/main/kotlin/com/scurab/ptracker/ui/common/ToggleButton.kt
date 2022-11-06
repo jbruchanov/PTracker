@@ -29,12 +29,15 @@ import com.scurab.ptracker.ui.model.AssetIcon
 
 @Composable
 fun ToggleButton(
-    text: String, isSelected: Boolean, onClick: () -> Unit
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     val textColor = AppColors.current.Content.get(isSelected = isSelected)
     ToggleButton(isSelected, onClick = onClick) {
         Text(
-            text = text, fontSize = AppTheme.TextRendering.small, color = textColor, maxLines = 1, modifier = Modifier
+            text = text, fontSize = AppTheme.TextRendering.small, color = textColor, maxLines = 1,
+            modifier = Modifier
                 .padding(horizontal = AppSizes.current.Space4)
                 .align(Alignment.Center)
         )
@@ -43,7 +46,9 @@ fun ToggleButton(
 
 @Composable
 fun ToggleButton(
-    imageVector: ImageVector, isSelected: Boolean, onClick: () -> Unit
+    imageVector: ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     val tint = AppColors.current.Content.get(isSelected = isSelected)
     val background = AppColors.current.ButtonBackground.get(isSelected = isSelected)
@@ -63,7 +68,9 @@ fun ToggleButton(
 
 @Composable
 fun FlatToggleButton(
-    item: AssetIcon, isSelected: Boolean, onClick: () -> Unit
+    item: AssetIcon,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     val color = AppColors.current.Content.get(isSelected = isSelected)
     val background = AppColors.current.ButtonBackground.get(isSelected = isSelected)

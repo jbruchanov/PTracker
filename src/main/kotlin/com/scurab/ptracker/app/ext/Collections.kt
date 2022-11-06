@@ -13,14 +13,13 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.min
 
-
 fun List<HasDateTime>.firstIndexOf(other: HasDateTime, grouping: DateGrouping): Int {
     val v = grouping.toLongGroup(other.dateTime)
     return indexOfFirst { grouping.toLongGroup(it.dateTime) == v }
 }
 
 fun <T> List<T>.takeAround(index: Int, n: Int): List<T> {
-    require(index in indices) { "Invalid index:$index, must be in indices:${indices}" }
+    require(index in indices) { "Invalid index:$index, must be in indices:$indices" }
     val l = floor(n / 2f).toInt()
     val r = ceil(n / 2f).toInt()
     val le = index - l
@@ -73,7 +72,6 @@ suspend fun <I, O> Collection<I>.parallelMapIndexed(parallelism: Int = 4, map: s
     }
     return result
 }
-
 
 inline fun <I, O> Iterable<I>.setOf(selector: (I) -> O): Set<O> {
     val result = mutableSetOf<O>()

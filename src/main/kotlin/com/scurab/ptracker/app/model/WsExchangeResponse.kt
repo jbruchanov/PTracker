@@ -2,7 +2,7 @@ package com.scurab.ptracker.app.model
 
 interface WsExchangeResponse {
 
-    val client:String
+    val client: String
 
     interface HeartBeat : WsExchangeResponse
     interface SubscriptionComplete : WsExchangeResponse
@@ -21,4 +21,3 @@ interface WsExchangeResponse {
         val asset: Asset
     }
 }
-

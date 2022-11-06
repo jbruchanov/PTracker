@@ -9,7 +9,6 @@ import java.time.format.TextStyle
 import java.time.temporal.ChronoField
 import java.util.Locale
 
-
 object DateTimeFormats {
     var twoFirstLettersOfDayName: Map<Long, String> = DayOfWeek.values().associateBy(
         keySelector = { it.value.toLong() },
@@ -52,5 +51,3 @@ object DateTimeFormats {
     fun fullDateTime2Lines(localDateTime: LocalDateTime): String = localDateTime.toJavaLocalDateTime().format(fullDateTime2Lines)
     fun fullTime(localDateTime: LocalDateTime): String = localDateTime.toJavaLocalDateTime().format(fullTime)
 }
-
-

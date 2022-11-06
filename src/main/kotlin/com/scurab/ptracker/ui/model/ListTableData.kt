@@ -3,7 +3,6 @@ package com.scurab.ptracker.ui.model
 import androidx.compose.runtime.Composable
 import com.scurab.ptracker.app.model.IDataTransformers
 
-
 interface ITableItem {
     fun getValue(index: Int, render: IDataTransformers): String
 }

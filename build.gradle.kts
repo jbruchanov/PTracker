@@ -6,6 +6,7 @@ plugins {
     kotlin("jvm") version "1.7.20"
     kotlin("plugin.serialization") version "1.7.20"
     id("org.jetbrains.compose") version "1.2.0"
+    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
 
 group = "com.scurab"
@@ -77,4 +78,13 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+ktlint {
+    //version.set("0.47.1")
+    version.set("0.45.2")
+    verbose.set(true)
+    android.set(false)
+    outputToConsole.set(true)
+    outputColorName.set("RED")
 }

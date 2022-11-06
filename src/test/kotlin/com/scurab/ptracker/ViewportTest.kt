@@ -52,4 +52,3 @@ class ViewportTest {
         assertEquals(expected.top, rect.top, 1e-6f)
     }
 }
-

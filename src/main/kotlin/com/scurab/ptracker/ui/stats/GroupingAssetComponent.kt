@@ -24,13 +24,13 @@ interface GroupingAssetComponent {
                     val (appData, grouping) = appDataAndGrouping
                     val asset = selectedAsset?.takeIf {
                         appData.ledger.assetsTradings.contains(it) ||
-                                (it.isSingleCoinAsset && appData.ledger.coins.contains(it.coin1))
+                            (it.isSingleCoinAsset && appData.ledger.coins.contains(it.coin1))
                     }
                     Tuple3(appData, grouping, asset)
                 }
         }
 
-        override fun GroupingAssetComponent.tryEmitGrouping(grouping: DateGrouping)  {
+        override fun GroupingAssetComponent.tryEmitGrouping(grouping: DateGrouping) {
             flowGrouping.tryEmit(grouping)
         }
 

@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.WaterfallChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,7 +57,9 @@ import com.scurab.ptracker.ui.common.VerticalTabButton
 import kotlinx.coroutines.delay
 
 private data class LeftMenuButton(
-    val imageVector: ImageVector, val token: NavToken<*>, val onClick: () -> Unit
+    val imageVector: ImageVector,
+    val token: NavToken<*>,
+    val onClick: () -> Unit
 )
 
 class MainUiState {
@@ -159,7 +160,6 @@ private fun PriceTickShape(tick: WsMessageToken?) {
         )
     }
 }
-
 
 @Preview
 @Composable

@@ -22,7 +22,6 @@ object StubData {
     val PriceETHUSD = CoinPrice(AssetETHUSD, 3500.bd)
     val PriceLTCGBP = CoinPrice(AssetLTCBGP, 94.25.bd)
 
-
     val cryptoTradingAssets = listOf(AssetBTCGBP, AssetLTCBGP, AssetETHUSD)
     val cryptoPrices = listOf(PriceBTCGBP, PriceETHGBP, PriceETHUSD, PriceLTCGBP).associateBy { it.asset }
 
@@ -46,4 +45,3 @@ object StubData {
         .sortedByDescending { it.asset }
         .pieChartData()
 }
-

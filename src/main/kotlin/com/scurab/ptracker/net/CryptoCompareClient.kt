@@ -12,13 +12,13 @@ import com.scurab.ptracker.net.model.CryptoCompareWsResponse
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscription
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.ui.model.Validity
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.plugins.websocket.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.websocket.*
-import io.ktor.utils.io.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.websocket.wss
+import io.ktor.client.request.get
+import io.ktor.http.HttpMethod
+import io.ktor.utils.io.CancellationException
+import io.ktor.websocket.Frame
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -89,10 +89,12 @@ class CryptoCompareClient(
                             when (obj) {
                                 is CryptoCompareWsResponse.Error -> throw IllegalStateException(message)
                                 null -> {
-                                    System.err.println("Parsing error?\n" +
+                                    System.err.println(
+                                        "Parsing error?\n" +
                                             "json:${message}\n" +
                                             "${parse.exceptionOrNull()?.message}\n" +
-                                            "${parse.exceptionOrNull()?.stackTraceToString()}")
+                                            "${parse.exceptionOrNull()?.stackTraceToString()}"
+                                    )
                                 }
                                 else -> channel.trySend(obj)
                             }
@@ -105,7 +107,6 @@ class CryptoCompareClient(
             job.invokeOnCompletion { ex ->
                 channel.cancel(cause = ex?.let { CancellationException("Cancel, ${it.message}") })
             }
-
         }
         return channel
     }
@@ -118,9 +119,9 @@ class CryptoCompareClient(
     companion object {
         private const val mainUrl = "https://min-api.cryptocompare.com"
         private const val wsUrl = "streamer.cryptocompare.com"
-        private fun historyUrl(fsym: String, tsym: String, limit: Int, toTs: Long) = "${mainUrl}/data/v2/histoday?fsym=$fsym&tsym=$tsym&limit=$limit&toTs=$toTs"
-        private fun coinUrl(fsym: String, apiKey: String? = null) = "${mainUrl}/data/all/coinlist?fsym=$fsym" + (apiKey?.let { "&api_key=${apiKey}" } ?: "")
-        private fun pricesUrl(cryptoSyms: String, fiatSyms: String) = "${mainUrl}/data/pricemulti?fsyms=${cryptoSyms}&tsyms=${fiatSyms}"
-        private fun webSocketPath(key: String) = "/v2?api_key=${key}"
+        private fun historyUrl(fsym: String, tsym: String, limit: Int, toTs: Long) = "$mainUrl/data/v2/histoday?fsym=$fsym&tsym=$tsym&limit=$limit&toTs=$toTs"
+        private fun coinUrl(fsym: String, apiKey: String? = null) = "$mainUrl/data/all/coinlist?fsym=$fsym" + (apiKey?.let { "&api_key=$apiKey" } ?: "")
+        private fun pricesUrl(cryptoSyms: String, fiatSyms: String) = "$mainUrl/data/pricemulti?fsyms=$cryptoSyms&tsyms=$fiatSyms"
+        private fun webSocketPath(key: String) = "/v2?api_key=$key"
     }
 }

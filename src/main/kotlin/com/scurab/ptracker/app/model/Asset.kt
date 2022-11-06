@@ -51,7 +51,7 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
     @Transient
     val hasCryptoCoin by lazy {
         (coin1.isNotEmpty() && !FiatCurrencies.contains(coin1)) ||
-                (coin2.isNotEmpty() && !FiatCurrencies.contains(coin2))
+            (coin2.isNotEmpty() && !FiatCurrencies.contains(coin2))
     }
 
     @Transient
@@ -117,7 +117,7 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
         fun fromString(value: String): Asset {
             require(value.isNotEmpty()) { "Invalid asset, empty string" }
             val items = value.split("-")
-            require(items.size == 2) { "Invalid input:${value}, must be 'COIN1-COIN2'" }
+            require(items.size == 2) { "Invalid input:$value, must be 'COIN1-COIN2'" }
             return fromUnknownPair(items[0], items[1])
         }
 

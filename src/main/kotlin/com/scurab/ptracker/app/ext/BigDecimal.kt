@@ -101,4 +101,3 @@ object BigDecimalFormats {
     }
     val justGrouping get() = groupingFormats[8].value
 }
-

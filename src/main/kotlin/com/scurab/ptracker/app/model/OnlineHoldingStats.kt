@@ -38,6 +38,13 @@ data class OnlineHoldingStats(
     fun cost(fiatCoin: FiatCoin?) = cost.takeIf { fiatCoin == null || asset.has(fiatCoin.item) } ?: ZERO
 
     override fun toString(): String {
-        return "OnlineHoldingStats(asset=${marketPriceItem.asset}, balance=$balance, cost=$cost, costUnit=$costUnit, marketValue=$marketValue, marketValuePriceUnit=$marketValueUnitPrice, gain=$gain, roi=$roi)"
+        return "OnlineHoldingStats(asset=${marketPriceItem.asset}, " +
+            "balance=$balance, " +
+            "cost=$cost, " +
+            "costUnit=$costUnit, " +
+            "marketValue=$marketValue, " +
+            "marketValuePriceUnit=$marketValueUnitPrice, " +
+            "gain=$gain, " +
+            "roi=$roi)"
     }
 }

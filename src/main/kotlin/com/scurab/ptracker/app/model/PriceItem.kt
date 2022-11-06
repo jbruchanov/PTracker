@@ -38,7 +38,11 @@ interface IPriceItem : HasDateTime {
 }
 
 data class PriceItem(
-    override val dateTime: LocalDateTime, override val open: BigDecimal, override val close: BigDecimal, override val high: BigDecimal, override val low: BigDecimal
+    override val dateTime: LocalDateTime,
+    override val open: BigDecimal,
+    override val close: BigDecimal,
+    override val high: BigDecimal,
+    override val low: BigDecimal
 ) : IPriceItem
 
 fun randomPriceData(random: Random, count: Int, startDate: LocalDateTime, step: Duration): List<PriceItemUI> {

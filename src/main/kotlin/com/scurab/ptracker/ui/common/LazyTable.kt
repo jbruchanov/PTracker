@@ -45,7 +45,6 @@ import com.scurab.ptracker.ui.model.TableState
 import com.scurab.ptracker.ui.model.height
 import com.scurab.ptracker.ui.model.width
 
-
 @Composable
 private fun defaultLazyTableCell(text: String) {
     FastText(
@@ -123,8 +122,7 @@ fun LazyTable(
                             .background(tableConfig.cellBackground.get(isEven = rowIndex % 2 == 0))
                             .height(data.metaData.getRowHeight(rowIndex, data))
                             .width(tableWidth)
-                    )
-                    {
+                    ) {
                         WSpacer2()
                         repeat(data.columns) { columnIndex ->
                             Box(
@@ -165,7 +163,7 @@ private fun PreviewLazyTable() {
             @Composable
             override fun cell(rowIndex: Int, columnIndex: Int): String = items[rowIndex][columnIndex]
             @Composable
-            override fun header(columnIndex: Int) = "Header:${columnIndex}"
+            override fun header(columnIndex: Int) = "Header:$columnIndex"
         }
     }
 
@@ -194,7 +192,3 @@ private fun PreviewLazyTable() {
         }
     }
 }
-
-
-
-

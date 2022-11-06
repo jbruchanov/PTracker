@@ -87,8 +87,8 @@ class StatsDatesUseCase {
             }
             .filter { transaction ->
                 asset == null ||
-                        (asset.isTradingAsset && transaction.hasAsset(asset)) ||
-                        (asset.isSingleCoinAsset && asset.containsAnyOfTransactionCoin(transaction))
+                    (asset.isTradingAsset && transaction.hasAsset(asset)) ||
+                    (asset.isSingleCoinAsset && asset.containsAnyOfTransactionCoin(transaction))
             }
             .groupBy { grouping.toLocalDateGroup(it.dateTime) }
             .map { (dateGroup, transactions) ->
@@ -126,4 +126,3 @@ class StatsDatesUseCase {
         else -> throw IllegalStateException("Unhandled case for:$transaction")
     }
 }
-

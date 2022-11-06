@@ -22,7 +22,6 @@ fun Long.toLocalDateTime(tz: TimeZone = TimeZone.currentSystemDefault()) = Insta
 fun LocalDateTime.toLong() = this.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 fun Instant.toLong() = this.toEpochMilliseconds()
 
-
 fun LocalDateTime.withDayOfWeek(targetDayOfWeek: java.time.DayOfWeek): LocalDateTime {
     val daysDiff = this.dayOfWeek.value - targetDayOfWeek.value
     return this.toJavaLocalDateTime().minusDays(daysDiff.toLong()).with(LocalTime.of(0, 0, 0, 0)).toKotlinLocalDateTime()

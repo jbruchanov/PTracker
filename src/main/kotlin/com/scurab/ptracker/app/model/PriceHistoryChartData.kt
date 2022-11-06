@@ -4,7 +4,6 @@ import com.scurab.ptracker.app.ext.atDayOfMonth
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.ui.Texts
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 
 class PriceHistoryChartData(

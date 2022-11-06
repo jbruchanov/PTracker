@@ -49,7 +49,6 @@ import java.time.format.DateTimeFormatter
 
 val dateFormat = DateTimeFormatter.ofPattern("dd/MM")
 
-
 object Colors {
     val ScrollBarBackground = Color(0xFFEFEFEF)
 }
@@ -66,7 +65,8 @@ fun Table(items: List<Transaction>) {
                 .fillMaxWidth()
         ) {
             LazyColumn(
-                state = vState, modifier = Modifier
+                state = vState,
+                modifier = Modifier
                     .padding(vertical = 8.dp)
                     .fillMaxSize()
             ) {
@@ -78,9 +78,12 @@ fun Table(items: List<Transaction>) {
                                 .background(Color.Red)
                                 .width(16.dp)
                                 .fillMaxHeight()
-                                .draggable(rememberDraggableState {
-                                    widths[0] += (it * 10)
-                                }, orientation = Orientation.Vertical)
+                                .draggable(
+                                    rememberDraggableState {
+                                        widths[0] += (it * 10)
+                                    },
+                                    orientation = Orientation.Vertical
+                                )
                         ) {
                             Text("xxx")
                         }
@@ -117,7 +120,7 @@ fun Table(items: List<Transaction>) {
 
 @Composable
 fun TableRow(item: Transaction, widths: SnapshotStateList<Float>) {
-    println("Bind:${item}")
+    println("Bind:$item")
     var background by remember { mutableStateOf(Color.White) }
     val scope = rememberCoroutineScope()
     val hoverSource = remember {

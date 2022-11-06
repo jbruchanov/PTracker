@@ -4,7 +4,6 @@ import com.scurab.ptracker.app.model.PriceHistoryChartData
 import com.scurab.ptracker.app.model.PriceItemUI
 import kotlinx.datetime.LocalDate
 
-
 //TODO: rename to common
 sealed class LineChartUiState {
     object NoPrimaryCurrency : LineChartUiState()

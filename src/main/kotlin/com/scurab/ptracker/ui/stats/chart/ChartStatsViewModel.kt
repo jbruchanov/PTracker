@@ -42,7 +42,8 @@ class ChartStatsViewModel(
     private val statsChartCalcUseCase: StatsChartCalcUseCase,
     private val appSettings: AppSettings,
     pricesRepository: PricesRepository
-) : ViewModel(), ChartStatsEventHandler,
+) : ViewModel(),
+    ChartStatsEventHandler,
     GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Day, null),
     PriceTickingComponent by PriceTickingComponent.Default(pricesRepository) {
 

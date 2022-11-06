@@ -60,14 +60,16 @@ private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: T
                         asset,
                         uiState.prices[asset],
                         isSelected = asset == uiState.selectedAsset,
-                        onClick = { eventHandler.onSelectedAsset(asset) })
+                        onClick = { eventHandler.onSelectedAsset(asset) }
+                    )
                     VerticalDivider()
                 }
             }
             Divider()
             ToggleButtons {
                 uiState.coins.forEach { coin ->
-                    ToggleButton(text = coin,
+                    ToggleButton(
+                        text = coin,
                         isSelected = uiState.selectedAsset?.has(coin, "") ?: false,
                         onClick = { eventHandler.onSelectedCoin(coin) }
                     )
@@ -78,7 +80,8 @@ private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: T
             ToggleButtons {
                 val values = remember { DateGrouping.values() }
                 values.forEach { grouping ->
-                    ToggleButton(text = grouping.name/*TODO:translate*/,
+                    ToggleButton(
+                        text = grouping.name/*TODO:translate*/,
                         isSelected = grouping == uiState.selectedGroupingKey,
                         onClick = { eventHandler.onSelectedGrouping(grouping) }
                     )
@@ -143,5 +146,3 @@ private fun TradingStatsStats(uiState: TradingStatsStatsUiState, eventHandler: T
         }
     }
 }
-
-

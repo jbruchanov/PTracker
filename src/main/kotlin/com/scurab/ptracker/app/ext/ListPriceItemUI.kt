@@ -16,7 +16,6 @@ import kotlin.math.min
 fun List<PriceItemUI>.filterVisibleIndexes(state: PriceBoardState, step: Int = 1, startOffset: Int = 0, endOffset: Int = 0): IntProgression =
     filterVisibleIndexes(state.viewport(), step, startOffset, endOffset)
 
-
 fun List<PriceItemUI>.filterVisibleIndexes(viewPort: Rect, step: Int = 1, startOffset: Int = 0, endOffset: Int = 0): IntProgression {
     val colWidth = AppTheme.DashboardSizes.PriceItemWidth
     val firstIndex = floor((max(0f, viewPort.left) / colWidth)).toInt()
@@ -53,12 +52,14 @@ fun List<PriceItemUI>.average(dateTime: LocalDateTime? = null): PriceItemUI {
     require(assets.size == 1) { "Invalid data, asset must be unique per collection, has:$assets" }
 
     val first = first()
-    return PriceItemUI(0, assets.first(),
+    return PriceItemUI(
+        0, assets.first(),
         PriceItem(
             dateTime = dateTime ?: first.dateTime,
             open = first.open,
             close = last().close,
             high = maxOf { it.high },
             low = minOf { it.low }
-        ))
+        )
+    )
 }

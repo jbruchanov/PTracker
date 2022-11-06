@@ -12,7 +12,9 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 data class PriceItemUI(
-    val index: Int, override val asset: Asset, val item: IPriceItem
+    val index: Int,
+    override val asset: Asset,
+    val item: IPriceItem
 ) : IPriceItem by item, WithCache by MapCache(), MarketPrice {
     private val rectHeight = (open - close).abs().toFloat()
     val rectOffsetY = open.min(close).toFloat()
@@ -26,7 +28,7 @@ data class PriceItemUI(
     override val price: BigDecimal = item.close
 
     override fun toString(): String {
-        return "PriceItem(index=$index, date='$formattedFullDate', centerY:${centerY} asset=$asset)"
+        return "PriceItem(index=$index, date='$formattedFullDate', centerY:$centerY asset=$asset)"
     }
 
     override fun withCurrentMarketPrice(marketPrice: MarketPrice): PriceItemUI = PriceItemUI(

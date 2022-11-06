@@ -7,12 +7,12 @@ import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.net.CryptoCompareClient
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.util.cio.*
-import io.ktor.utils.io.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.prepareGet
+import io.ktor.util.cio.writeChannel
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.copyTo
 import java.io.File
 
 class LoadIconsUseCase(
@@ -37,8 +37,10 @@ class LoadIconsUseCase(
                 } else {
                     kotlin.runCatching { cryptoCompareClient.getCoinData(c).data[c]?.fullImageUrl }.getOrNull()
                 }
-                fullImageUrl?.let { kotlin.runCatching {
-                    httpClient.prepareGet(urlString = it).execute().body<ByteReadChannel>().copyTo(f.writeChannel()) }.getOrNull()
+                fullImageUrl?.let {
+                    kotlin.runCatching {
+                        httpClient.prepareGet(urlString = it).execute().body<ByteReadChannel>().copyTo(f.writeChannel())
+                    }.getOrNull()
                 }
                 Triple(c, f, fullImageUrl)
             }

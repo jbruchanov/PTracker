@@ -26,7 +26,6 @@ fun List<MarketPercentage>.pieChartData(groupingThreshold: Float = 0f): List<Pie
     return result
 }
 
-
 fun List<MarketPercentage>.pieChartData2(groupingThreshold: Float = 0f): List<PieChartSegment> {
     val result = mutableListOf<PieChartSegment>()
     val angleOffset = -90

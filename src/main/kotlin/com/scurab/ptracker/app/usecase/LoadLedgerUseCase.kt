@@ -17,7 +17,6 @@ import java.io.File
 import java.net.URI
 import kotlin.math.absoluteValue
 
-
 class LoadLedgerUseCase(
     private val appSettings: AppSettings,
     private val mapping: (Transaction) -> Transaction?
@@ -60,4 +59,3 @@ class LoadLedgerUseCase(
         return target
     }
 }
-

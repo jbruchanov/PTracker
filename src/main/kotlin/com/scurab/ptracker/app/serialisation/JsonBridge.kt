@@ -11,7 +11,6 @@ object JsonBridge {
         ignoreUnknownKeys = true
         encodeDefaults = true
         serializersModule = SerializersModule {
-
         }
     }
 
@@ -22,5 +21,4 @@ object JsonBridge {
     inline fun <reified T> serialize(any: T, beautify: Boolean = false) = (if (beautify) jsonBeautify else json).encodeToString(any)
 
     inline fun <reified T> deserialize(string: String) = json.decodeFromString<T>(string)
-
 }

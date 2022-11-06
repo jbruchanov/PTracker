@@ -41,14 +41,14 @@ enum class DateGrouping(
     Week(
         dateTimeFormatter = DateTimeFormats.yearWeek,
         groupToLocalDateTime = { it.withDayOfWeek(DayOfWeek.MONDAY/*todo US*/).atTimeZero() },
-        transformDateToLong = {  Week.groupToLocalDateTime(it).groupingYD() }
+        transformDateToLong = { Week.groupToLocalDateTime(it).groupingYD() }
     ) {
         override fun previous(value: LocalDateTime): LocalDateTime = value.withDayOfWeek(java.time.DayOfWeek.MONDAY).date.minus(DatePeriod(days = 7)).atTime(0, 0, 0)
         override fun next(value: LocalDateTime): LocalDateTime = value.withDayOfWeek(java.time.DayOfWeek.MONDAY).date.plus(DatePeriod(days = 7)).atTime(0, 0, 0)
     },
     Month(
         dateTimeFormatter = DateTimeFormats.yearMonthMid,
-        groupToLocalDateTime = { LocalDateTime(it.year, it.monthNumber, 1,0,0,0,0) },
+        groupToLocalDateTime = { LocalDateTime(it.year, it.monthNumber, 1, 0, 0, 0, 0) },
         transformDateToLong = { it.groupingYM() }
     ) {
         override fun previous(value: LocalDateTime): LocalDateTime = value.date.minus(DatePeriod(months = 1)).atTime(0, 0, 0)

@@ -38,6 +38,3 @@ class LedgerStats(
         val Empty = LedgerStats(emptyList(), emptyMap(), emptyMap(), emptyMap(), emptyMap())
     }
 }
-
-
-
