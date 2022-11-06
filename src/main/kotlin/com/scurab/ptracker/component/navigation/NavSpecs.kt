@@ -1,16 +1,13 @@
 package com.scurab.ptracker.component.navigation
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import com.scurab.ptracker.app.ext.peekOrNull
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import java.util.Stack
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateListOf
 
 interface NavSpecs {
-    val activeScreen: StateFlow<NavToken<*>>
+    val activeScreen: State<NavToken<out NavArgs>>
     val activeScreenNavToken: NavToken<*>
 
     @Composable
@@ -24,12 +21,12 @@ class DefaultNavSpecs(
     items: List<NavRecord<*, *>>, private val componentFactory: ComponentFactory, private val appNavArgs: AppNavArgs
 ) : NavSpecs, NavController {
     private val navItems = items.toList()
-    private val stack: Stack<ActiveNavRecord<*>> = Stack()
-    private val _activeScreenTokens = MutableStateFlow<NavToken<*>>(InitNavToken)
-    override val activeScreen = _activeScreenTokens.asStateFlow()
+    private val stack = mutableStateListOf<ActiveNavRecord<*>>()
+    private val _activeScreenToken = derivedStateOf { stack.lastOrNull()?.navigationRecord?.navToken ?: InitNavToken }
+    override val activeScreen = _activeScreenToken
 
     override val activeRecords: Int get() = stack.size
-    override val activeScreenNavToken: NavToken<*> get() = stack.peek().navigationRecord.navToken
+    override val activeScreenNavToken: NavToken<*> get() = stack.last().navigationRecord.navToken
 
     private var needInitRecord = true
 
@@ -55,24 +52,21 @@ class DefaultNavSpecs(
             init()
         }
 
-        val token by activeScreen.collectAsState()
-        //reading of token necessary to make it working, otherwise recomposition not triggered
-        println(token)
-        stack.peek()?.render()
+        Crossfade(stack.lastOrNull()) {
+            it?.render()
+        }
     }
 
     override fun <T : NavArgs> push(token: NavToken<T>, args: T) {
-        stopPeek(required = false)
+        stopLast(required = false)
         addRecord(token, args)
-        startPeek(required = true)
-        notifyPeekStackChanged()
+        startLast(required = true)
     }
 
     override fun pop(steps: Int): Int {
         if (steps <= 0) return 0
         val popped = popAndDestroy(steps)
-        startPeek(required = false)
-        notifyPeekStackChanged()
+        startLast(required = false)
         return popped
     }
 
@@ -92,19 +86,13 @@ class DefaultNavSpecs(
     private fun <T : NavArgs> replace(removeRecords: Int, token: NavToken<T>, args: T) {
         popAndDestroy(steps = removeRecords)
         addRecord(token, args)
-        startPeek(required = true)
-        notifyPeekStackChanged()
-    }
-
-    private fun notifyPeekStackChanged() {
-        val token = stack.peekOrNull()?.navigationRecord?.navToken ?: InitNavToken
-        _activeScreenTokens.tryEmit(token)
+        startLast(required = true)
     }
 
     private fun popAndDestroy(steps: Int): Int {
         var counter = 0
         while (stack.size > 0 && counter < steps) {
-            stack.pop().lifecycleComponent.apply {
+            stack.removeLast().lifecycleComponent.apply {
                 stop()
                 destroy()
             }
@@ -113,13 +101,13 @@ class DefaultNavSpecs(
         return counter
     }
 
-    private fun startPeek(required: Boolean) {
-        val peek = if (required) stack.peek() else stack.peekOrNull()
+    private fun startLast(required: Boolean) {
+        val peek = if (required) stack.last() else stack.lastOrNull()
         peek?.lifecycleComponent?.start()
     }
 
-    private fun stopPeek(required: Boolean) {
-        val record = if (required) stack.peek() else stack.peekOrNull()
+    private fun stopLast(required: Boolean) {
+        val record = if (required) stack.last() else stack.lastOrNull()
         record?.lifecycleComponent?.stop()
     }
 
@@ -129,7 +117,7 @@ class DefaultNavSpecs(
             "Unable to find navItem matching token:$token"
         } as NavRecord<T, *>
         val activeRecord = navItem.createActiveRecord(componentFactory, args)
-        stack.push(activeRecord)
+        stack.add(activeRecord)
     }
 
     companion object {

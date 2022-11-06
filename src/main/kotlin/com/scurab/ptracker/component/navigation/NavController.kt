@@ -1,10 +1,10 @@
 package com.scurab.ptracker.component.navigation
 
-import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.runtime.State
 
 interface NavController {
     val activeRecords: Int
-    val activeScreen: StateFlow<NavToken<*>>
+    val activeScreen: State<NavToken<*>>
     val activeScreenNavToken: NavToken<*>
 
     fun push(key: String) = push(StringNavToken(key))

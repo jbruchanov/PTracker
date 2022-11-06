@@ -88,7 +88,7 @@ private fun MainScreen(uiState: MainUiState, eventHandler: MainEventHandler) {
             }
     ) {
         Row {
-            val navToken by navigation.activeScreen.collectAsState()
+            val navToken by navigation.activeScreen
             Column(
                 modifier = Modifier.width(IntrinsicSize.Max).zIndex(1000f)
             ) {
