@@ -2,9 +2,9 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.20"
-    kotlin("plugin.serialization") version "1.7.20"
-    id("org.jetbrains.compose") version "1.2.2"
+    kotlin("jvm") version "1.8.0"
+    kotlin("plugin.serialization") version "1.8.0"
+    id("org.jetbrains.compose") version "1.3.0"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
 
@@ -23,12 +23,12 @@ dependencies {
     val ktSerialization = "1.4.0"
     val junit = "5.9.0"
     val koinVersion = "3.2.2"
-    val composeVersion = "1.2.2"
+    val composeVersion = "1.3.0"
     val mockKVersion = "1.12.8"
     val coroutines = "1.6.4"
 
     implementation(compose.desktop.currentOs)
-    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.7.20")
+    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:$coroutines")
