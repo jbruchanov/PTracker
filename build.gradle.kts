@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.8.0"
     kotlin("plugin.serialization") version "1.8.0"
-    id("org.jetbrains.compose") version "1.3.0"
+    id("org.jetbrains.compose") version "1.3.1"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
 
@@ -23,7 +23,7 @@ dependencies {
     val ktSerialization = "1.4.0"
     val junit = "5.9.0"
     val koinVersion = "3.2.2"
-    val composeVersion = "1.3.0"
+    val composeVersion = "1.3.1"
     val mockKVersion = "1.12.8"
     val coroutines = "1.6.4"
 
