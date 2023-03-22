@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.MarketPrice
+import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.Transaction
 import com.scurab.ptracker.app.model.Tuple4
 import com.scurab.ptracker.app.repository.AppSettings
@@ -21,6 +22,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.toKotlinLocalDate
+import java.time.LocalDate
 
 class ChartStatsUiState {
     var selectedGroupingKey by mutableStateOf(DateGrouping.Day)
@@ -41,7 +45,7 @@ class ChartStatsViewModel(
     private val appStateRepository: AppStateRepository,
     private val statsChartCalcUseCase: StatsChartCalcUseCase,
     private val appSettings: AppSettings,
-    pricesRepository: PricesRepository
+    private val pricesRepository: PricesRepository
 ) : ViewModel(),
     ChartStatsEventHandler,
     GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Day, null),
@@ -69,7 +73,7 @@ class ChartStatsViewModel(
                             LineChartUiState.Data(
                                 statsChartCalcUseCase.getLineChartData(
                                     appData.ledger.items.filter { asset == null || (it is Transaction.Trade && it.hasAsset(asset)) },
-                                    appData.historyPrices,
+                                    merge(appData.historyPrices, pricesRepository.latestPrices[asset]),
                                     selectedFiat,
                                     dateGrouping
                                 ),
@@ -92,6 +96,22 @@ class ChartStatsViewModel(
         }
 
         startPriceObserver(uiState.prices)
+    }
+
+    private fun merge(historyPrices: Map<Asset, List<PriceItemUI>>, latestPriceForAsset: MarketPrice?): Map<Asset, List<PriceItemUI>> {
+        val asset = latestPriceForAsset?.asset ?: return historyPrices
+        val items = historyPrices[asset] ?: return historyPrices
+        if (items.isEmpty()) return historyPrices
+
+        val lastPrice = items.last()
+        return if (lastPrice.dateTime.date <= LocalDate.now().toKotlinLocalDate()) {
+            val result = historyPrices.toMutableMap()
+            result[asset] = items.toMutableList()
+                .also { it[items.size - 1] = lastPrice.copy(item = lastPrice.withCurrentMarketPrice(latestPriceForAsset)) }
+            result
+        } else {
+            historyPrices
+        }
     }
 
     override fun onExpandCollapseHistoryClick() {
