@@ -1,6 +1,8 @@
 package com.scurab.ptracker.ui.app
 
+import com.jibru.kostra.defaultQualifiers
 import com.scurab.ptracker.AppNavTokens
+import com.scurab.ptracker.K
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.usecase.LoadDataUseCase
@@ -10,6 +12,7 @@ import com.scurab.ptracker.component.error.ErrorHandler
 import com.scurab.ptracker.component.navigation.AppNavArgs
 import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.picker.FilePicker
+import com.scurab.ptracker.get
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,7 +66,7 @@ class AppViewModel(
                 navController.replace(AppNavTokens.Main)
                 appSettings.ledgers = listOf(file)
             } catch (e: Throwable) {
-                errorHandler.showErrorDialog(texts.texts().ErrUnableToOpenXlsFile + "\n$file", exception = e)
+                errorHandler.showErrorDialog(K.string.ErrUnableToOpenXlsFile.get(defaultQualifiers(), file), exception = e)
                 _uiState.tryEmit(AppUiState.Intro())
             }
         }

@@ -22,15 +22,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import com.scurab.ptracker.K
+import com.scurab.ptracker.StringResourceKey
 import com.scurab.ptracker.app.ext.formattedPrices
 import com.scurab.ptracker.app.ext.iconColor
 import com.scurab.ptracker.app.ext.scaled
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.compose.stringResource
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
-import com.scurab.ptracker.ui.LocalTexts
 import org.koin.java.KoinJavaComponent
 
 @Composable
@@ -75,29 +77,28 @@ fun TransactionRow(
                     modifier = Modifier.size(size)
                 )
             }
-            val texts = LocalTexts.current
             if (prices.buy != null) {
                 Row {
                     Text(text = prices.buy, style = AppTheme.TextStyles.TransactionPrimary)
-                    AnnotatedText(text = item.typeIfNotTradeElseText(texts.Buy))
+                    AnnotatedText(text = item.typeIfNotTradeElseText(K.string.Buy))
                 }
             }
             if (prices.sell != null) {
                 Row {
                     Text(text = prices.sell, style = AppTheme.TextStyles.TransactionPrimary)
-                    AnnotatedText(text = item.typeIfNotTradeElseText(texts.Sell))
+                    AnnotatedText(text = item.typeIfNotTradeElseText(K.string.Sell))
                 }
             }
             if (prices.fee != null) {
                 Row {
                     Text(text = prices.fee, style = AppTheme.TextStyles.TransactionPrimary)
-                    AnnotatedText(text = texts.Fee)
+                    AnnotatedText(text = stringResource(K.string.Fee))
                 }
             }
             if (prices.unitPrice != null) {
                 Row {
                     Text(text = prices.unitPrice, style = AppTheme.TextStyles.TransactionPrimaryVariant)
-                    AnnotatedText(text = texts.Price)
+                    AnnotatedText(text = stringResource(K.string.Price))
                 }
             }
             HSpacer()
@@ -106,7 +107,8 @@ fun TransactionRow(
     }
 }
 
-private fun Transaction.typeIfNotTradeElseText(text: String) = if (this is Transaction.Trade) text else type
+@Composable
+private fun Transaction.typeIfNotTradeElseText(text: StringResourceKey) = if (this is Transaction.Trade) stringResource(text) else type
 
 @Composable
 private fun RowScope.AnnotatedText(text: String) {

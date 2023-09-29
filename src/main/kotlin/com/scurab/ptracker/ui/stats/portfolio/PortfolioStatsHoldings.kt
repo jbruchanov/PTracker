@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.scurab.ptracker.K
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.fiatCoins
 import com.scurab.ptracker.app.ext.firstIf
@@ -63,6 +64,7 @@ import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.model.OnlineHoldingStats
 import com.scurab.ptracker.component.compose.StateContainer
 import com.scurab.ptracker.component.util.mock
+import com.scurab.ptracker.compose.stringResource
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
@@ -148,13 +150,13 @@ private fun RowHeader(hasMultipleFiatCoins: Boolean) {
         modifier = Modifier.defaultTableRow().defaultMinSize(minHeight = 40.dp)
     ) {
         val col1Width = ColumnWidths.Icon + ColumnWidths.IconCoinGap + ColumnWidths.Coin.default2If(hasMultipleFiatCoins).scaled()
-        TextCell(texts.Asset, isMonoSpace = false, textAlign = TextAlign.Center, width = col1Width)
-        TextCell(texts.Balance, isMonoSpace = false, width = ColumnWidths.Balance.scaled())
-        TextCell(texts.Cost, isMonoSpace = false, width = ColumnWidths.Cost.scaled())
-        TextCell(texts.Price, isMonoSpace = false, width = ColumnWidths.Cost.scaled())
-        TextCell(texts.MarketValue, isMonoSpace = false, width = ColumnWidths.MarketValue.scaled())
+        TextCell(stringResource(K.string.Asset), isMonoSpace = false, textAlign = TextAlign.Center, width = col1Width)
+        TextCell(stringResource(K.string.Balance), isMonoSpace = false, width = ColumnWidths.Balance.scaled())
+        TextCell(stringResource(K.string.Cost), isMonoSpace = false, width = ColumnWidths.Cost.scaled())
+        TextCell(stringResource(K.string.Price), isMonoSpace = false, width = ColumnWidths.Cost.scaled())
+        TextCell(stringResource(K.string.MarketValue), isMonoSpace = false, width = ColumnWidths.MarketValue.scaled())
         WSpacer4()
-        TextCell(texts.ROI, isMonoSpace = false, textAlign = TextAlign.Center, width = ColumnWidths.ROI.scaled())
+        TextCell(stringResource(K.string.ROI), isMonoSpace = false, textAlign = TextAlign.Center, width = ColumnWidths.ROI.scaled())
         WSpacer4()
     }
 }
@@ -363,14 +365,14 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
         }
         if (showFullCryptoBalance) {
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
-                TextCell(texts.TotalBoughtOwned, isMonoSpace = false, textAlign = TextAlign.Start)
+                TextCell(stringResource(K.string.TotalBoughtOwned), isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell(onlineHoldingStats.totalCryptoBalance.hrs(), color = AppColors.current.Secondary)
                 TextCell(onlineHoldingStats.totalMarketValue.hrs())
             }
             WSpacer4()
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
-                TextCell(texts.PerUnitWithGiveLost, isMonoSpace = false, textAlign = TextAlign.Start)
+                TextCell(stringResource(K.string.PerUnitWithGiveLost), isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell("1.0", color = AppColors.current.Secondary)
                 TextCell(onlineHoldingStats.costUnit.hrs())
@@ -379,7 +381,7 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
         }
         if (hasFreeIncome) {
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
-                TextCell(texts.FreeIncome, isMonoSpace = false, textAlign = TextAlign.Start)
+                TextCell(stringResource(K.string.FreeIncome), isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell(onlineHoldingStats.freeIncome.hrs(), color = AppColors.current.CandleGreen)
                 TextCell(onlineHoldingStats.freeIncomeMarketPrice.hrs(), color = AppColors.current.CandleGreen)
@@ -388,7 +390,7 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
         }
         if (hasNoProfitOutcome) {
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
-                TextCell(texts.NoProfitableOutcome, isMonoSpace = false, textAlign = TextAlign.Start)
+                TextCell(stringResource(K.string.NoProfitableOutcome), isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell(onlineHoldingStats.nonProfitableOutcome.hrs(), color = AppColors.current.CandleRed)
                 val nonProfitableOutcomeMarketPrice = onlineHoldingStats.nonProfitableOutcomeMarketPrice.s2
@@ -400,7 +402,7 @@ private fun DetailHoldingsCryptoContent(onlineHoldingStats: OnlineHoldingStats) 
         }
         if (hasFees) {
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1f).defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
-                TextCell(texts.Fees, isMonoSpace = false, textAlign = TextAlign.Start)
+                TextCell(stringResource(K.string.Fees), isMonoSpace = false, textAlign = TextAlign.Start)
                 HSpacer()
                 TextCell(onlineHoldingStats.feesCrypto.hrs(), color = AppColors.current.CandleRed)
                 val feesCryptoMarketValue = onlineHoldingStats.feesCryptoMarketValue.s2
@@ -420,7 +422,7 @@ private fun ColumnScope.DetailFiat(fiatCoin: FiatCoin, state: PortfolioStatsUiSt
     Row(modifier = Modifier.fillMaxWidth()) {
         val fees = (state.feesPerCoin[fiatCoin.item] ?: BigDecimal.ZERO)
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.defaultMinSize(minWidth = ColumnWidths.DetailColumnElementWidthMin)) {
-            TextCell(texts.Fees, isMonoSpace = false, textAlign = TextAlign.Start)
+            TextCell(stringResource(K.string.Fees), isMonoSpace = false, textAlign = TextAlign.Start)
             HSpacer()
             TextCell(fees.hrs(), color = if (fees.isNotZero()) AppColors.current.CandleRed else AppColors.current.OnBackground)
         }
@@ -433,13 +435,13 @@ private fun DetailExchangeCoinStats(exchangeCoverage: List<CoinExchangeStats>): 
     val hasContent = exchangeCoverage.isNotEmpty()
     if (hasContent) {
         Row(modifier = Modifier.padding(AppSizes.current.Space2)) {
-            TextCell(texts.ExchangeWallet, isMonoSpace = false, textAlign = TextAlign.Start, modifier = Modifier.width(ColumnWidths.DetailContentLabel))
+            TextCell(stringResource(K.string.ExchangeWallet), isMonoSpace = false, textAlign = TextAlign.Start, modifier = Modifier.width(ColumnWidths.DetailContentLabel))
             WSpacer()
-            TextCell(texts.Balance, isMonoSpace = false, modifier = Modifier.width(ColumnWidths.DetailContentBalance))
+            TextCell(stringResource(K.string.Balance), isMonoSpace = false, modifier = Modifier.width(ColumnWidths.DetailContentBalance))
             WSpacer()
             TextCell("%", width = ColumnWidths.ExchangePerc)
             WSpacer()
-            TextCell(texts.MarketValue, isMonoSpace = false, modifier = Modifier.width(ColumnWidths.DetailContentBalance), textAlign = TextAlign.End)
+            TextCell(stringResource(K.string.MarketValue), isMonoSpace = false, modifier = Modifier.width(ColumnWidths.DetailContentBalance), textAlign = TextAlign.End)
         }
         Divider(color = AppColors.current.PrimaryVariant, thickness = AppSizes.current.ThickLine)
         exchangeCoverage.forEachIndexed { index, stats ->

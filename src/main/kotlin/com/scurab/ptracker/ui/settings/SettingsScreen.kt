@@ -41,7 +41,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scurab.ptracker.K
 import com.scurab.ptracker.component.util.mock
+import com.scurab.ptracker.compose.stringResource
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppSizes
 import com.scurab.ptracker.ui.AppTheme
@@ -96,7 +98,7 @@ private fun SettingsScreen(state: SettingsUiState, handler: SettingsEventHandler
                 modifier = Modifier.defaultMinSize(minHeight = this@BoxWithConstraints.maxHeight)
             ) {
                 Row(modifier = Modifier.wrapContentWidth()) {
-                    Text(text = texts.Settings, style = AppTheme.TextStyles.Header, modifier = Modifier)
+                    Text(text = stringResource(K.string.Settings), style = AppTheme.TextStyles.Header, modifier = Modifier)
                     FSpacer()
                     Button(onClick = handler::onSaveClicked, modifier = Modifier.align(Alignment.Top)) {
                         Text(LocalTexts.current.Save, maxLines = 1, color = AppColors.current.Secondary)
@@ -121,7 +123,7 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
     val texts = LocalTexts.current
     val appSizes = AppSizes.current
 
-    Label(text = "${texts.FontScaling}: ${(state.fontScale * 100).roundToInt()}%")
+    Label(text = "${stringResource(K.string.FontScaling)}: ${(state.fontScale * 100).roundToInt()}%")
     Row(modifier = Modifier) {
         Slider(
             state.fontScale,
@@ -134,7 +136,7 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
         Text(LocalTexts.current.TextSample, fontSize = 14.sp * state.fontScale, modifier = Modifier.align(Alignment.CenterVertically))
     }
 
-    Label(text = texts.PrimaryCoin)
+    Label(text = stringResource(K.string.PrimaryCoin))
     Row {
         TextField(
             value = state.primaryCoin,
@@ -155,7 +157,7 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
         )
     }
 
-    Label(text = texts.CryptoCompareApiKey)
+    Label(text = stringResource(K.string.CryptoCompareApiKey))
     Row {
         TextField(
             value = state.cryptoCompareKey,
@@ -178,11 +180,11 @@ fun ColumnScope.SettingsContent(state: SettingsUiState, handler: SettingsEventHa
                     Image(icon.imageVector.get(), contentDescription = "", colorFilter = ColorFilter.tint(icon.color.get()))
                 }
                 WSpacer(if (smallSpace) appSizes.Space2 else appSizes.Space8)
-                Text(texts.Test, maxLines = 1, modifier = Modifier.align(Alignment.CenterVertically))
+                Text(stringResource(K.string.Test), maxLines = 1, modifier = Modifier.align(Alignment.CenterVertically))
             }
         }
     }
-    Label(text = texts.Ledgers)
+    Label(text = stringResource(K.string.Ledgers))
     state.predefinedLedgers.forEachIndexed { index, s ->
         val isLast = index == state.predefinedLedgers.size - 1
         LedgerRow(

@@ -12,18 +12,28 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import com.jibru.kostra.compose.LocalQualifiers
+import com.scurab.ptracker.K
 import com.scurab.ptracker.app.ext.One
 import com.scurab.ptracker.app.ext.nativeCanvas
 import com.scurab.ptracker.app.ext.toFlagEmoji
+import com.scurab.ptracker.get
 import com.scurab.ptracker.ui.AppTheme
+import org.jetbrains.skia.Data
+import org.jetbrains.skia.Font
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.TextLine
+import org.jetbrains.skia.Typeface
 import org.jetbrains.skia.shaper.ShapingOptions
 
 @Composable
 fun Flag(code: String, size: Dp, modifier: Modifier = Modifier) {
     val sizePx = size.value * LocalDensity.current.fontScale
-    val font = remember { AppTheme.TextRendering.flagFont() }.also {
+    val qualifiers = LocalQualifiers.current
+    val font = remember {
+        K.root.babelstoneflags.get(qualifiers)
+            .let { Font(Typeface.makeFromData(Data.makeFromBytes(it))) }
+    }.also {
         it.size = sizePx
     }
     val paint = remember {

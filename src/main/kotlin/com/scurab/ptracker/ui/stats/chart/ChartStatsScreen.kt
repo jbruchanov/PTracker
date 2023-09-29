@@ -30,10 +30,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.jibru.kostra.compose.LocalQualifiers
+import com.scurab.ptracker.K
 import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.GroupStatsSum
+import com.scurab.ptracker.compose.stringResource
 import com.scurab.ptracker.ui.AppColors
 import com.scurab.ptracker.ui.AppShapes
 import com.scurab.ptracker.ui.AppSizes
@@ -155,11 +158,12 @@ private fun LineChartContent(uiState: ChartStatsUiState, eventHandler: ChartStat
                                     .padding(AppSizes.current.Space2, AppSizes.current.Space)
                                     .animateContentSize()
                             ) {
-                                val history = remember { chartState.chartData.historyStats(texts) }
+                                val kQualifiers = LocalQualifiers.current
+                                val history = remember { chartState.chartData.historyStats(kQualifiers) }
                                 if (uiState.historyDetailsVisible && history.size > 1) {
                                     DetailRowsTable(history)
                                 } else {
-                                    DetailRow(texts.Today, today)
+                                    DetailRow(stringResource(K.string.Today), today)
                                 }
                             }
                             //KeyboardArrowUp + horizontal padding to keep it centered
@@ -182,8 +186,8 @@ private fun DetailRow(label: String, groupStatsSum: GroupStatsSum) {
             maxLines = 1
         )
         WSpacer2()
-        val texts = LocalTexts.current
-        val description = remember { groupStatsSum.detail(texts) }
+        val qualifiers = LocalQualifiers.current
+        val description = remember { groupStatsSum.detail(qualifiers) }
         Text(description, style = AppTheme.TextStyles.SmallMonospace)
     }
 }
@@ -199,16 +203,16 @@ private fun DetailRowsTable(items: List<Pair<String, GroupStatsSum>>) {
         modifier = Modifier.width(IntrinsicSize.Max)
     ) {
         Row {
-            Cell(texts.Date, width = cols[0])
+            Cell(stringResource(K.string.Date), width = cols[0])
             WSpacer(spacing)
-            Cell(texts.MarketValue, width = cols[1])
+            Cell(stringResource(K.string.MarketValue), width = cols[1])
             WSpacer(spacing)
-            Cell(texts.Cost, width = cols[2])
+            Cell(stringResource(K.string.Cost), width = cols[2])
             WSpacer(spacing)
             Cell("%", width = cols[3])
             if (hasAvgPricePerCoin) {
                 WSpacer(spacing)
-                Cell(texts.AvgPricePerCoin, width = cols[4])
+                Cell(stringResource(K.string.AvgPricePerCoin), width = cols[4])
             }
         }
         HSpacer05()

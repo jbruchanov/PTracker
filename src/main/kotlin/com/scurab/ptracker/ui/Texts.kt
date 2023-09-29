@@ -95,5 +95,5 @@ object English : Texts {
     override val AvgPricePerCoin: String = "Avg/Coin"
     override val Today: String = "Today"
     override val Yesterday: String = "Yesterday"
-    override val ErrUnableToOpenXlsFile = "Unable to open XLS(x) file"
+    override val ErrUnableToOpenXlsFile = "Unable to open XLS(x) file:\n%s"
 }
