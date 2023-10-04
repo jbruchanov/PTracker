@@ -2,20 +2,17 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.20"
-    kotlin("plugin.serialization") version "1.8.20"
-    id("org.jetbrains.compose") version "1.4.1"
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
+    kotlin("jvm")
+    kotlin("plugin.serialization")
+    id("org.jetbrains.compose")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("com.jibru.kostra.resources")
 }
+
+apply(plugin = "com.jibru.kostra.resources")
 
 group = "com.scurab"
 version = "0.1"
-
-repositories {
-    google()
-    mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-}
 
 dependencies {
     val ktorVersion = "2.3.2"
@@ -26,9 +23,10 @@ dependencies {
     val composeVersion = "1.4.1"
     val mockKVersion = "1.12.8"
     val coroutines = "1.7.2"
+    val kostra = "0.1.0"
 
     implementation(compose.desktop.currentOs)
-    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.8.20")
+    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.9.10")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:$coroutines")
@@ -51,6 +49,9 @@ dependencies {
     implementation("io.insert-koin:koin-core:$koinVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
+
+    implementation("com.github.jbruchanov.kostra:kostra-common:$kostra")
+    implementation("com.github.jbruchanov.kostra:kostra-compose:$kostra")
     testImplementation("io.mockk:mockk:$mockKVersion")
 
     testImplementation(kotlin("test"))
@@ -86,4 +87,11 @@ ktlint {
     android.set(false)
     outputToConsole.set(true)
     outputColorName.set("RED")
+}
+
+kostra {
+    kClassName.set("com.scurab.ptracker.K")
+    androidResources {
+        resourceDirs.add(file("src/main/resources_strings"))
+    }
 }

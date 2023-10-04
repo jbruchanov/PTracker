@@ -3,6 +3,9 @@ package com.scurab.ptracker.app.model
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import com.jibru.kostra.KQualifiers
+import com.scurab.ptracker.K
+import com.scurab.ptracker.Resources
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.colored
 import com.scurab.ptracker.app.ext.f2
@@ -10,9 +13,10 @@ import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.ext.isNotZero
 import com.scurab.ptracker.app.ext.isZero
 import com.scurab.ptracker.app.ext.safeDiv
+import com.scurab.ptracker.compose.get
+import com.scurab.ptracker.get
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.DateTimeFormats
-import com.scurab.ptracker.ui.Texts
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toJavaLocalDateTime
 import java.math.BigDecimal
@@ -36,27 +40,32 @@ data class GroupStatsSum(
 
     val percents = marketValue.safeDiv(cost).toFloat().let {
         val v = (
-            100f * when {
-                cost.isZero() -> 0f
-                it > 1f -> it - 1f
-                else -> -(1 - it)
-            }
-            )
+                100f * when {
+                    cost.isZero() -> 0f
+                    it > 1f -> it - 1f
+                    else -> -(1 - it)
+                }
+                )
         when {
             v >= 0f -> "+${v.f2}%".colored(AppTheme.Colors.CandleGreen)
             else -> "${v.f2}%".colored(AppTheme.Colors.CandleRed)
         }
     }
 
-    fun detail(texts: Texts) = buildAnnotatedString {
-        append(AnnotatedString("${texts.MarketValue}: ${marketValue.hrs()}", spanStyle = SpanStyle(color = AppTheme.Colors.CandleGreen)))
+    fun detail(qualifiers: KQualifiers) = buildAnnotatedString {
+        append(AnnotatedString("${K.string.MarketValue.get(qualifiers)}: ${marketValue.hrs()}", spanStyle = SpanStyle(color = AppTheme.Colors.CandleGreen)))
         append(" ")
-        append(AnnotatedString("${texts.Cost}: -${cost.abs().hrs()}", spanStyle = SpanStyle(color = AppTheme.Colors.CandleRed)))
+        append(AnnotatedString("${K.string.Cost.get(qualifiers)}: -${cost.abs().hrs()}", spanStyle = SpanStyle(color = AppTheme.Colors.CandleRed)))
         append(" ")
         append(percents)
         if (avgCryptoPrice.isNotZero()) {
             append(" ")
-            append(AnnotatedString("${texts.AvgPricePerCoin}: ${avgCryptoPrice.hrs()}", spanStyle = SpanStyle(color = AppTheme.Colors.Secondary)))
+            append(
+                AnnotatedString(
+                    "${K.string.AvgPricePerCoin.get(qualifiers)}: ${avgCryptoPrice.hrs()}",
+                    spanStyle = SpanStyle(color = AppTheme.Colors.Secondary)
+                )
+            )
         }
     }
 

@@ -14,6 +14,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.component.navigation.NavSpecs
+import com.scurab.ptracker.compose.stringResource
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.English
 import com.scurab.ptracker.ui.LocalTexts
@@ -46,7 +47,7 @@ object App : KoinComponent {
         val appStateRepo = remember { getKoin().get<AppStateRepository>() }
         Window(
             onCloseRequest = ::exitApplication,
-            title = LocalTexts.current.AppTitle,
+            title = stringResource(K.string.AppTitle),
             state = rememberWindowState(size = DpSize((resolution.width * 0.5).dp, (resolution.height * 0.75).dp))
         ) {
             val density by appStateRepo.density.collectAsState()

@@ -41,7 +41,7 @@ fun List<Transaction>.totalMarketValue(
             val isCoinCrypto = !FiatCurrencies.contains(coin)
             val price = when {
                 asset.isIdentity -> 1.bd
-                else -> requireNotNull(prices[asset] ?: prices[asset.flipCoins()]) { "Missing price for asset:$asset" }.price
+                else -> (prices[asset] ?: prices[asset.flipCoins()])?.price ?: 0.bd
             }
             val fiatValue = (price * value)
             val cryptoAmount = if (isCoinCrypto) transaction.getAmount(coin) else 0.bd

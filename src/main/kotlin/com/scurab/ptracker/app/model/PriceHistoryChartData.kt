@@ -1,8 +1,11 @@
 package com.scurab.ptracker.app.model
 
+import com.jibru.kostra.KQualifiers
+import com.scurab.ptracker.K
+import com.scurab.ptracker.Resources
 import com.scurab.ptracker.app.ext.atDayOfMonth
 import com.scurab.ptracker.app.ext.now
-import com.scurab.ptracker.ui.Texts
+import com.scurab.ptracker.get
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 
@@ -18,7 +21,7 @@ class PriceHistoryChartData(
     //y flipped for canvas
     val hasProfit = (marketPrice.lastOrNull()?.y ?: 0f) < (cost.lastOrNull()?.y ?: 0f)
 
-    fun historyStats(texts: Texts): List<Pair<String, GroupStatsSum>> {
+    fun historyStats(qualifiers: KQualifiers): List<Pair<String, GroupStatsSum>> {
         if (stats.isEmpty()) return emptyList()
 
         val subResult = mutableListOf<GroupStatsSum>()
@@ -47,8 +50,8 @@ class PriceHistoryChartData(
             .sortedByDescending { it.localDateTime }
             .map { statsSum ->
                 val label = when (statsSum.localDateTime.date) {
-                    today -> texts.Today
-                    yesterday -> texts.Yesterday
+                    today -> K.string.Today.get(qualifiers)
+                    yesterday -> K.string.Yesterday.get(qualifiers)
                     else -> statsSum.formattedDateTime
                 }
                 Pair(label, statsSum)

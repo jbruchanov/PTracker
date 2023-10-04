@@ -43,8 +43,8 @@ class LoadDataUseCase(
         appSettings.latestLedger = ledgerUri
         appStateRepository.setAppData(data)
         if (appSettings.cryptoCompareApiKey != null) {
-//            pricesRepository.subscribeWs(
-            pricesRepository.subscribeWsRandomPrices(
+            pricesRepository.subscribeWs(
+//            pricesRepository.subscribeWsRandomPrices(
                 data.ledgerStats.assetsByExchange
             )
         }
