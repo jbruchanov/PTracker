@@ -22,9 +22,10 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.9.10" apply false
-    kotlin("plugin.serialization") version "1.9.10" apply false
-    id("org.jetbrains.compose") version "1.5.1" apply false
+    id("de.fayard.refreshVersions") version "0.60.5"
+    kotlin("jvm") version "1.9.22" apply false
+    kotlin("plugin.serialization") version "1.9.22" apply false
+    id("org.jetbrains.compose") version "1.6.0" apply false
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0" apply false
 }
 
