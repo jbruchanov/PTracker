@@ -18,7 +18,6 @@ import com.scurab.ptracker.app.ext.One
 import com.scurab.ptracker.app.ext.nativeCanvas
 import com.scurab.ptracker.app.ext.toFlagEmoji
 import com.scurab.ptracker.get
-import com.scurab.ptracker.ui.AppTheme
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.Font
 import org.jetbrains.skia.Paint

@@ -49,7 +49,6 @@ java {
     targetCompatibility = JavaVersion.toVersion(libs.versions.jvmtarget.get())
 }
 
-
 compose.desktop {
     application {
         mainClass = "MainKt"
@@ -63,7 +62,7 @@ compose.desktop {
 
 ktlint {
     //version.set("0.47.1")
-    version.set("0.45.2")
+    version.set("1.0.0")
     verbose.set(true)
     android.set(false)
     outputToConsole.set(true)

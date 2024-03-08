@@ -5,7 +5,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.jibru.kostra.KQualifiers
 import com.scurab.ptracker.K
-import com.scurab.ptracker.Resources
 import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.colored
 import com.scurab.ptracker.app.ext.f2
@@ -40,12 +39,12 @@ data class GroupStatsSum(
 
     val percents = marketValue.safeDiv(cost).toFloat().let {
         val v = (
-                100f * when {
-                    cost.isZero() -> 0f
-                    it > 1f -> it - 1f
-                    else -> -(1 - it)
-                }
-                )
+            100f * when {
+                cost.isZero() -> 0f
+                it > 1f -> it - 1f
+                else -> -(1 - it)
+            }
+            )
         when {
             v >= 0f -> "+${v.f2}%".colored(AppTheme.Colors.CandleGreen)
             else -> "${v.f2}%".colored(AppTheme.Colors.CandleRed)

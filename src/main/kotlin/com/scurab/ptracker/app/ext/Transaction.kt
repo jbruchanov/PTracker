@@ -93,7 +93,9 @@ fun Transaction.convertTradePrice(prices: Map<Asset, MarketPrice>, targetFiatCur
             val tx = init.convertCurrency(price, targetFiatCurrency)
             val (feeAsset, feeQuantity) = if (this.feeAsset == price.asset.coin2) {
                 price.asset.coin1 to init.copy(price = feeQuantity).convertCurrency(price).price
-            } else feeAsset to feeQuantity
+            } else {
+                feeAsset to feeQuantity
+            }
             copy(
                 sellAsset = price.asset.coin1, sellQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
             ).also { it.originalTransaction = this }
@@ -103,7 +105,9 @@ fun Transaction.convertTradePrice(prices: Map<Asset, MarketPrice>, targetFiatCur
             val tx = init.convertCurrency(price)
             val (feeAsset, feeQuantity) = if (this.feeAsset == price.asset.coin2) {
                 price.asset.coin1 to init.copy(price = feeQuantity).convertCurrency(price).price
-            } else feeAsset to feeQuantity
+            } else {
+                feeAsset to feeQuantity
+            }
             copy(
                 buyAsset = price.asset.coin1, buyQuantity = tx.price, feeAsset = feeAsset, feeQuantity = feeQuantity
             ).also { it.originalTransaction = this }

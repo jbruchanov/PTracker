@@ -58,7 +58,7 @@ fun Table(items: List<Transaction>) {
     val vState = rememberLazyListState()
     val hState = rememberScrollState()
     val widths = remember { mutableStateListOf(100f, 100f, 100f, 100f, 100f) }
-    Box() {
+    Box {
         Box(
             modifier = Modifier
                 .horizontalScroll(hState)

@@ -7,7 +7,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-private typealias _KtlintWorkaroundForNoFileName = Unit
 object CryptoCompareResultSerializer : JsonContentPolymorphicSerializer<CryptoCompareWsResponse>(CryptoCompareWsResponse::class) {
     //https://min-api.cryptocompare.com/documentation/websockets
     override fun selectDeserializer(element: JsonElement) = when (element.jsonObject["TYPE"]?.jsonPrimitive?.contentOrNull?.toInt() ?: 0) {

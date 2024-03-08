@@ -26,7 +26,7 @@ plugins {
     kotlin("jvm") version "1.9.22" apply false
     kotlin("plugin.serialization") version "1.9.22" apply false
     id("org.jetbrains.compose") version "1.6.0" apply false
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0" apply false
+    id("org.jlleitschuh.gradle.ktlint") version "12.0.2" apply false
 }
 
 dependencyResolutionManagement {

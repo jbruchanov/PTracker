@@ -17,8 +17,10 @@ data class Point(override val x: Float, override val y: Float) : IPoint {
 
 class MutablePoint() : IPoint {
 
-    override var x: Float = 0f; private set
-    override var y: Float = 0f; private set
+    override var x: Float = 0f
+        private set
+    override var y: Float = 0f
+        private set
 
     constructor(x: Float, y: Float) : this() {
         set(x, y)

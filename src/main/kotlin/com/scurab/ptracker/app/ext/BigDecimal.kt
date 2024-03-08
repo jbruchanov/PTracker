@@ -30,7 +30,9 @@ fun BigDecimal.round(isFiat: Boolean, scaleFiat: Int = 4, scaleCrypto: Int = 8):
         setScale(scaleFiat, RoundingMode.HALF_UP)
     } else if (scale() > scaleCrypto) {
         setScale(scaleCrypto, RoundingMode.HALF_UP)
-    } else this
+    } else {
+        this
+    }
 }
 
 fun BigDecimal.valueIf(value: Boolean, falseValue: BigDecimal = ZERO) = if (value) this else falseValue

@@ -44,8 +44,12 @@ class StatsCalculatorUseCase(
         //predata
         val realData = ledger.items
         val convertedData = realData.filter(filter).let { data ->
-            if (primaryCurrency == null) data else data.map { transaction ->
-                transaction.convertTradePrice(prices, primaryCurrency)
+            if (primaryCurrency == null) {
+                data
+            } else {
+                data.map { transaction ->
+                    transaction.convertTradePrice(prices, primaryCurrency)
+                }
             }
         }
         val allCoins = convertedData.map { it.assets }.flatten().toSet()

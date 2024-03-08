@@ -47,8 +47,11 @@ class LoadPriceHistoryUseCase(
                 .run {
                     //don't download data which are downloaded in last [hourInMs] only
                     val timeDiffSinceNow = lastOrNull()?.timeMs?.let { now.toLong() - it } ?: 0
-                    if (timeDiffSinceNow > hourInMs) dropLast(1)
-                    else this
+                    if (timeDiffSinceNow > hourInMs) {
+                        dropLast(1)
+                    } else {
+                        this
+                    }
                 }
 
             //in case of some data mess, just delete it and redownload it fully
@@ -74,7 +77,9 @@ class LoadPriceHistoryUseCase(
                         it[it.size - 1] = it.last().copy(time = now().toLong() / 1000)
                     }
                 }
-        } else emptyList()
+        } else {
+            emptyList()
+        }
 
         return ((localData ?: emptyList()) + loadedData)
             .also {

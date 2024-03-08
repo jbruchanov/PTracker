@@ -29,14 +29,17 @@ class StatsChartCalcUseCase(
         val assets = transactions.setOf { it.asset }
         val doSumCrypto = assets.size == 1
 
-        val pricesGrouped = if (dateGrouping == DateGrouping.Day) prices
-        else prices
-            .mapValues { (_, assetPrices) ->
-                assetPrices.groupBy { dateGrouping.toLongGroup(it.dateTime) }
-                    .mapValues { it.value.average(dateGrouping.toLocalDateGroup(it.value.first().dateTime)) }
-                    .values
-                    .toList()
-            }
+        val pricesGrouped = if (dateGrouping == DateGrouping.Day) {
+            prices
+        } else {
+            prices
+                .mapValues { (_, assetPrices) ->
+                    assetPrices.groupBy { dateGrouping.toLongGroup(it.dateTime) }
+                        .mapValues { it.value.average(dateGrouping.toLocalDateGroup(it.value.first().dateTime)) }
+                        .values
+                        .toList()
+                }
+        }
 
         val stats = statsCalculatorUseCase.calculateMarketDailyGains(transactions, pricesGrouped, primaryCurrency, dateGrouping, doSumCrypto)
         if (stats.isEmpty()) return PriceHistoryChartData.Empty
@@ -53,7 +56,9 @@ class StatsChartCalcUseCase(
             val asset = assets.first()
             val diff = pricesGrouped.getValue(asset).maxOf { it.price } - pricesGrouped.getValue(asset).minOf { it.price }
             diff.abs().toFloat()
-        } else 0f
+        } else {
+            0f
+        }
 
         val marketPrice = mutableListOf<Point>()
         val cost = mutableListOf<Point>()

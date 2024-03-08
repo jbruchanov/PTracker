@@ -76,7 +76,9 @@ class PricesRepository(
                 val missingAssets = request - localData.keys
                 val toRequest = missingAssets.filter { !it.isIdentity }
                 if (toRequest.isNotEmpty()) client.getPrices(request, primaryCoin).toSet() else missingAssets.map { CoinPrice(it, 1.bd) }
-            } else emptySet()
+            } else {
+                emptySet()
+            }
             ).associateBy { it.asset }
         val result = (localData.keys + onlineData.keys).mapNotNull { onlineData[it] ?: localData[it] }
         if (onlineData.isNotEmpty()) {

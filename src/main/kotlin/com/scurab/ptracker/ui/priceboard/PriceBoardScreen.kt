@@ -561,18 +561,18 @@ private fun AxisContent(state: PriceBoardState) {
         val text = TextLine.make(label, TextRendering.fontAxis)
         nativeCanvas.drawTextLine(text, -text.width / 2, (-bottomAxisHeight + text.height - metrics.bottom) / 2, TextRendering.paint)
     }, verticalContent = { step, steps ->
-            val minPrice = viewport.bottom
-            val maxPrice = minPrice + viewport.nHeight
-            val priceStep = (maxPrice - minPrice) / steps.toFloat()
-            val offsetYStep = state.canvasSize.height / steps
-            val price = minPrice + ((steps - step) * priceStep)
-            val text = TextLine.make(price.toLabelPrice(minPrice.rangeTo(maxPrice)), TextRendering.fontAxis)
-            val topOffset = step * offsetYStep
-            if (topOffset < text.height) return@PriceAxisContentTemplate
-            nativeCanvas.drawTextLine(
-                text, canvasSize.width - text.width - DashboardSizes.VerticalAxisHorizontalPadding.toPx(), topOffset + text.descent, TextRendering.paint
-            )
-        })
+        val minPrice = viewport.bottom
+        val maxPrice = minPrice + viewport.nHeight
+        val priceStep = (maxPrice - minPrice) / steps.toFloat()
+        val offsetYStep = state.canvasSize.height / steps
+        val price = minPrice + ((steps - step) * priceStep)
+        val text = TextLine.make(price.toLabelPrice(minPrice.rangeTo(maxPrice)), TextRendering.fontAxis)
+        val topOffset = step * offsetYStep
+        if (topOffset < text.height) return@PriceAxisContentTemplate
+        nativeCanvas.drawTextLine(
+            text, canvasSize.width - text.width - DashboardSizes.VerticalAxisHorizontalPadding.toPx(), topOffset + text.descent, TextRendering.paint
+        )
+    })
 }
 
 @Composable
@@ -586,9 +586,9 @@ private fun Grid(state: PriceBoardState) {
         val bottomAxisHeight = state.bottomAxisBarHeight()
         drawLine(DashboardColors.GridLine, start = Offset(0f, -canvasSize.height), end = Offset(0f, -bottomAxisHeight))
     }, verticalContent = { step, _ ->
-            val topOffset = step * offsetYStep
-            drawLine(DashboardColors.GridLine, start = Offset(0f, topOffset), end = Offset(canvasSize.width, topOffset))
-        })
+        val topOffset = step * offsetYStep
+        drawLine(DashboardColors.GridLine, start = Offset(0f, topOffset), end = Offset(canvasSize.width, topOffset))
+    })
 }
 
 @Composable
@@ -645,7 +645,9 @@ private fun Mouse(state: PriceBoardState) {
             val vPointer = state.normalizedPointer().transformNormToViewPort(viewPort)
             val x = (((vPointer.x + colWidthHalf) / colWidth).roundToInt() * colWidth) - colWidthHalf
             Point(x, 0f).normalize(viewPort).transformNormToReal(size).x
-        } else state.pointer.x
+        } else {
+            state.pointer.x
+        }
 
         //vertical
         if (state.pointer.x <= verticalPriceBarLeft) {

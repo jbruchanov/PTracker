@@ -82,8 +82,11 @@ class StatsDatesUseCase {
         return ledger.items
             .asSequence()
             .run {
-                if (asset?.isSingleCoinAsset != false) this
-                else filterIsInstance<Transaction.Trade>()
+                if (asset?.isSingleCoinAsset != false) {
+                    this
+                } else {
+                    filterIsInstance<Transaction.Trade>()
+                }
             }
             .filter { transaction ->
                 asset == null ||
@@ -107,8 +110,9 @@ class StatsDatesUseCase {
                     .sortedBy { it.coin }
             }
             .map {
-                if (asset == null || it.size != 2) it
-                else {
+                if (asset == null || it.size != 2) {
+                    it
+                } else {
                     val coin1 = it.first { it.coin == asset.coin1 }
                     val coin2 = it.first { it.coin == asset.coin2 }
                     listOf(StatsItem(coin1.groupDate, asset.toString(), coin1.quantity1, coin1.grouping, coin1.count, coin2.quantity1))

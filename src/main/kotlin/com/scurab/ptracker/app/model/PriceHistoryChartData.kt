@@ -2,7 +2,6 @@ package com.scurab.ptracker.app.model
 
 import com.jibru.kostra.KQualifiers
 import com.scurab.ptracker.K
-import com.scurab.ptracker.Resources
 import com.scurab.ptracker.app.ext.atDayOfMonth
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.get
