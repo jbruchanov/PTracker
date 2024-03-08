@@ -17,7 +17,7 @@ buildscript {
         maven("https://jitpack.io")
     }
     dependencies {
-        classpath("com.github.jbruchanov.kostra:com.jibru.kostra.resources.gradle.plugin:0.1.0")
+        classpath("com.github.jbruchanov.kostra:com.jibru.kostra.resources.gradle.plugin:0.1.3")
     }
 }
 

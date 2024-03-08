@@ -39,10 +39,16 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = libs.versions.jvmtarget.get()
         freeCompilerArgs = freeCompilerArgs + listOf("-Xcontext-receivers")
     }
 }
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.jvmtarget.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.jvmtarget.get())
+}
+
 
 compose.desktop {
     application {
