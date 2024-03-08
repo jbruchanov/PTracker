@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.model.Asset
@@ -36,10 +37,13 @@ fun ToggleButton(
     val textColor = AppColors.current.Content.get(isSelected = isSelected)
     ToggleButton(isSelected, onClick = onClick) {
         Text(
-            text = text, fontSize = AppTheme.TextRendering.small, color = textColor, maxLines = 1,
+            text = text,
+            style = AppTheme.TextStyles.Small,
+            color = textColor,
+            maxLines = 1,
             modifier = Modifier
                 .padding(horizontal = AppSizes.current.Space4)
-                .align(Alignment.Center)
+                .wrapContentHeight(Alignment.CenterVertically)
         )
     }
 }
@@ -129,6 +133,7 @@ fun AssetToggleButton(asset: Asset, price: MarketPrice?, isSelected: Boolean, on
 private fun ToggleButton(isSelected: Boolean, onClick: () -> Unit, content: @Composable BoxScope.() -> Unit) {
     val background = AppColors.current.ButtonBackground.get(isSelected = isSelected)
     Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .background(background)
             .clickable(onClick = onClick)
