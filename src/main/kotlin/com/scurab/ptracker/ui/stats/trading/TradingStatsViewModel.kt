@@ -8,7 +8,7 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.IDataTransformers
 import com.scurab.ptracker.app.model.MarketPrice
-import com.scurab.ptracker.app.model.Tuple4
+import com.scurab.ptracker.app.model.Tuple5
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
@@ -59,10 +59,10 @@ class TradingStatsViewModel(
         launch(Dispatchers.IO) {
             appStateRepository.appData
                 .combineWithGroupingAsset()
-                .map { (appData, grouping, asset) ->
-                    Tuple4(appData, grouping, statsUseCase.getStats(appData.ledger, grouping, asset), asset)
+                .map { (appData, grouping, asset, filter) ->
+                    Tuple5(appData, grouping, statsUseCase.getStats(appData.ledger, grouping, asset), asset, filter)
                 }
-                .collectLatest { (appData, grouping, tableData, asset) ->
+                .collectLatest { (appData, grouping, tableData, asset, filter) ->
                     uiState.selectedAsset = asset
                     uiState.assets = appData.ledger.assetsTradings
                     uiState.coins = appData.ledger.coins

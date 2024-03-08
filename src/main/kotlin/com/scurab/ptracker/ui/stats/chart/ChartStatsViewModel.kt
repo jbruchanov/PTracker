@@ -5,11 +5,12 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.scurab.ptracker.app.model.Asset
+import com.scurab.ptracker.app.model.DataFilter
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.MarketPrice
 import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.model.Transaction
-import com.scurab.ptracker.app.model.Tuple4
+import com.scurab.ptracker.app.model.Tuple5
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.repository.AppStateRepository
 import com.scurab.ptracker.app.repository.PricesRepository
@@ -28,6 +29,7 @@ import java.time.LocalDate
 class ChartStatsUiState {
     var selectedGroupingKey by mutableStateOf(DateGrouping.Day)
     var selectedAsset by mutableStateOf<Asset?>(null)
+    var selectedDataFilter by mutableStateOf(DataFilter.Last6Months)
     var assets by mutableStateOf(emptyList<Asset>())
     var chartUiState by mutableStateOf<LineChartUiState>(LineChartUiState.Loading)
     var historyDetailsVisible by mutableStateOf(false)
@@ -38,6 +40,7 @@ interface ChartStatsEventHandler {
     fun onSelectedAsset(asset: Asset)
     fun onSelectedGrouping(grouping: DateGrouping)
     fun onExpandCollapseHistoryClick()
+    fun onSelectedFilter(filter: DataFilter)
 }
 
 class ChartStatsViewModel(
@@ -47,7 +50,7 @@ class ChartStatsViewModel(
     private val pricesRepository: PricesRepository
 ) : ViewModel(),
     ChartStatsEventHandler,
-    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Day, null),
+    GroupingAssetComponent by GroupingAssetComponent.Default(DateGrouping.Day, asset = null, filter = DataFilter.Last6Months),
     PriceTickingComponent by PriceTickingComponent.Default(pricesRepository) {
 
     val uiState = ChartStatsUiState()
@@ -59,7 +62,7 @@ class ChartStatsViewModel(
         }
         launch(Dispatchers.IO) {
             appStateRepository.appData.combineWithGroupingAsset()
-                .map { (appData, dateGrouping, asset) ->
+                .map { (appData, dateGrouping, asset, dataFilter) ->
                     uiState.assets = appData.ledger.assetsTradings
                     uiState.selectedGroupingKey = dateGrouping
                     val lineChartState = try {
@@ -74,7 +77,8 @@ class ChartStatsViewModel(
                                     appData.ledger.items.filter { asset == null || (it is Transaction.Trade && it.hasAsset(asset)) },
                                     merge(appData.historyPrices, pricesRepository.latestPrices[asset]),
                                     selectedFiat,
-                                    dateGrouping
+                                    dateGrouping,
+                                    dataFilter
                                 ),
                                 appData.historyPrices[asset]
                                     .takeIf { dateGrouping == DateGrouping.Day }
@@ -84,13 +88,14 @@ class ChartStatsViewModel(
                     } catch (e: Exception) {
                         LineChartUiState.Error((e.message ?: "Null exception message") + "\n" + e.stackTraceToString())
                     }
-                    Tuple4(appData, dateGrouping, asset, lineChartState)
+                    Tuple5(appData, dateGrouping, asset, lineChartState, dataFilter)
                 }
-                .collectLatest { (appData, dateGrouping, asset, lineChartState) ->
+                .collectLatest { (appData, dateGrouping, asset, lineChartState, dataFilter) ->
                     uiState.selectedAsset = asset
                     uiState.assets = appData.ledger.assetsTradings
                     uiState.chartUiState = lineChartState
                     uiState.selectedGroupingKey = dateGrouping
+                    uiState.selectedDataFilter = dataFilter
                 }
         }
 
@@ -127,5 +132,10 @@ class ChartStatsViewModel(
         if (uiState.selectedGroupingKey != grouping) {
             tryEmitGrouping(grouping)
         }
+    }
+
+    override fun onSelectedFilter(filter: DataFilter) {
+        uiState.selectedDataFilter = filter
+        tryEmitFilter(filter)
     }
 }

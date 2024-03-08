@@ -11,6 +11,7 @@ import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.datetime.toLocalDateTime
 import java.time.LocalTime
+import kotlin.time.Duration
 
 fun LocalDateTime.groupingYMD(): Long = (year * 1_00_00L) + (monthNumber * 1_00L) + dayOfMonth
 fun LocalDateTime.groupingYD(): Long = (year * 1000L) + dayOfYear
@@ -30,3 +31,5 @@ fun LocalDateTime.withDayOfWeek(targetDayOfWeek: java.time.DayOfWeek): LocalDate
 fun LocalDateTime.atTimeZero() = this.date.atTime(0, 0, 0, 0)
 
 fun LocalDate.atDayOfMonth(dayOfMonth: Int) = LocalDate(year, month, dayOfMonth)
+
+fun LocalDateTime.minus(duration: Duration) = toInstant(TimeZone.UTC).minus(duration).toLocalDateTime(TimeZone.UTC)

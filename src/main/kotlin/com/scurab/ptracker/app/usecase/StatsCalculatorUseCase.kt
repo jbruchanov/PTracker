@@ -17,6 +17,7 @@ import com.scurab.ptracker.app.model.CoinCalculation
 import com.scurab.ptracker.app.model.CoinExchangeStats
 import com.scurab.ptracker.app.model.CryptoCoin
 import com.scurab.ptracker.app.model.CryptoHoldings
+import com.scurab.ptracker.app.model.DataFilter
 import com.scurab.ptracker.app.model.DateGrouping
 import com.scurab.ptracker.app.model.ExchangeWallet
 import com.scurab.ptracker.app.model.FiatCurrencies
@@ -131,6 +132,7 @@ class StatsCalculatorUseCase(
         pricesGrouped: Map<Asset, List<PriceItemUI>>,
         primaryCurrency: String,
         dateGrouping: DateGrouping,
+        dataFilter: DataFilter = DataFilter.All,
         doSumCrypto: Boolean = false
     ): List<GroupStatsSum> {
         if (transactions.isEmpty()) return emptyList()
@@ -194,7 +196,7 @@ class StatsCalculatorUseCase(
                 statsPerGroup
             }
         }
-        return result
+        return result.filter(dataFilter.filter(now))
     }
 }
 

@@ -34,7 +34,7 @@ import com.jibru.kostra.compose.LocalQualifiers
 import com.scurab.ptracker.K
 import com.scurab.ptracker.app.ext.hrs
 import com.scurab.ptracker.app.ext.isNotZero
-import com.scurab.ptracker.app.model.DateGrouping
+import com.scurab.ptracker.app.model.DataFilter
 import com.scurab.ptracker.app.model.GroupStatsSum
 import com.scurab.ptracker.compose.stringResource
 import com.scurab.ptracker.ui.AppColors
@@ -93,12 +93,12 @@ private fun ChartStatsScreen(
             }
             Divider()
             ToggleButtons {
-                val values = remember { DateGrouping.values().filter { it != DateGrouping.NoGrouping } }
-                values.forEach { grouping ->
+                val filters = remember { DataFilter.entries }
+                filters.forEach { filter ->
                     ToggleButton(
-                        text = grouping.name/*TODO:translate*/,
-                        isSelected = grouping == uiState.selectedGroupingKey,
-                        onClick = { eventHandler.onSelectedGrouping(grouping) }
+                        text = filter.name/*TODO:translate*/,
+                        isSelected = filter == uiState.selectedDataFilter,
+                        onClick = { eventHandler.onSelectedFilter(filter) }
                     )
                     VerticalDivider()
                 }
