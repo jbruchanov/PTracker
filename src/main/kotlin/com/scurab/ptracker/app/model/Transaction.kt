@@ -178,6 +178,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         val TypeStaking = "Staking"
         val TypeInterest = "Interest"
         val TypeDividend = "Dividend"
+        val TypeFeeRebate = "Fee-Rebate"
         val TypeIncome = "Income"
         val TypeGiftReceived = "Gift-Received"
         val TypeGiftSent = "Gift-Sent"

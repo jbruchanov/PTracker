@@ -252,6 +252,7 @@ object AppTheme {
             Transaction.TypeStaking to IconColor(4, Icons.Outlined.Star, ColorOrange),
             Transaction.TypeInterest to IconColor(5, Icons.Outlined.Star, ColorGray),
             Transaction.TypeDividend to IconColor(6, Icons.Outlined.Star, ColorGray),
+            Transaction.TypeFeeRebate to IconColor(6, Icons.Outlined.Star, ColorRed),
             Transaction.TypeIncome to IconColor(7, Icons.Outlined.Star, ColorWhite),
             Transaction.TypeGiftReceived to IconColor(8, Icons.Outlined.FavoriteBorder, ColorGreen),
             Transaction.TypeGiftSent to IconColor(9, Icons.Outlined.FavoriteBorder, ColorRed),
