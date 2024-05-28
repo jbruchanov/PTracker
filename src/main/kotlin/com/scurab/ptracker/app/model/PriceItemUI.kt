@@ -3,6 +3,7 @@ package com.scurab.ptracker.app.model
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import com.scurab.ptracker.app.ext.bd
 import com.scurab.ptracker.app.ext.isZero
 import com.scurab.ptracker.ui.AppTheme
 import com.scurab.ptracker.ui.AppTheme.DashboardColors
@@ -40,18 +41,29 @@ private fun BigDecimal.toScaleString(scale: Int = 6) = setScale(scale, RoundingM
 
 fun PriceItemUI.priceDetails(): AnnotatedString {
     val spanStyle = SpanStyle(color = color)
+    val scale = when {
+        open > 100.bd -> 2
+        open > 10.bd -> 3
+        open > 1.bd -> 4
+        open > 0.1.bd -> 5
+        else -> 6
+    }
     return AnnotatedString.Builder().apply {
         append("O")
-        append(AnnotatedString(open.toScaleString(), spanStyle))
+        append(AnnotatedString(open.toScaleString(scale), spanStyle))
         append(" H")
-        append(AnnotatedString(high.toScaleString(), spanStyle))
+        append(AnnotatedString(high.toScaleString(scale), spanStyle))
         append(" L")
-        append(AnnotatedString(low.toScaleString(), spanStyle))
+        append(AnnotatedString(low.toScaleString(scale), spanStyle))
         append(" C")
-        append(AnnotatedString(close.toScaleString(), spanStyle))
+        append(AnnotatedString(close.toScaleString(scale), spanStyle))
         if (!open.isZero()) {
             append(" %")
-            append(AnnotatedString((close.setScale(3, RoundingMode.HALF_UP) / open).toScaleString(2), spanStyle))
+            val diffRatio = (close.setScale(3, RoundingMode.HALF_UP) / open)
+                .let { if (it > BigDecimal.ONE) it - BigDecimal.ONE else -(BigDecimal.ONE - it) }
+                .let { it * 100.bd }
+                .toScaleString(2)
+            append(AnnotatedString(diffRatio, spanStyle))
         }
     }.toAnnotatedString()
 }
