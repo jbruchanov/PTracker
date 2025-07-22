@@ -21,4 +21,12 @@ fun String.colored(color: Color) = AnnotatedString(
     spanStyle = SpanStyle(color = color)
 )
 
-fun String.toAnnotedString() = AnnotatedString(this)
+fun String.normalizedExchange(): String {
+    return when {
+        contains("kraken", ignoreCase = true) -> "Kraken"
+        contains("binance", ignoreCase = true) -> "Binance"
+        contains("trezor", ignoreCase = true) -> "Trezor"
+        contains("coinbase", ignoreCase = true) -> "Coinbase"
+        else -> this
+    }
+}

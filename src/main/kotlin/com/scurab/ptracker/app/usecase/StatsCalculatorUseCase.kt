@@ -6,6 +6,7 @@ import com.scurab.ptracker.app.ext.convertTradePrice
 import com.scurab.ptracker.app.ext.getAmount
 import com.scurab.ptracker.app.ext.getFees
 import com.scurab.ptracker.app.ext.isNotZero
+import com.scurab.ptracker.app.ext.normalizedExchange
 import com.scurab.ptracker.app.ext.now
 import com.scurab.ptracker.app.ext.safeDiv
 import com.scurab.ptracker.app.ext.setOf
@@ -116,15 +117,6 @@ class StatsCalculatorUseCase(
         }
 
         return LedgerStats(tradingAssets.toList(), assetsByExchange, feesPerCoin, cryptoHoldings, coinSumPerExchange)
-    }
-
-    private fun String.normalizedExchange(): String {
-        return when {
-            contains("kraken", ignoreCase = true) -> "Kraken"
-            contains("binance", ignoreCase = true) -> "Binance"
-            contains("trezor", ignoreCase = true) -> "Trezor"
-            else -> this
-        }
     }
 
     fun calculateMarketDailyGains(
