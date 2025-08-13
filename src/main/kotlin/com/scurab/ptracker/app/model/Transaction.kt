@@ -185,6 +185,7 @@ sealed class Transaction(private val cache: MutableMap<String, Any?> = mutableMa
         val TypeCharitySent = "Charity-Sent"
         val TypeGiftSpouse = "Gift-Spouse"
         val TypeLost = "Lost"
+        val TypeSpend = "Spend"
         val TypeTrade = "Trade"
         val _TypeTradeIn = "TradeIn"
         val _TypeTradeOut = "TradeOut"

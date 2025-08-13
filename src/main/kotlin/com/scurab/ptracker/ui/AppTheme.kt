@@ -242,11 +242,13 @@ object AppTheme {
         private val ColorWhite = Color(0xFFFFFFFFF)
         private val ColorGray = Color.LightGray
         private val ColorOrange = Color(0xFFFFC100)
+        private val ColorBlue = Color(0xFF7171FF)
         private val ColorBlack = Color.Black
         val IconsMap = mapOf(
             Transaction._TypeGrouping to IconColor(-1, Icons.Default.Hive, ColorOrange, candleScale = IconColor.CandleScaleGrouping),
             Transaction.TypeDeposit to IconColor(0, Icons.Default.ArrowDownward, ColorWhite, Offset(0f, 4f)),
             Transaction.TypeWithdrawal to IconColor(1, Icons.Default.ArrowUpward, ColorWhite, Offset(0f, -4f)),
+            Transaction.TypeSpend to IconColor(1, Icons.Default.TriangleUp, ColorBlue, Offset(0f, -4f)),
             Transaction.TypeAirdrop to IconColor(2, Icons.Outlined.WbCloudy, ColorGreen),
             Transaction.TypeMining to IconColor(3, Icons.Outlined.Star, ColorRed),
             Transaction.TypeStaking to IconColor(4, Icons.Outlined.Star, ColorOrange),
