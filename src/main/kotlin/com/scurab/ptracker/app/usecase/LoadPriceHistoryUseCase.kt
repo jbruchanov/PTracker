@@ -23,7 +23,7 @@ class LoadPriceHistoryUseCase(
     private val jsonBridge: JsonBridge
 ) {
 
-    private val maxReqPerSecond = 20
+    private val maxReqPerSecond = 5
     private val maxReqPerSecondDelay = 1000L / maxReqPerSecond
     private var lastRequestMark = LoadMark(0, 0)
     private val location = File(Locations.Daily)
