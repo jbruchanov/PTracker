@@ -7,6 +7,7 @@ import com.scurab.ptracker.app.ext.toLocalDateTime
 import com.scurab.ptracker.app.model.Ledger
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.model.Transaction
+import com.scurab.ptracker.app.model.accept
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.component.util.Hashing
 import kotlinx.datetime.daysUntil
@@ -34,6 +35,7 @@ class LoadLedgerUseCase(
                     .mapIndexedNotNull { index, row ->
                         try {
                             row.toTransaction(index, exchange)
+                                ?.takeIf { it.asset.accept() }
                         } catch (e: Exception) {
                             throw IllegalStateException("Unable to read row:${index + 1} sheet:${sheet.sheetName}", e)
                         }

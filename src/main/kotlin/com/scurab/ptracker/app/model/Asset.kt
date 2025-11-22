@@ -126,3 +126,6 @@ data class Asset(val coin1: String, val coin2: String) : Comparable<Asset> {
 
     override fun compareTo(other: Asset): Int = label.compareTo(other.label)
 }
+
+private val ignorePatterns = setOf(".", "XX")
+fun Asset.accept() = !ignorePatterns.any { coin1.contains(it) || coin2.contains(it) }
