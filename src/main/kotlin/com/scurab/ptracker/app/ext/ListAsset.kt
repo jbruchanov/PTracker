@@ -8,7 +8,7 @@ import com.scurab.ptracker.ui.RandomColors
 
 fun List<Asset>.colors(): List<Color> {
     var colorIndex = 0
-    return map { CoinColors[it.coin1] ?: CoinColors[it.coin2] ?: RandomColors[colorIndex++ % size] }
+    return map { CoinColors[it.coin1] ?: CoinColors[it.coin2] ?: RandomColors[colorIndex++ % (RandomColors.size - 1)] }
 }
 
 fun Collection<Asset>.allCoins() = (map { it.coin1 } + map { it.coin2 }).distinct().filter { it.isNotBlank() }
