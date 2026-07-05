@@ -16,7 +16,7 @@ import com.scurab.ptracker.app.model.WsExchangeResponse
 import com.scurab.ptracker.app.model.WsMessageToken
 import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.component.ProcessScope
-import com.scurab.ptracker.net.CryptoCompareClient
+import com.scurab.ptracker.net.MarketDataClient
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
 import com.scurab.ptracker.ui.DateTimeFormats
 import kotlinx.coroutines.CancellationException
@@ -39,7 +39,7 @@ import kotlin.random.Random
 
 class PricesRepository(
     private val appSettings: AppSettings,
-    private val client: CryptoCompareClient
+    private val client: MarketDataClient
 ) {
     data class Subscription(
         val exchangeWallet: ExchangeWallet,

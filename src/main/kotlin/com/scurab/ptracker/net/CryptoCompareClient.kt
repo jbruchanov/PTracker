@@ -6,7 +6,9 @@ import com.scurab.ptracker.app.model.FiatCoin
 import com.scurab.ptracker.app.repository.AppSettings
 import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.net.model.CryptoCompareCoinDetail
+import com.scurab.ptracker.net.model.CryptoCompareErrorEnvelope
 import com.scurab.ptracker.net.model.CryptoCompareHistoryData
+import com.scurab.ptracker.net.model.CryptoComparePriceItem
 import com.scurab.ptracker.net.model.CryptoCompareResult
 import com.scurab.ptracker.net.model.CryptoCompareWsResponse
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscription
@@ -16,7 +18,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.websocket.wss
 import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
 import io.ktor.utils.io.CancellationException
 import io.ktor.websocket.Frame
 import kotlinx.coroutines.CoroutineScope
@@ -32,35 +39,61 @@ class CryptoCompareClient(
     private val httpClient: HttpClient = defaultHttpClient(),
     private val settings: AppSettings,
     private val jsonBridge: JsonBridge
-) : CoroutineScope {
+) : MarketDataClient, CoroutineScope {
 
     private var job = Job()
     override val coroutineContext: CoroutineContext get() = SupervisorJob(job) + Dispatchers.IO
 
-    suspend fun testKey(key: String): Validity {
-        TODO()
+    override suspend fun testKey(key: String): Validity {
+        val response = apiGet(pricesUrl("BTC", "USD"), apiKey = key)
+        return when {
+            response.status.isSuccess() -> Validity.Tested
+            response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden -> Validity.Invalid
+            else -> Validity.Unknown
+        }
+    }
+
+    override suspend fun getDailyHistory(cryptoSymbol: String, fiatSymbol: String, limit: Int): List<CryptoComparePriceItem> {
+        return getHistoryData(cryptoSymbol, fiatSymbol, limit).data.items
+    }
+
+    override suspend fun getCoinIconUrl(coin: String): String? {
+        return getCoinData(coin).data[coin]?.fullImageUrl
     }
 
     suspend fun getHistoryData(cryptoSymbol: String, fiatSymbol: String, limit: Int = 1000, toTs: Long = -1): CryptoCompareResult<CryptoCompareHistoryData> {
-        return httpClient.get(historyUrl(cryptoSymbol, fiatSymbol, limit, toTs)).body()
+        return apiGet(historyUrl(cryptoSymbol, fiatSymbol, limit, toTs)).validated().body()
     }
 
     suspend fun getCoinData(cryptoSymbol: String): CryptoCompareResult<Map<String, CryptoCompareCoinDetail>> {
-        return httpClient.get(coinUrl(cryptoSymbol)).body()
+        return apiGet(coinUrl(cryptoSymbol)).validated().body()
     }
 
-    suspend fun getPrices(assets: Collection<Asset>, primaryFiatCoin: FiatCoin? = null): List<CoinPrice> {
+    override suspend fun getPrices(assets: Collection<Asset>, primaryFiatCoin: FiatCoin?): List<CoinPrice> {
         if (assets.isEmpty()) return emptyList()
         val fromSyms = assets.map { it.coin2 }.distinct().joinToString(separator = ",")
         val toCoins = (assets.map { it.coin1 } + primaryFiatCoin?.item).filterNotNull().distinct()
         val toSyms = toCoins.joinToString(separator = ",")
-        val rawData = httpClient.get(pricesUrl(toSyms, fromSyms)).body<Map<String, Map<String, Double>>>()
+        val rawData = apiGet(pricesUrl(toSyms, fromSyms)).validated().body<Map<String, Map<String, Double>>>()
         val result = rawData.mapNotNull { (c1, v) -> v.mapNotNull { (c2, price) -> CoinPrice.fromUnknownPairOrNull(c1, c2, price.toBigDecimal()) } }
             .flatten()
         return result
     }
 
-    fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>): Channel<CryptoCompareWsResponse> {
+    private suspend fun apiGet(url: String, apiKey: String? = settings.cryptoCompareApiKey): HttpResponse =
+        httpClient.get(url) {
+            apiKey?.takeIf { it.isNotBlank() }?.let { header(HttpHeaders.Authorization, "Apikey $it") }
+        }
+
+    private suspend fun HttpResponse.validated(): HttpResponse {
+        if (!status.isSuccess()) {
+            val message = runCatching { body<CryptoCompareErrorEnvelope>().err?.message }.getOrNull()
+            throw IllegalStateException("CryptoCompare request failed, status:${status.value}, message:${message ?: "n/a"}, url:${call.request.url}")
+        }
+        return this
+    }
+
+    override fun subscribeTicker(args: List<CryptoCompareWssSubscriptionArg>): Channel<CryptoCompareWsResponse> {
         val apiKey = settings.cryptoCompareApiKey
         requireNotNull(apiKey) { "cryptoCompareApiKey is null" }
         return subscribeTicker(args, apiKey)
@@ -111,7 +144,7 @@ class CryptoCompareClient(
         return channel
     }
 
-    fun stop() {
+    override fun stop() {
         job.cancel()
         job = Job()
     }
@@ -120,7 +153,7 @@ class CryptoCompareClient(
         private const val mainUrl = "https://min-api.cryptocompare.com"
         private const val wsUrl = "streamer.cryptocompare.com"
         private fun historyUrl(fsym: String, tsym: String, limit: Int, toTs: Long) = "$mainUrl/data/v2/histoday?fsym=$fsym&tsym=$tsym&limit=$limit&toTs=$toTs"
-        private fun coinUrl(fsym: String, apiKey: String? = null) = "$mainUrl/data/all/coinlist?fsym=$fsym" + (apiKey?.let { "&api_key=$apiKey" } ?: "")
+        private fun coinUrl(fsym: String) = "$mainUrl/data/all/coinlist?fsym=$fsym"
         private fun pricesUrl(cryptoSyms: String, fiatSyms: String) = "$mainUrl/data/pricemulti?fsyms=$cryptoSyms&tsyms=$fiatSyms"
         private fun webSocketPath(key: String) = "/v2?api_key=$key"
     }

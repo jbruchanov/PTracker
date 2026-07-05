@@ -7,7 +7,6 @@ import com.scurab.ptracker.app.serialisation.JsonBridge
 import com.scurab.ptracker.app.usecase.LoadLedgerUseCase
 import com.scurab.ptracker.app.util.LedgerParsingProcessor
 import com.scurab.ptracker.net.model.CryptoCompareWssSubscriptionArg
-import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.consumeEach
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
+//integration tests against live cryptocompare API, requires paid API key since 05/2026
 @Disabled
 internal class CryptoCompareClientTest {
 
@@ -28,7 +28,7 @@ internal class CryptoCompareClientTest {
 
     @Test
     fun getCoinData() {
-        val client = CryptoCompareClient(defaultHttpClient(), mockk(), JsonBridge)
+        val client = CryptoCompareClient(defaultHttpClient(), MemoryAppSettings(), JsonBridge)
         val coins = listOf("BTC", "ETH")
         runBlocking {
             coins.forEach {
@@ -46,7 +46,7 @@ internal class CryptoCompareClientTest {
         folder.mkdirs()
         runBlocking {
             symbols.forEach { (c, f) ->
-                val historyData = CryptoCompareClient(defaultHttpClient(), mockk(), JsonBridge).getHistoryData(c, f, 1000)
+                val historyData = CryptoCompareClient(defaultHttpClient(), MemoryAppSettings(), JsonBridge).getHistoryData(c, f, 1000)
                 File(folder, "$c-$f.json").writeText(JsonBridge.serialize(historyData.data.items))
             }
         }
@@ -54,7 +54,7 @@ internal class CryptoCompareClientTest {
 
     @Test
     fun wss() {
-        val client = CryptoCompareClient(defaultHttpClient(), mockk(), JsonBridge)
+        val client = CryptoCompareClient(defaultHttpClient(), MemoryAppSettings(), JsonBridge)
         val assets = listOf(Asset("BTC", "GBP"), Asset("ETH", "USD"))
         val channel = client.subscribeTicker(assets.map { CryptoCompareWssSubscriptionArg("Coinbase", it) })
         val job = GlobalScope.launch(Dispatchers.IO) {

@@ -27,7 +27,8 @@ import com.scurab.ptracker.component.navigation.NavController
 import com.scurab.ptracker.component.navigation.NavSpecs
 import com.scurab.ptracker.component.picker.FilePicker
 import com.scurab.ptracker.component.picker.JavaFilePicker
-import com.scurab.ptracker.net.CryptoCompareClient
+import com.scurab.ptracker.net.KrakenClient
+import com.scurab.ptracker.net.MarketDataClient
 import com.scurab.ptracker.net.defaultHttpClient
 import com.scurab.ptracker.ui.DateTimeFormats
 import com.scurab.ptracker.ui.app.AppViewModel
@@ -60,7 +61,8 @@ fun createKoinModule(appArgs: Array<String>) = module {
     single { DateTimeFormats }
     single { defaultHttpClient() }
     single<AppSettings> { AppSettingsJsonRepository.default(get()) }
-    single { CryptoCompareClient(get(), get(), get()) }
+    //CryptoCompareClient still available, but its free API tier was retired in 05/2026
+    single<MarketDataClient> { KrakenClient(get(), get()) }
     single { PricesRepository(get(), get()) }
     single<FilePicker> { JavaFilePicker() }
     single<ErrorHandler> { JavaErrorHandler(get()) }

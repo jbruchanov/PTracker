@@ -7,7 +7,7 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.model.PriceItemUI
 import com.scurab.ptracker.app.serialisation.JsonBridge
-import com.scurab.ptracker.net.CryptoCompareClient
+import com.scurab.ptracker.net.MarketDataClient
 import com.scurab.ptracker.net.model.CryptoComparePriceItem
 import kotlinx.coroutines.delay
 import kotlinx.datetime.daysUntil
@@ -19,7 +19,7 @@ private class LoadMark(
 )
 
 class LoadPriceHistoryUseCase(
-    private val cryptoCompareClient: CryptoCompareClient,
+    private val marketDataClient: MarketDataClient,
     private val jsonBridge: JsonBridge
 ) {
 
@@ -66,7 +66,7 @@ class LoadPriceHistoryUseCase(
         val toLoad = lastLoadedDate?.daysUntil(now.date) ?: 1000
         val loadedData: List<CryptoComparePriceItem> = if (toLoad > 0) {
             slowDownIfNecessary()
-            cryptoCompareClient.getHistoryData(asset.coin1, asset.coin2, limit = toLoad).data.items
+            marketDataClient.getDailyHistory(asset.coin1, asset.coin2, limit = toLoad)
                 .run {
                     if (localData != null) drop(1) else this
                 }

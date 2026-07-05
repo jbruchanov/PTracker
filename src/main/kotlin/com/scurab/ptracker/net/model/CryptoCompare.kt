@@ -32,6 +32,18 @@ class CryptoCompareResult<T>(
 )
 
 @Serializable
+class CryptoCompareErrorEnvelope(
+    @SerialName("Err") val err: CryptoCompareError? = null
+)
+
+@Serializable
+class CryptoCompareError(
+    @SerialName("type") val type: Int = -1,
+    @SerialName("message") val message: String? = null,
+    @SerialName("http_status_code") val httpStatusCode: Int? = null
+)
+
+@Serializable
 class CryptoCompareHistoryData(
     @SerialName("Aggregated") val aggregated: Boolean,
     @SerialName("TimeFrom") val timeFrom: Long,

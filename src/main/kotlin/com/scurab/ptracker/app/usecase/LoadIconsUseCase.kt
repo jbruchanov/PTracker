@@ -6,10 +6,11 @@ import com.scurab.ptracker.app.model.Asset
 import com.scurab.ptracker.app.model.FiatCurrencies
 import com.scurab.ptracker.app.model.Locations
 import com.scurab.ptracker.app.repository.AppSettings
-import com.scurab.ptracker.net.CryptoCompareClient
+import com.scurab.ptracker.net.MarketDataClient
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.prepareGet
+import io.ktor.http.isSuccess
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
@@ -18,7 +19,7 @@ import java.io.File
 class LoadIconsUseCase(
     private val appSettings: AppSettings,
     private val httpClient: HttpClient,
-    private val cryptoCompareClient: CryptoCompareClient
+    private val marketDataClient: MarketDataClient
 ) {
 
     private val location = File(Locations.Icons)
@@ -35,11 +36,15 @@ class LoadIconsUseCase(
                 val fullImageUrl = if (FiatCurrencies.contains(c)) {
                     "${Locations.IconsUrl}${c.take(2).lowercase()}.png"
                 } else {
-                    kotlin.runCatching { cryptoCompareClient.getCoinData(c).data[c]?.fullImageUrl }.getOrNull()
+                    kotlin.runCatching { marketDataClient.getCoinIconUrl(c) }.getOrNull()
                 }
                 fullImageUrl?.let {
                     kotlin.runCatching {
-                        httpClient.prepareGet(urlString = it).execute().body<ByteReadChannel>().copyTo(f.writeChannel())
+                        val response = httpClient.prepareGet(urlString = it).execute()
+                        //don't save an error body (404 page, ...) as an icon
+                        if (response.status.isSuccess()) {
+                            response.body<ByteReadChannel>().copyTo(f.writeChannel())
+                        }
                     }.getOrNull()
                 }
                 Triple(c, f, fullImageUrl)
